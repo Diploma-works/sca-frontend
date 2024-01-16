@@ -1,8 +1,9 @@
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Container, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { lightTheme } from "./themes/light";
 import { darkTheme } from "./themes/dark";
 
 import Navbar from "./components/Navbar";
+import Home from "./components/Home";
 import { useMemo, useState } from "react";
 
 const App = () => {
@@ -22,6 +23,14 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <Navbar mode={mode} switchMode={switchMode}/>
+            <Container sx={{
+                flex: 1,
+                p: 3,
+                display: 'flex',
+                flexDirection: 'column',
+            }}>
+                <Home/>
+            </Container>
         </ThemeProvider>
     );
 }
