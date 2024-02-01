@@ -8,10 +8,11 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 
 const NavbarButton = ({ children }) => {
     return (
-        <Button sx={{
+        <Button color={"inherit"} sx={{
             textTransform: 'none',
             color: 'text.secondary',
             fontSize: 'larger',
+            py: 0,
         }}>
             {children}
         </Button>
@@ -24,32 +25,29 @@ const Navbar = ({ mode, switchMode }) => {
             bgcolor: 'background.paper',
             backgroundImage: 'none',
             boxShadow: 'none',
-            borderBottomWidth: 'thin',
-            borderBottomStyle: 'solid',
-            borderBottomColor: 'divider',
         }}>
-            <Toolbar disableGutters sx={{ px: 2 }}>
+            <Toolbar variant={"dense"} disableGutters sx={{ px: 1 }}>
                 <Typography variant="h4" fontWeight="bold" color="primary">IDE</Typography>
-                <Stack ml={3} direction="row" spacing={1}>
+                <Stack ml={2} direction="row" spacing={1}>
                     <NavbarButton>Home</NavbarButton>
                     <NavbarButton>Help</NavbarButton>
                 </Stack>
                 <Box sx={{ flexGrow: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <IconButton>
+                    <IconButton size="small">
                         <Badge color="error" variant="dot">
                             <NotificationsOutlinedIcon sx={{ color: 'text.disabled' }}/>
                         </Badge>
                     </IconButton>
-                    <IconButton>
+                    <IconButton size="small">
                         <SettingsOutlinedIcon sx={{ color: 'text.disabled' }}/>
                     </IconButton>
-                    <IconButton onClick={() => switchMode(mode)}>
+                    <IconButton size="small" onClick={() => switchMode(mode)}>
                         {mode === "light" ? <DarkModeOutlinedIcon sx={{ color: 'text.disabled' }}/> :
                             <LightModeOutlinedIcon sx={{ color: 'text.disabled' }}/>}
                     </IconButton>
                     <IconButton sx={{ p: 0 }}>
-                        <AccountCircleIcon sx={{ color: 'text.primary', width: 40, height: 40 }}/>
+                        <AccountCircleIcon sx={{ color: 'text.primary', width: 34, height: 34 }}/>
                     </IconButton>
                 </Stack>
             </Toolbar>

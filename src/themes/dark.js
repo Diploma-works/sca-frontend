@@ -11,6 +11,7 @@ export const darkTheme = createTheme({
         },
         background: {
             default: '#0a0a0a'
-        }
+        },
+        divider: '#282828',
     },
 });

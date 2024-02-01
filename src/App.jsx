@@ -1,4 +1,4 @@
-import { Container, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Container, createTheme, CssBaseline, Divider, ThemeProvider } from "@mui/material";
 import { lightTheme } from "./themes/light";
 import { darkTheme } from "./themes/dark";
 
@@ -23,11 +23,12 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <Navbar mode={mode} switchMode={switchMode}/>
+            <Divider/>
             <Container sx={{
                 flex: 1,
-                p: 3,
                 display: 'flex',
                 flexDirection: 'column',
+                p: 0,
             }}>
                 <Home/>
             </Container>
