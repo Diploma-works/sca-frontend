@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/cloud-ide/static/css/main.4fc13d8d.css",
-    "main.js": "/cloud-ide/static/js/main.b9bcd967.js",
+    "main.js": "/cloud-ide/static/js/main.bed62348.js",
     "static/media/Montserrat-SemiBold.ttf": "/cloud-ide/static/media/Montserrat-SemiBold.62b8eee010e3957d425f.ttf",
     "static/media/Montserrat-Medium.ttf": "/cloud-ide/static/media/Montserrat-Medium.a281f04d4c8926e7dea1.ttf",
     "static/media/Montserrat-Bold.ttf": "/cloud-ide/static/media/Montserrat-Bold.d0ca82d8ca07ba209aee.ttf",
     "index.html": "/cloud-ide/index.html",
     "main.4fc13d8d.css.map": "/cloud-ide/static/css/main.4fc13d8d.css.map",
-    "main.b9bcd967.js.map": "/cloud-ide/static/js/main.b9bcd967.js.map"
+    "main.bed62348.js.map": "/cloud-ide/static/js/main.bed62348.js.map"
   },
   "entrypoints": [
     "static/css/main.4fc13d8d.css",
-    "static/js/main.b9bcd967.js"
+    "static/js/main.bed62348.js"
   ]
 }
