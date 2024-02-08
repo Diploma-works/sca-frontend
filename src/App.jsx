@@ -3,11 +3,11 @@ import { lightTheme } from "./themes/light";
 import { darkTheme } from "./themes/dark";
 
 import Navbar from "./components/Navbar";
-import Home from "./components/Home";
+import Editor from "./components/Editor";
 import { useMemo, useState } from "react";
 
 const App = () => {
-    const [mode, setMode] = useState("light");
+    const [mode, setMode] = useState("dark");
 
     const switchMode = (prev) => {
         const next = prev === "light" ? "dark" : "light";
@@ -30,7 +30,7 @@ const App = () => {
                 flexDirection: 'column',
                 p: 0,
             }}>
-                <Home/>
+                <Editor/>
             </Container>
         </ThemeProvider>
     );
