@@ -1,12 +1,13 @@
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Container, createTheme, CssBaseline, Divider, ThemeProvider } from "@mui/material";
 import { lightTheme } from "./themes/light";
 import { darkTheme } from "./themes/dark";
 
 import Navbar from "./components/Navbar";
+import Editor from "./components/Editor";
 import { useMemo, useState } from "react";
 
 const App = () => {
-    const [mode, setMode] = useState("light");
+    const [mode, setMode] = useState("dark");
 
     const switchMode = (prev) => {
         const next = prev === "light" ? "dark" : "light";
@@ -22,6 +23,15 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <Navbar mode={mode} switchMode={switchMode}/>
+            <Divider/>
+            <Container sx={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                p: 0,
+            }}>
+                <Editor/>
+            </Container>
         </ThemeProvider>
     );
 }

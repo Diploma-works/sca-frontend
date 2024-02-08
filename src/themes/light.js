@@ -16,6 +16,7 @@ export const lightTheme = createTheme({
             primary: '#283646',
             secondary: '#5b5d6c',
             disabled: '#939ea8'
-        }
+        },
+        divider: '#e0e0e0',
     },
 });
