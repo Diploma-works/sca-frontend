@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 import { useState } from "react";
 import SortableTabs from "./SortableTabs";
 
@@ -18,20 +18,21 @@ const Editor = () => {
     ]);
 
     return (
-        <>
+        <Stack sx={{
+            flex: 1,
+            overflow: 'hidden',
+        }}>
             <SortableTabs tabs={tabs} setTabs={setTabs}/>
             <Box sx={{
                 flex: 1,
                 overflow: 'auto',
-                border: `thin solid ${theme.palette.divider}`,
-                borderTop: 'none',
                 boxShadow: `0 -1px 0 ${theme.palette.divider}`,
                 bgcolor: 'background.paper',
                 zIndex: 2,
             }}>
-
+                <div style={{ width: 1920, height: 1920}}>//Тут будет код</div>
             </Box>
-        </>
+        </Stack>
     );
 }
 
