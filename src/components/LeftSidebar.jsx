@@ -1,71 +1,103 @@
-import { Box, Button, Divider, Stack, useTheme } from "@mui/material";
-import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
-import QueryStatsRoundedIcon from '@mui/icons-material/QueryStatsRounded';
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Box, Button, Divider, Stack, Tooltip } from "@mui/material";
+import Zoom from "@mui/material/Zoom";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 
 const buttons = [
-    { label: "Файлы проекта", icon: <FolderOutlinedIcon sx={{ color: 'text.disabled' }}/> },
-    { label: "Статистика", icon: <QueryStatsRoundedIcon sx={{ color: 'text.disabled' }}/> },
-    { label: "Проблемы", icon: <ErrorOutlineRoundedIcon sx={{ color: 'text.disabled' }}/> },
+    { title: "Файлы проекта", icon: <FolderOutlinedIcon/>, component: <div style={{ width: 1870, height: 1 }}></div> },
+    { title: "Статистика", icon: <QueryStatsRoundedIcon/>, component: <div style={{ width: 187, height: 1 }}></div> },
+    { title: "Проблемы", icon: <ErrorOutlineRoundedIcon/>, component: <div style={{ width: 500, height: 1 }}></div> },
 ];
 
-const SidebarButton = ({ value, label, icon, divider, active, onChange }) => {
-    const theme = useTheme();
-
-    // TODO: tooltip
+const SidebarButton = ({ title, icon, onClick, renderDivider, isActive, }) => {
     return (
         <>
-            <Button
-                variant={active ? "contained" : "text"}
-                disableElevation
-                color="inherit"
-                sx={{
-                    //bgcolor: 'action.focus',
-                    minWidth: 0,
-                    p: 6 / 8,
+            <Tooltip
+                title={title}
+                placement="right"
+                disableInteractive
+                enterDelay={300}
+                TransitionComponent={Zoom}
+                slotProps={{
+                    popper: {
+                        modifiers: [{
+                            name: 'offset',
+                            options: {
+                                offset: [0, 3],
+                            },
+                        }],
+                    },
                 }}
-                onClick={() => onChange(value)}
             >
-                {icon}
-            </Button>
-            {divider && <Divider flexItem/>}
+                <Button
+                    variant={isActive ? "contained" : "text"}
+                    color={isActive ? "bg" : "inherit"}
+                    disableElevation
+                    onClick={onClick}
+                    sx={{
+                        minWidth: 0,
+                        p: 6 / 8,
+                        color: 'text.disabled',
+                    }}
+                >
+                    {icon}
+                </Button>
+            </Tooltip>
+            {renderDivider && <Divider flexItem/>}
         </>
     )
 }
 
-const LeftSidebar = () => {
-    const theme = useTheme();
+const InteractiveDivider = ({ activationArea, ...props }) => {
+    return (
+        <Divider orientation="vertical"
+                 sx={{
+                     position: 'relative',
+                     cursor: 'ew-resize',
+                     touchAction: 'none',
+                     overflow: 'visible',
+                     '::before, ::after': {
+                         zIndex: 1000,
+                         content: '""',
+                         position: 'absolute',
+                         top: 0,
+                         width: activationArea,
+                         height: '100%',
+                     },
+                     '::before': { left: -activationArea, },
+                     '::after': { right: -activationArea - 1, },
+                 }}
+                 {...props}
+        />
+    )
+}
 
-    const [maxWidth, setMaxWidth] = useState(null);
+const ResizeableBox = ({ minWidth, maxWidth, initialWidth, updateInitialWidth, children }) => {
     const [isResizing, setIsResizing] = useState(false);
+    const [width, setWidth] = useState(initialWidth ?? window.innerWidth - 52 - minWidth);
     const [startPos, setStartPos] = useState({ x: 0, width: 0 });
 
-    const [activeValue, setActiveValue] = useState(null);
-
     const boxRef = useRef(null);
-
-    const onChange = (value) => {
-        setMaxWidth((window.innerWidth) / 2);
-        setActiveValue((prev) => prev === value ? null : value);
-    };
 
     const handleMouseDown = (e) => {
         e.preventDefault();
         setIsResizing(true);
         setStartPos({ x: e.clientX, width: boxRef.current.offsetWidth });
-        console.log(boxRef.current);
     }
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback(({ clientX }) => {
         if (!isResizing) {
             return;
         }
-        const newWidth = startPos.width + e.clientX - startPos.x;
-        if (newWidth >= 20 && newWidth <= (window.innerWidth - boxRef.current.offsetLeft)) {
-            setMaxWidth(newWidth); // TODO: подумать над максимальной шириной
+        const newWidth = startPos.width + clientX - startPos.x;
+        if (newWidth >= minWidth && newWidth <= window.innerWidth - 52 - minWidth) {
+            setWidth(newWidth);
+            updateInitialWidth(newWidth);
         }
-    }
+    }, [isResizing, minWidth, startPos, updateInitialWidth]);
 
     const handleMouseUp = () => {
         setIsResizing(false);
@@ -75,31 +107,35 @@ const LeftSidebar = () => {
         e.preventDefault();
         setIsResizing(true);
         setStartPos({ x: e.touches[0].clientX, width: boxRef.current.offsetWidth });
-    };
+    }
 
-    const handleTouchMove = (e) => {
-        if (!isResizing) {
-            return;
-        }
-        const newWidth = startPos.width + e.touches[0].clientX - startPos.x;
-        if (newWidth >= 100) {
-            setMaxWidth(newWidth); // TODO: возможно, есть смысл ограничить размером окна
-        }
-    };
+    const handleTouchMove = useCallback((e) => {
+        e.preventDefault();
+        handleMouseMove(e.touches[0]);
+    }, [handleMouseMove]);
+
+    const handleResize = useCallback(() => {
+        setWidth((prevMaxWidth) => Math.min(prevMaxWidth, window.innerWidth - 52 - minWidth));
+    }, [minWidth]);
+
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [handleResize]);
 
     useEffect(() => {
         if (isResizing) {
             window.addEventListener("mousemove", handleMouseMove);
-            window.addEventListener("mouseup", handleMouseUp);
             window.addEventListener("touchmove", handleTouchMove);
+            window.addEventListener("mouseup", handleMouseUp);
             window.addEventListener("touchend", handleMouseUp);
             document.body.style.cursor = "ew-resize";
         }
 
         return () => {
             window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("mouseup", handleMouseUp);
             window.removeEventListener("touchmove", handleTouchMove);
+            window.removeEventListener("mouseup", handleMouseUp);
             window.removeEventListener("touchend", handleMouseUp);
             document.body.style.cursor = "auto";
         }
@@ -107,52 +143,63 @@ const LeftSidebar = () => {
 
     return (
         <>
-            <Stack spacing={1} alignItems="center" sx={{
-                p: 1,
-                //bgcolor: 'white',
+            <Box ref={boxRef} sx={{
+                overflow: 'auto',
+                maxWidth: width,
             }}>
+                {children}
+            </Box>
+            <InteractiveDivider
+                activationArea={5} // TODO: подумать о том, как увеличить это значение на телефоне (и стоит ли)
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+            />
+        </>
+    )
+}
+
+const MIN_WIDTH = 40;
+const BTN_WIDTH = 52;
+
+const LeftSidebar = () => {
+    const [activeValue, setActiveValue] = useState(null);
+    const [prevWidths, setPrevWidths] = useState(Array(buttons.length));
+
+    const handleClick = (value) => {
+        setActiveValue((prevValue) => prevValue === value ? null : value);
+    };
+
+    const updatePrevWidth = (newWidth) => {
+        const updatedPrevWidths = [...prevWidths];
+        updatedPrevWidths[activeValue] = newWidth;
+        setPrevWidths(updatedPrevWidths);
+    }
+
+    return (
+        <>
+            <Stack spacing={1} alignItems="center" sx={{ p: 1 }}>
                 {buttons.map((button, index) => (
                     <SidebarButton
-                        value={index}
                         key={index}
-                        label={button.label}
+                        title={button.title}
                         icon={button.icon}
-                        divider={index !== buttons.length - 1}
-                        active={activeValue === index}
-                        onChange={onChange}
+                        onClick={() => handleClick(index)}
+                        renderDivider={index !== buttons.length - 1}
+                        isActive={activeValue === index}
                     />
                 ))}
             </Stack>
             <Divider orientation="vertical"/>
             {activeValue !== null &&
-                <>
-                    <Box ref={boxRef} sx={{
-                        overflow: 'auto',
-                        maxWidth: maxWidth,
-                    }}>
-                        {buttons[activeValue]?.label}
-                        <div style={{ width: 1870, height: 1920 }}></div>
-                    </Box>
-                    <Divider orientation="vertical"
-                             sx={{
-                                 position: 'relative',
-                                 cursor: 'ew-resize',
-                                 overflow: 'visible',
-                                 '::before, ::after': {
-                                     zIndex: 1000,
-                                     content: '""',
-                                     position: 'absolute',
-                                     top: 0,
-                                     width: '5px',
-                                     height: '100%',
-                                 },
-                                 '::before': { left: '-5px', },
-                                 '::after': { right: '-6px', },
-                             }}
-                             onMouseDown={handleMouseDown}
-                             onTouchStart={handleTouchStart}
-                    />
-                </>
+                <ResizeableBox
+                    key={activeValue}
+                    minWidth={MIN_WIDTH}
+                    initialWidth={prevWidths[activeValue]}
+                    updateInitialWidth={updatePrevWidth}
+                >
+                    {buttons[activeValue]?.title}
+                    {buttons[activeValue]?.component}
+                </ResizeableBox>
             }
         </>
     );

@@ -1,12 +1,12 @@
-import { Box, Container, createTheme, CssBaseline, Divider, Stack, ThemeProvider } from "@mui/material";
+import { useMemo, useState } from "react";
+
+import { createTheme, CssBaseline, Divider, Stack, ThemeProvider } from "@mui/material";
 import { lightTheme } from "./themes/light";
 import { darkTheme } from "./themes/dark";
 
 import Navbar from "./components/Navbar";
 import Editor from "./components/Editor";
-import { useMemo, useState } from "react";
 import LeftSidebar from "./components/LeftSidebar";
-import RightSidebar from "./components/RightSidebar";
 
 const App = () => {
     const [mode, setMode] = useState("dark");
