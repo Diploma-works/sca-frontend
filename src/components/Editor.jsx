@@ -30,7 +30,7 @@ const Editor = () => {
                 bgcolor: 'background.paper',
                 zIndex: 2,
             }}>
-                <div style={{ width: 1920, height: 1920}}>//Тут будет код</div>
+                <div style={{ width: 1920, height: 1920}}></div>
             </Box>
         </Stack>
     );

@@ -1,162 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
-import { Box, Button, Divider, Stack, Tooltip } from "@mui/material";
-import Zoom from "@mui/material/Zoom";
+import { Divider, Stack } from "@mui/material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
+
+import SidebarButton from "./SidebarButton";
+import HorizontallyResizableBox from "./HorizontallyResizableBox";
 
 const buttons = [
     { title: "Файлы проекта", icon: <FolderOutlinedIcon/>, component: <div style={{ width: 1870, height: 1 }}></div> },
     { title: "Статистика", icon: <QueryStatsRoundedIcon/>, component: <div style={{ width: 187, height: 1 }}></div> },
     { title: "Проблемы", icon: <ErrorOutlineRoundedIcon/>, component: <div style={{ width: 500, height: 1 }}></div> },
 ];
-
-const SidebarButton = ({ title, icon, onClick, renderDivider, isActive, }) => {
-    return (
-        <>
-            <Tooltip
-                title={title}
-                placement="right"
-                disableInteractive
-                enterDelay={300}
-                TransitionComponent={Zoom}
-                slotProps={{
-                    popper: {
-                        modifiers: [{
-                            name: 'offset',
-                            options: {
-                                offset: [0, 3],
-                            },
-                        }],
-                    },
-                }}
-            >
-                <Button
-                    variant={isActive ? "contained" : "text"}
-                    color={isActive ? "bg" : "inherit"}
-                    disableElevation
-                    onClick={onClick}
-                    sx={{
-                        minWidth: 0,
-                        p: 6 / 8,
-                        color: 'text.disabled',
-                    }}
-                >
-                    {icon}
-                </Button>
-            </Tooltip>
-            {renderDivider && <Divider flexItem/>}
-        </>
-    )
-}
-
-const InteractiveDivider = ({ activationArea, ...props }) => {
-    return (
-        <Divider orientation="vertical"
-                 sx={{
-                     position: 'relative',
-                     cursor: 'ew-resize',
-                     touchAction: 'none',
-                     overflow: 'visible',
-                     '::before, ::after': {
-                         zIndex: 1000,
-                         content: '""',
-                         position: 'absolute',
-                         top: 0,
-                         width: activationArea,
-                         height: '100%',
-                     },
-                     '::before': { left: -activationArea, },
-                     '::after': { right: -activationArea - 1, },
-                 }}
-                 {...props}
-        />
-    )
-}
-
-const ResizeableBox = ({ minWidth, maxWidth, initialWidth, updateInitialWidth, children }) => {
-    const [isResizing, setIsResizing] = useState(false);
-    const [width, setWidth] = useState(initialWidth ?? window.innerWidth - 52 - minWidth);
-    const [startPos, setStartPos] = useState({ x: 0, width: 0 });
-
-    const boxRef = useRef(null);
-
-    const handleMouseDown = (e) => {
-        e.preventDefault();
-        setIsResizing(true);
-        setStartPos({ x: e.clientX, width: boxRef.current.offsetWidth });
-    }
-
-    const handleMouseMove = useCallback(({ clientX }) => {
-        if (!isResizing) {
-            return;
-        }
-        const newWidth = startPos.width + clientX - startPos.x;
-        if (newWidth >= minWidth && newWidth <= window.innerWidth - 52 - minWidth) {
-            setWidth(newWidth);
-            updateInitialWidth(newWidth);
-        }
-    }, [isResizing, minWidth, startPos, updateInitialWidth]);
-
-    const handleMouseUp = () => {
-        setIsResizing(false);
-    }
-
-    const handleTouchStart = (e) => {
-        e.preventDefault();
-        setIsResizing(true);
-        setStartPos({ x: e.touches[0].clientX, width: boxRef.current.offsetWidth });
-    }
-
-    const handleTouchMove = useCallback((e) => {
-        e.preventDefault();
-        handleMouseMove(e.touches[0]);
-    }, [handleMouseMove]);
-
-    const handleResize = useCallback(() => {
-        setWidth((prevMaxWidth) => Math.min(prevMaxWidth, window.innerWidth - 52 - minWidth));
-    }, [minWidth]);
-
-    useEffect(() => {
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [handleResize]);
-
-    useEffect(() => {
-        if (isResizing) {
-            window.addEventListener("mousemove", handleMouseMove);
-            window.addEventListener("touchmove", handleTouchMove);
-            window.addEventListener("mouseup", handleMouseUp);
-            window.addEventListener("touchend", handleMouseUp);
-            document.body.style.cursor = "ew-resize";
-        }
-
-        return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            window.removeEventListener("touchmove", handleTouchMove);
-            window.removeEventListener("mouseup", handleMouseUp);
-            window.removeEventListener("touchend", handleMouseUp);
-            document.body.style.cursor = "auto";
-        }
-    }, [isResizing, handleMouseMove, handleTouchMove])
-
-    return (
-        <>
-            <Box ref={boxRef} sx={{
-                overflow: 'auto',
-                maxWidth: width,
-            }}>
-                {children}
-            </Box>
-            <InteractiveDivider
-                activationArea={5} // TODO: подумать о том, как увеличить это значение на телефоне (и стоит ли)
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleTouchStart}
-            />
-        </>
-    )
-}
 
 const MIN_WIDTH = 40;
 const BTN_WIDTH = 52;
@@ -169,11 +25,11 @@ const LeftSidebar = () => {
         setActiveValue((prevValue) => prevValue === value ? null : value);
     };
 
-    const updatePrevWidth = (newWidth) => {
+    const updatePrevWidth = useCallback((newWidth) => {
         const updatedPrevWidths = [...prevWidths];
         updatedPrevWidths[activeValue] = newWidth;
         setPrevWidths(updatedPrevWidths);
-    }
+    }, [prevWidths, activeValue]);
 
     return (
         <>
@@ -191,15 +47,16 @@ const LeftSidebar = () => {
             </Stack>
             <Divider orientation="vertical"/>
             {activeValue !== null &&
-                <ResizeableBox
+                <HorizontallyResizableBox
                     key={activeValue}
-                    minWidth={MIN_WIDTH}
-                    initialWidth={prevWidths[activeValue]}
-                    updateInitialWidth={updatePrevWidth}
+                    getMinWidth={() => MIN_WIDTH}
+                    getMaxWidth={() => window.innerWidth - MIN_WIDTH - BTN_WIDTH}
+                    prevWidth={prevWidths[activeValue]}
+                    updatePrevWidth={updatePrevWidth}
+                    dividerPosition="after"
                 >
-                    {buttons[activeValue]?.title}
                     {buttons[activeValue]?.component}
-                </ResizeableBox>
+                </HorizontallyResizableBox>
             }
         </>
     );
