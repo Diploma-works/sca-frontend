@@ -83,11 +83,8 @@ const SortableTabs = ({ tabs, setTabs }) => {
                     scrollButtons
                     allowScrollButtonsMobile
                     sx={{
-                        width: '100%',
                         minHeight: 0,
                         position: 'relative', // нужен для кнопок!
-                        borderLeft: `thin solid ${theme.palette.divider}`,
-                        borderRight: `thin solid ${theme.palette.divider}`,
                         '& .MuiTabs-indicator': {
                             display: 'none',
                         },
@@ -95,7 +92,7 @@ const SortableTabs = ({ tabs, setTabs }) => {
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
                             },
-                            position: 'absolute',
+                            position: 'absolute', // TODO: подумать, что делать с рендерингом кнопок (сейчас периодически пропадают)
                             borderBottom: `thin solid ${theme.palette.divider}`,
                             backdropFilter: 'blur(5px)',
                             height: 36,
