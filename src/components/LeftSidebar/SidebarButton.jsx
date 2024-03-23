@@ -1,5 +1,4 @@
-import { Button, Divider, Tooltip } from "@mui/material";
-import Zoom from "@mui/material/Zoom";
+import { Button, Divider, Tooltip, Zoom } from "@mui/material";
 
 const SidebarButton = ({ title, icon, onClick, renderDivider, isActive }) => {
     return (

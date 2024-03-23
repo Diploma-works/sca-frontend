@@ -1,7 +1,8 @@
-import { IconButton, Tab, useTheme } from "@mui/material";
 import { DragOverlay } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+
+import { IconButton, Tab, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 const commonTabSx = {
@@ -34,8 +35,8 @@ const SortableTab = ({ value, handleClose, ...props }) => {
                 transition,
                 ...commonTabSx,
                 ...(isDragging ? {
-                    color: `transparent !important`,
-                    bgcolor: `${theme.palette.mode === "light" ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.16)'}`,
+                    color: 'transparent !important',
+                    bgcolor: 'action.focus',
                 } : {
                     color: 'text.disabled',
                     bgcolor: 'background.default',
@@ -44,7 +45,7 @@ const SortableTab = ({ value, handleClose, ...props }) => {
                         visibility: 'hidden',
                     },
                     ':hover': {
-                        bgcolor: `${theme.palette.mode === "light" ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.08)'}`,
+                        bgcolor: 'action.hover',
                         '.MuiIconButton-root': {
                             visibility: 'visible',
                         },

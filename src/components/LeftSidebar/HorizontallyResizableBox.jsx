@@ -1,7 +1,6 @@
 import { forwardRef } from "react";
-
 import { Box, Divider } from "@mui/material";
-import useHorizontalResizing from "../hooks/useHorizontalResizing";
+import useHorizontalResizing from "./useHorizontalResizing";
 
 const InteractiveDivider = forwardRef(({ activationArea, ...props }, ref) => {
     return (

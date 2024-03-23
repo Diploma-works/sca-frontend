@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import {
     closestCenter,
     DndContext,
@@ -14,7 +15,9 @@ import {
     SortableContext,
     sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+
 import { Tabs, useTheme } from "@mui/material";
+
 import { SortableTab, SortableTabOverlay } from "./SortableTab";
 
 const SortableTabs = ({ tabs, setTabs }) => {
@@ -92,7 +95,7 @@ const SortableTabs = ({ tabs, setTabs }) => {
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
                             },
-                            position: 'absolute', // TODO: подумать, что делать с рендерингом кнопок (сейчас периодически пропадают)
+                            position: 'absolute',
                             borderBottom: `thin solid ${theme.palette.divider}`,
                             backdropFilter: 'blur(5px)',
                             height: 36,
@@ -139,4 +142,5 @@ const SortableTabs = ({ tabs, setTabs }) => {
         </DndContext>
     );
 };
+
 export default SortableTabs;

@@ -1,7 +1,8 @@
 #root {
   display: flex;
   flex-direction: column;
-  height: 100svh;
+  height: 100dvh;
+  /* transition: height 0.1s linear; */
 }
 
 body {
