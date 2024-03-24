@@ -45,6 +45,7 @@ const HorizontallyResizableBox = ({
         <>
             {dividerPosition === "before" && <InteractiveDivider ref={resizeHandleRef} activationArea={5}/>}
             <Box ref={resizeableElementRef} sx={{
+                display: 'flex',
                 overflow: 'auto',
                 width: width ?? 'auto',
                 minWidth: getMinWidth(),

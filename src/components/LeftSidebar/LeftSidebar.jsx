@@ -7,9 +7,10 @@ import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 
 import SidebarButton from "./SidebarButton";
 import HorizontallyResizableBox from "./HorizontallyResizableBox";
+import ProjectStructure from "../ProjectStructure";
 
 const buttons = [
-    { title: "Файлы проекта", icon: <FolderOutlinedIcon/>, component: <div style={{ width: 1870, height: 1 }}></div> },
+    { title: "Файлы проекта", icon: <FolderOutlinedIcon/>, component: <ProjectStructure/> },
     { title: "Статистика", icon: <QueryStatsRoundedIcon/>, component: <div style={{ width: 187, height: 1 }}></div> },
     { title: "Проблемы", icon: <ErrorOutlineRoundedIcon/>, component: <div style={{ width: 500, height: 1 }}></div> },
 ];
