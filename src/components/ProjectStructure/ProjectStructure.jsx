@@ -1,14 +1,20 @@
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
-import { Stack, useTheme } from "@mui/material";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import { Stack, SvgIcon, useTheme } from "@mui/material";
+
+import fileTypeIcons from "./fileTypeIcons";
 
 const ITEMS = [
     {
         id: "public",
         label: "public",
         children: [
+            { id: "favicon.ico", label: "favicon.ico" },
             { id: "index.html", label: "index.html" },
+            { id: "logo192.png", label: "logo192.png" },
+            { id: "logo512.jpg", label: "logo512.jpg" },
+            { id: "manifest.json", label: "manifest.json" },
+            { id: "robots.txt", label: "robots.txt" },
         ],
     },
     {
@@ -16,19 +22,55 @@ const ITEMS = [
         label: "src",
         children: [
             {
+                id: "assets",
+                label: "assets",
+                children: [
+                    {
+                        id: "fonts",
+                        label: "fonts",
+                        children: [
+                            { id: "Montserrat-Black.ttf", label: "Montserrat-Black.ttf" },
+                            { id: "Montserrat-Bold.ttf", label: "Montserrat-Bold.ttf" },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: "components",
+                label: "components",
+                children: [
+                    {
+                        id: "Editor",
+                        label: "Editor",
+                        children: [
+                            { id: "Editor.jsx", label: "Editor.jsx" },
+                            { id: "index1.js", label: "index.js" },
+                            { id: "SortableTab.jsx", label: "SortableTab.jsx" },
+                            { id: "SortableTabs.jsx", label: "SortableTabs.jsx" },
+                        ],
+                    },
+                    {
+                        id: "Sidebars",
+                        label: "Sidebars",
+                        children: [
+                            { id: "index.js", label: "index.js" },
+                            { id: "LeftSidebar", label: "LeftSidebar.jsx" },
+                            { id: "RightSidebar", label: "RightSidebar.tsx" },
+                            { id: "useHorizontalResizing.js", label: "useHorizontalResizing.js" },
+                        ],
+                    },
+                    { id: "Navbar", label: "Navbar.jsx" },
+                ],
+            },
+            {
                 id: "themes",
                 label: "themes",
                 children: [
                     { id: "dark", label: "dark.js" },
                     { id: "light", label: "light.js" },
-                    { id: "custom", label: "custom.js" }
+                    { id: "utils", label: "utils.ts" },
                 ],
             },
-            { id: "assets", label: "assets" },
-            { id: "components", label: "components" },
-            { id: "utils", label: "utils" },
-            { id: "helpers", label: "helpers" },
-            { id: "constants", label: "constants" }
         ],
     },
     {
@@ -41,14 +83,10 @@ const ITEMS = [
                 children: [
                     { id: "main.css", label: "main.css" },
                     { id: "reset.css", label: "reset.css" },
-                    { id: "responsive.css", label: "responsive.css" }
+                    { id: "responsive.css", label: "responsive.css" },
+                    { id: "test.css", label: "test.css" }
                 ],
             },
-            { id: "scss", label: "scss" },
-            { id: "less", label: "less" },
-            { id: "stylus", label: "stylus" },
-            { id: "postcss", label: "postcss" },
-            { id: "sass", label: "sass" }
         ],
     },
     {
@@ -61,15 +99,6 @@ const ITEMS = [
         ]
     },
     {
-        id: "tests",
-        label: "tests",
-        children: [
-            { id: "unit", label: "unit" },
-            { id: "integration", label: "integration" },
-            { id: "e2e", label: "e2e" }
-        ]
-    },
-    {
         id: "scripts",
         label: "scripts",
         children: [
@@ -78,23 +107,15 @@ const ITEMS = [
             { id: "start.bat", label: "start.bat" }
         ]
     },
-    {
-        id: "docs",
-        label: "docs",
-        children: [
-            { id: "api", label: "api" },
-            { id: "guides", label: "guides" },
-            { id: "tutorials", label: "tutorials" }
-        ]
-    },
 ];
 
-// TODO: Сделать выбор иконки в зависимости от типа файла
 const ProjectStructureItemLabel = ({ label, isFolder }) => {
+    const extension = (!isFolder && label.includes(".")) ? label.split(".").pop() : null;
+    const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[extension] ?? fileTypeIcons.unknown);
+
     return (
-        <Stack direction="row" alignItems="center" spacing={1}>
-            {isFolder ? <FolderOutlinedIcon sx={{ width: 18, height: 18 }}/> :
-                <div style={{ width: 18, height: 18, flexShrink: 0 }}/>}
+        <Stack direction="row" spacing={1}>
+            <SvgIcon sx={{ width: 18, height: 18 }}>{icon}</SvgIcon>
             <span>{label}</span>
         </Stack>
     )
@@ -123,7 +144,8 @@ const ProjectStructureItem = ({ itemId, label, children }) => {
                     },
                     '.MuiTreeItem-label': {
                         fontSize: '0.875rem',
-                        lineHeight: 1.25,
+                        lineHeight: 'normal',
+                        textWrap: 'nowrap',
                     },
                 },
                 '.MuiTreeItem-groupTransition': {
