@@ -28,4 +28,6 @@ const fileTypeIcons = {
     ttf: <TbTextSize/>,
 };
 
-export default fileTypeIcons;
+const getFileType = (filename) => filename?.includes(".") ? filename.split(".").pop() : null;
+
+export { fileTypeIcons, getFileType }

@@ -53,6 +53,7 @@ const SortableTabs = ({ tabs, setTabs }) => {
         if (!over || active.id === over.id) {
             return;
         }
+
         setTabs((tabs) => {
             const oldIndex = tabs.findIndex((user) => user.id === active.id);
             const newIndex = tabs.findIndex((user) => user.id === over.id);
@@ -86,28 +87,33 @@ const SortableTabs = ({ tabs, setTabs }) => {
                     scrollButtons
                     allowScrollButtonsMobile
                     sx={{
+                        position: 'relative',
                         minHeight: 0,
-                        position: 'relative', // нужен для кнопок!
+                        boxShadow: `inset 0 -1px ${theme.palette.divider}`,
                         '& .MuiTabs-indicator': {
                             display: 'none',
                         },
+                        '& .MuiTabs-flexContainer': {
+                            gap: '1px',
+                        },
                         '& .MuiTabScrollButton-root': {
+                            position: 'absolute',
+                            height: 36,
+                            zIndex: 3,
+                            opacity: 1,
+                            boxSizing: 'content-box',
+                            backdropFilter: 'blur(5px)',
+                            borderBottom: `thin solid ${theme.palette.divider}`,
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
                             },
-                            position: 'absolute',
-                            borderBottom: `thin solid ${theme.palette.divider}`,
-                            backdropFilter: 'blur(5px)',
-                            height: 36,
-                            zIndex: 4,
-                            opacity: 1,
                             '::before, ::after': {
-                                pointerEvents: 'none',
-                                content: '""',
                                 position: 'absolute',
+                                top: 0,
                                 width: 40,
                                 height: '100%',
-                                top: 0,
+                                content: '""',
+                                pointerEvents: 'none',
                             },
                             ':first-of-type': {
                                 left: 0,

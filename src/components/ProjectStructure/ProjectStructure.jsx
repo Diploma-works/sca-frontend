@@ -2,9 +2,10 @@ import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { Stack, SvgIcon, useTheme } from "@mui/material";
 
-import fileTypeIcons from "./fileTypeIcons";
 import { useTabs } from "../../contexts/TabsContext";
 import { memo } from "react";
+
+import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 
 const ITEMS = [
     {
@@ -112,10 +113,7 @@ const ITEMS = [
 ];
 
 const ProjectStructureItemLabel = memo(({ id, label, isFolder, setTabs, }) => {
-    console.log("ProjectStructureItemLabel");
-
-    const extension = (!isFolder && label.includes(".")) ? label.split(".").pop() : null;
-    const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[extension] ?? fileTypeIcons.unknown);
+    const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
 
     const handleDoubleClick = () => {
         // TODO: если вкладка уже есть в массиве, переключиться на эту вкладку
@@ -123,7 +121,7 @@ const ProjectStructureItemLabel = memo(({ id, label, isFolder, setTabs, }) => {
     };
 
     return (
-        <Stack onDoubleClick={!isFolder ? handleDoubleClick : null} direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} onDoubleClick={!isFolder ? handleDoubleClick : null}>
             <SvgIcon sx={{ width: 18, height: 18 }}>{icon}</SvgIcon>
             <span>{label}</span>
         </Stack>
@@ -154,6 +152,7 @@ const ProjectStructureItem = ({ itemId, label, children }) => {
                     },
                     '.MuiTreeItem-label': {
                         fontSize: '0.875rem',
+                        fontWeight: '500',
                         lineHeight: 'normal',
                         textWrap: 'nowrap',
                     },
