@@ -35,8 +35,8 @@ const SortableTabs = ({ tabs, setTabs }) => {
         }),
         useSensor(MouseSensor, {
             activationConstraint: {
-                distance: 0.1,
-                delay: 500,
+                delay: 250,
+                tolerance: 5,
             }
         }),
         useSensor(KeyboardSensor, {

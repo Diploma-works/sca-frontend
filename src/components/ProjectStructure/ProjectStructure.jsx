@@ -3,6 +3,8 @@ import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { Stack, SvgIcon, useTheme } from "@mui/material";
 
 import fileTypeIcons from "./fileTypeIcons";
+import { useTabs } from "../../contexts/TabsContext";
+import { memo } from "react";
 
 const ITEMS = [
     {
@@ -109,25 +111,33 @@ const ITEMS = [
     },
 ];
 
-const ProjectStructureItemLabel = ({ label, isFolder }) => {
+const ProjectStructureItemLabel = memo(({ id, label, isFolder, setTabs, }) => {
+    console.log("ProjectStructureItemLabel");
+
     const extension = (!isFolder && label.includes(".")) ? label.split(".").pop() : null;
     const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[extension] ?? fileTypeIcons.unknown);
 
+    const handleDoubleClick = () => {
+        // TODO: если вкладка уже есть в массиве, переключиться на эту вкладку
+        setTabs((prevTabs) => [...prevTabs, { id, label }]);
+    };
+
     return (
-        <Stack direction="row" spacing={1}>
+        <Stack onDoubleClick={!isFolder ? handleDoubleClick : null} direction="row" spacing={1}>
             <SvgIcon sx={{ width: 18, height: 18 }}>{icon}</SvgIcon>
             <span>{label}</span>
         </Stack>
     )
-}
+});
 
 const ProjectStructureItem = ({ itemId, label, children }) => {
     const theme = useTheme();
+    const [, setTabs] = useTabs();
 
     return (
         <TreeItem
             itemId={itemId}
-            label={<ProjectStructureItemLabel label={label} isFolder={children?.length}/>}
+            label={<ProjectStructureItemLabel id={itemId} label={label} isFolder={children?.length} setTabs={setTabs}/>}
             sx={{
                 '.MuiTreeItem-iconContainer': {
                     color: 'text.disabled',
