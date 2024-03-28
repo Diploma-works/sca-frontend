@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import {
     closestCenter,
@@ -9,21 +9,14 @@ import {
     useSensor,
     useSensors
 } from "@dnd-kit/core";
-import {
-    arrayMove,
-    horizontalListSortingStrategy,
-    SortableContext,
-    sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable";
+import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates, } from "@dnd-kit/sortable";
 
 import { Tabs, useTheme } from "@mui/material";
 
-import { SortableTab, SortableTabOverlay } from "./SortableTab";
+import { EditorTab, EditorTabOverlay } from "./EditorTab";
 
-const SortableTabs = ({ tabs, setTabs }) => {
+const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeValue, setActiveValue }) => {
     const theme = useTheme();
-
-    const [value, setValue] = useState(tabs[0]?.id ?? null);
     const [draggedTab, setDraggedTab] = useState(null);
 
     const sensors = useSensors(
@@ -44,48 +37,34 @@ const SortableTabs = ({ tabs, setTabs }) => {
         })
     )
 
-    const handleDragStart = (event) => {
+    const handleDragStart = useCallback((event) => {
         setDraggedTab(tabs[event.active.data.current.sortable.index]);
-    }
+    }, [tabs])
 
-    const handleDragEnd = ({ active, over }) => {
+    const handleDragEnd = useCallback(({ active, over }) => {
         setDraggedTab(null);
         if (!over || active.id === over.id) {
             return;
         }
+        moveTab(active.data.current.sortable.index, over.data.current.sortable.index);
+    }, [moveTab]);
 
-        setTabs((tabs) => {
-            const oldIndex = tabs.findIndex((user) => user.id === active.id);
-            const newIndex = tabs.findIndex((user) => user.id === over.id);
-            return arrayMove(tabs, oldIndex, newIndex);
-        });
-    };
-
-    const handleClose = (event, indexToDelete) => {
-        event.stopPropagation();
-        const updatedTabs = Array.from(tabs);
-        updatedTabs.splice(indexToDelete, 1);
-
-        if (tabs[indexToDelete].id === value) {
-            setValue(indexToDelete === 0 ? updatedTabs[0]?.id : tabs[indexToDelete - 1].id);
-        }
-        setTabs(updatedTabs);
-    };
+    const handleChange = useCallback((event, newValue) => setActiveValue(newValue), [setActiveValue]);
 
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            collisionDetection={closestCenter}
         >
             <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
                 <Tabs
-                    value={value}
-                    onChange={(event, newValue) => setValue(newValue)}
                     variant="scrollable"
                     scrollButtons
                     allowScrollButtonsMobile
+                    value={activeValue}
+                    onChange={handleChange}
                     sx={{
                         position: 'relative',
                         minHeight: 0,
@@ -134,19 +113,12 @@ const SortableTabs = ({ tabs, setTabs }) => {
                         },
                     }}
                 >
-                    {tabs.map((tab, index) => (
-                        <SortableTab
-                            key={tab.id}
-                            value={tab.id}
-                            label={tab.label}
-                            handleClose={(event) => handleClose(event, index)}
-                        />
-                    ))}
+                    {tabs.map(({ id, label }) => <EditorTab key={id} value={id} label={label} removeTab={removeTab}/>)}
                 </Tabs>
             </SortableContext>
-            <SortableTabOverlay draggedTab={draggedTab} value={value}/>
+            <EditorTabOverlay draggedTab={draggedTab} isSelected={draggedTab?.id === activeValue}/>
         </DndContext>
     );
 };
 
-export default SortableTabs;
+export default EditorTabsRoot;

@@ -7,19 +7,19 @@ import { darkTheme } from "./themes/dark";
 import Navbar from "./components/Navbar";
 import Editor from "./components/Editor";
 import LeftSidebar from "./components/LeftSidebar";
-import { TabsProvider } from "./contexts/TabsContext";
+import { TabsContextProvider } from "./contexts/TabsContext";
 
 const defaultTabs = [
-    { id: 1, label: "file1.dsl" },
-    { id: 2, label: "file2.dsl" },
-    { id: 3, label: "test.dsl" },
-    { id: 4, label: "file3.dsl" },
-    { id: 5, label: "testttt.dsl" },
-    { id: 6, label: "file9.dsl" },
-    { id: 7, label: "file8.dsl" },
-    { id: 8, label: "t.dsl" },
-    { id: 9, label: "file28.dsl" },
-    { id: 10, label: "no.dsl" }
+    { id: "Editor.jsx", label: "Editor.jsx" },
+    { id: "index.js", label: "index.js" },
+    { id: "utils", label: "utils.ts" },
+    { id: "RightSidebar", label: "RightSidebar.tsx" },
+    { id: "logo512.jpg", label: "logo512.jpg" },
+    { id: "manifest.json", label: "manifest.json" },
+    { id: "robots.txt", label: "robots.txt" },
+    { id: "main.css", label: "main.css" },
+    { id: "Montserrat-Bold.ttf", label: "Montserrat-Bold.ttf" },
+    { id: "index.html", label: "index.html" },
 ];
 
 const App = () => {
@@ -44,10 +44,10 @@ const App = () => {
                 flex: 1,
                 overflow: 'hidden',
             }}>
-                <TabsProvider defaultTabs={defaultTabs}>
+                <TabsContextProvider tabs={defaultTabs} activeValue={defaultTabs[0].id}>
                     <LeftSidebar/>
                     <Editor/>
-                </TabsProvider>
+                </TabsContextProvider>
             </Stack>
         </ThemeProvider>
     );

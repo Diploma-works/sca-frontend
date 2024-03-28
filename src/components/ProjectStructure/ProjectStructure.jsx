@@ -1,11 +1,11 @@
+import { memo } from "react";
+
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { Stack, SvgIcon, useTheme } from "@mui/material";
 
-import { useTabs } from "../../contexts/TabsContext";
-import { memo } from "react";
-
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
+import { useTabsContext } from "../../contexts/TabsContext";
 
 const ITEMS = [
     {
@@ -112,13 +112,10 @@ const ITEMS = [
     },
 ];
 
-const ProjectStructureItemLabel = memo(({ id, label, isFolder, setTabs, }) => {
+const ProjectStructureItemLabel = memo(({ id, label, isFolder, addTab }) => {
     const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
 
-    const handleDoubleClick = () => {
-        // TODO: если вкладка уже есть в массиве, переключиться на эту вкладку
-        setTabs((prevTabs) => [...prevTabs, { id, label }]);
-    };
+    const handleDoubleClick = () => addTab({ id, label });
 
     return (
         <Stack direction="row" spacing={1} onDoubleClick={!isFolder ? handleDoubleClick : null}>
@@ -130,12 +127,12 @@ const ProjectStructureItemLabel = memo(({ id, label, isFolder, setTabs, }) => {
 
 const ProjectStructureItem = ({ itemId, label, children }) => {
     const theme = useTheme();
-    const [, setTabs] = useTabs();
+    const { addTab } = useTabsContext();
 
     return (
         <TreeItem
             itemId={itemId}
-            label={<ProjectStructureItemLabel id={itemId} label={label} isFolder={children?.length} setTabs={setTabs}/>}
+            label={<ProjectStructureItemLabel id={itemId} label={label} isFolder={children?.length} addTab={addTab}/>}
             sx={{
                 '.MuiTreeItem-iconContainer': {
                     color: 'text.disabled',

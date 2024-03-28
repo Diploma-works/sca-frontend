@@ -1,17 +1,24 @@
 import { Box, Stack, useTheme } from "@mui/material";
-import SortableTabs from "./SortableTabs";
-import { useTabs } from "../../contexts/TabsContext";
+
+import EditorTabsRoot from "./EditorTabsRoot";
+import { useTabsContext } from "../../contexts/TabsContext";
 
 const Editor = () => {
     const theme = useTheme();
-    const [tabs, setTabs] = useTabs();
+    const { tabs, moveTab, removeTab, activeValue, setActiveValue } = useTabsContext();
 
     return (
         <Stack sx={{
             flex: 1,
             overflow: 'hidden',
         }}>
-            {tabs && <SortableTabs tabs={tabs} setTabs={setTabs}/>}
+            {tabs && <EditorTabsRoot
+                tabs={tabs}
+                moveTab={moveTab}
+                removeTab={removeTab}
+                activeValue={activeValue}
+                setActiveValue={setActiveValue}
+            />}
             <Box sx={{
                 flex: 1,
                 overflow: 'auto',
