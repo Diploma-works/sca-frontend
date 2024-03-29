@@ -19,12 +19,13 @@ const commonTabSx = {
 }
 
 const EditorTabLabel = memo(({ label, handleClose }) => {
-    const fileTypeIcon = fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown;
+    const filename = label.split("/").pop();
+    const fileTypeIcon = fileTypeIcons[getFileType(filename)] ?? fileTypeIcons.unknown;
 
     return (
         <>
             <SvgIcon sx={{ width: 20, height: 20 }}>{fileTypeIcon}</SvgIcon>
-            <span>{label}</span>
+            <span>{filename}</span>
             {handleClose &&
                 <IconButton component="div" color="inherit" sx={{ p: 0 }} onClick={handleClose}>
                     <CloseIcon fontSize="small"/>

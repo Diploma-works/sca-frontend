@@ -15,7 +15,7 @@ import { Tabs, useTheme } from "@mui/material";
 
 import { EditorTab, EditorTabOverlay } from "./EditorTab";
 
-const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeValue, setActiveValue }) => {
+const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) => {
     const theme = useTheme();
     const [draggedTab, setDraggedTab] = useState(null);
 
@@ -49,7 +49,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeValue, setActiveValue 
         moveTab(active.data.current.sortable.index, over.data.current.sortable.index);
     }, [moveTab]);
 
-    const handleChange = useCallback((event, newValue) => setActiveValue(newValue), [setActiveValue]);
+    const handleChange = useCallback((event, newValue) => setActiveTab({ id: newValue }), [setActiveTab]);
 
     return (
         <DndContext
@@ -63,7 +63,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeValue, setActiveValue 
                     variant="scrollable"
                     scrollButtons
                     allowScrollButtonsMobile
-                    value={activeValue}
+                    value={activeTab?.id}
                     onChange={handleChange}
                     sx={{
                         position: 'relative',
@@ -116,7 +116,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeValue, setActiveValue 
                     {tabs.map(({ id, label }) => <EditorTab key={id} value={id} label={label} removeTab={removeTab}/>)}
                 </Tabs>
             </SortableContext>
-            <EditorTabOverlay draggedTab={draggedTab} isSelected={draggedTab?.id === activeValue}/>
+            <EditorTabOverlay draggedTab={draggedTab} isSelected={draggedTab?.id === activeTab?.id}/>
         </DndContext>
     );
 };

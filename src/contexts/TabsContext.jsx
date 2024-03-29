@@ -8,33 +8,34 @@ const tabsReducer = (state, action) => {
         case "ADD_TAB":
             const existingTab = state.tabs.find((tab) => tab.id === action.tab.id);
             if (existingTab) {
-                return { ...state, activeValue: existingTab.id };
+                return { ...state, activeTab: existingTab };
             }
-            return { ...state, tabs: [...state.tabs, action.tab], activeValue: action.tab.id };
+            return { ...state, tabs: [...state.tabs, action.tab], activeTab: action.tab };
         case "MOVE_TAB":
             return { ...state, tabs: arrayMove(state.tabs, action.from, action.to) };
         case "REMOVE_TAB":
-            if (action.id === state.activeValue) {
-                const indexToDelete = state.tabs.findIndex((tab) => tab.id === state.activeValue);
+            if (action.id === state.activeTab.id) {
+                const indexToDelete = state.tabs.findIndex((tab) => tab.id === state.activeTab.id);
                 const tabs = [...state.tabs];
                 tabs.splice(indexToDelete, 1);
-                return { tabs, activeValue: indexToDelete === 0 ? tabs[0]?.id : state.tabs[indexToDelete - 1].id };
+                return { tabs, activeTab: indexToDelete === 0 ? tabs[0] : state.tabs[indexToDelete - 1] };
             }
             return { ...state, tabs: state.tabs.filter((tab) => tab.id !== action.id) };
-        case "SET_VALUE":
-            return { ...state, activeValue: action.activeValue };
+        case "SET_ACTIVE_TAB":
+            const activeTab = state.tabs.find((tab) => tab.id === action.activeTab.id);
+            return { ...state, activeTab };
         default:
             return state;
     }
 };
 
-const TabsContextProvider = ({ tabs, activeValue, children }) => {
-    const [state, dispatch] = useReducer(tabsReducer, { tabs: tabs ?? [], activeValue: activeValue ?? null });
+const TabsContextProvider = ({ tabs, activeTab, children }) => {
+    const [state, dispatch] = useReducer(tabsReducer, { tabs: tabs ?? [], activeTab: activeTab ?? null });
 
     const addTab = useCallback((tab) => dispatch({ type: "ADD_TAB", tab }), [dispatch]);
     const moveTab = useCallback((from, to) => dispatch({ type: "MOVE_TAB", from, to }), [dispatch]);
     const removeTab = useCallback((id) => dispatch({ type: "REMOVE_TAB", id }), [dispatch]);
-    const setActiveValue = useCallback((activeValue) => dispatch({ type: "SET_VALUE", activeValue }), [dispatch]);
+    const setActiveTab = useCallback((activeTab) => dispatch({ type: "SET_ACTIVE_TAB", activeTab }), [dispatch]);
 
     return (
         <TabsContext.Provider value={{
@@ -42,8 +43,8 @@ const TabsContextProvider = ({ tabs, activeValue, children }) => {
             addTab,
             moveTab,
             removeTab,
-            activeValue: state.activeValue,
-            setActiveValue
+            activeTab: state.activeTab,
+            setActiveTab
         }}>
             {children}
         </TabsContext.Provider>

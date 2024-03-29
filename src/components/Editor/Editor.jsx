@@ -5,7 +5,7 @@ import { useTabsContext } from "../../contexts/TabsContext";
 
 const Editor = () => {
     const theme = useTheme();
-    const { tabs, moveTab, removeTab, activeValue, setActiveValue } = useTabsContext();
+    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext();
 
     return (
         <Stack sx={{
@@ -16,8 +16,8 @@ const Editor = () => {
                 tabs={tabs}
                 moveTab={moveTab}
                 removeTab={removeTab}
-                activeValue={activeValue}
-                setActiveValue={setActiveValue}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
             />}
             <Box sx={{
                 flex: 1,

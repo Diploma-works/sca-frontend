@@ -13,9 +13,7 @@ const SidebarButton = ({ title, icon, onClick, renderDivider, isActive }) => {
                     popper: {
                         modifiers: [{
                             name: 'offset',
-                            options: {
-                                offset: [0, 3],
-                            },
+                            options: { offset: [0, -5] },
                         }],
                     },
                 }}
@@ -26,9 +24,9 @@ const SidebarButton = ({ title, icon, onClick, renderDivider, isActive }) => {
                     disableElevation
                     onClick={onClick}
                     sx={{
+                        p: 4 / 8,
                         minWidth: 0,
-                        p: 6 / 8,
-                        color: 'text.disabled',
+                        color: 'text.secondary',
                     }}
                 >
                     {icon}

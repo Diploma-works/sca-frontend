@@ -9,10 +9,23 @@ import SidebarButton from "./SidebarButton";
 import HorizontallyResizableBox from "./HorizontallyResizableBox";
 import ProjectStructure from "../ProjectStructure";
 
+// TODO: может есть смысл добавить размер иконок через cloneElement?
 const buttons = [
-    { title: "Файлы проекта", icon: <FolderOutlinedIcon/>, component: <ProjectStructure/> },
-    { title: "Статистика", icon: <QueryStatsRoundedIcon/>, component: <div style={{ width: 187, height: 1 }}></div> },
-    { title: "Проблемы", icon: <ErrorOutlineRoundedIcon/>, component: <div style={{ width: 500, height: 1 }}></div> },
+    {
+        title: "Файлы проекта",
+        icon: <FolderOutlinedIcon sx={{ width: 20, height: 20, }}/>,
+        component: <ProjectStructure/>
+    },
+    {
+        title: "Статистика",
+        icon: <QueryStatsRoundedIcon sx={{ width: 20, height: 20, }}/>,
+        component: <div style={{ width: 187, height: 1 }}></div>
+    },
+    {
+        title: "Проблемы",
+        icon: <ErrorOutlineRoundedIcon sx={{ width: 20, height: 20, }}/>,
+        component: <div style={{ width: 500, height: 1 }}></div>
+    },
 ];
 
 const MIN_WIDTH = 40;
@@ -34,7 +47,7 @@ const LeftSidebar = () => {
 
     return (
         <>
-            <Stack spacing={1} alignItems="center" sx={{ p: 1 }}>
+            <Stack spacing={4 / 8} alignItems="center" sx={{ p: 4 / 8 }}>
                 {buttons.map((button, index) => (
                     <SidebarButton
                         key={index}

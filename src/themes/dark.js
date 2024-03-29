@@ -44,9 +44,8 @@ export const darkTheme = createTheme({
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    padding: 8,
+                    height: 28,
                     fontSize: '0.875rem',
-                    lineHeight: 1.5,
                     backgroundColor: grey[800],
                     boxShadow: '0 0 10px 2px #0a0a0a',
                 },

@@ -8,18 +8,19 @@ import Navbar from "./components/Navbar";
 import Editor from "./components/Editor";
 import LeftSidebar from "./components/LeftSidebar";
 import { TabsContextProvider } from "./contexts/TabsContext";
+import PathBreadcrumbs from "./components/PathBreadcrumbs";
 
 const defaultTabs = [
-    { id: "Editor.jsx", label: "Editor.jsx" },
-    { id: "index.js", label: "index.js" },
-    { id: "utils", label: "utils.ts" },
-    { id: "RightSidebar", label: "RightSidebar.tsx" },
-    { id: "logo512.jpg", label: "logo512.jpg" },
-    { id: "manifest.json", label: "manifest.json" },
-    { id: "robots.txt", label: "robots.txt" },
-    { id: "main.css", label: "main.css" },
-    { id: "Montserrat-Bold.ttf", label: "Montserrat-Bold.ttf" },
-    { id: "index.html", label: "index.html" },
+    { id: "Editor.jsx", label: "src/components/Editor/Editor.jsx" },
+    { id: "index.js", label: "src/components/Editor/index.js" },
+    { id: "utils", label: "src/themes/utils.ts" },
+    { id: "RightSidebar", label: "src/components/Sidebars/RightSidebar.tsx" },
+    { id: "index.html", label: "public/index.html" },
+    { id: "logo512.jpg", label: "public/logo512.jpg" },
+    { id: "manifest.json", label: "public/manifest.json" },
+    { id: "robots.txt", label: "public/robots.txt" },
+    { id: "main.css", label: "styles/css/main.css" },
+    { id: "Montserrat-Bold.ttf", label: "src/assets/fonts/Montserrat-Bold.ttf" },
 ];
 
 const App = () => {
@@ -40,15 +41,14 @@ const App = () => {
             <CssBaseline enableColorScheme/>
             <Navbar mode={mode} switchMode={switchMode}/>
             <Divider/>
-            <Stack direction="row" sx={{
-                flex: 1,
-                overflow: 'hidden',
-            }}>
-                <TabsContextProvider tabs={defaultTabs} activeValue={defaultTabs[0].id}>
+            <TabsContextProvider tabs={defaultTabs} activeTab={defaultTabs[0]}>
+                <PathBreadcrumbs/>
+                <Divider/>
+                <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
                     <LeftSidebar/>
                     <Editor/>
-                </TabsContextProvider>
-            </Stack>
+                </Stack>
+            </TabsContextProvider>
         </ThemeProvider>
     );
 }
