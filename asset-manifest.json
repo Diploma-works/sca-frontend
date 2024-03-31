@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/cloud-ide/static/css/main.6ae29097.css",
-    "main.js": "/cloud-ide/static/js/main.81393b52.js",
+    "main.css": "/cloud-ide/static/css/main.8a975b61.css",
+    "main.js": "/cloud-ide/static/js/main.2e37d4ad.js",
     "static/media/Montserrat-SemiBold.ttf": "/cloud-ide/static/media/Montserrat-SemiBold.62b8eee010e3957d425f.ttf",
     "static/media/Montserrat-Medium.ttf": "/cloud-ide/static/media/Montserrat-Medium.a281f04d4c8926e7dea1.ttf",
     "static/media/Montserrat-Bold.ttf": "/cloud-ide/static/media/Montserrat-Bold.d0ca82d8ca07ba209aee.ttf",
@@ -10,11 +10,11 @@
     "static/media/Montserrat-ExtraLight.ttf": "/cloud-ide/static/media/Montserrat-ExtraLight.41d61b3f1d94d1d526d8.ttf",
     "static/media/Montserrat-Thin.ttf": "/cloud-ide/static/media/Montserrat-Thin.1728a6d0eb6ac2caea47.ttf",
     "index.html": "/cloud-ide/index.html",
-    "main.6ae29097.css.map": "/cloud-ide/static/css/main.6ae29097.css.map",
-    "main.81393b52.js.map": "/cloud-ide/static/js/main.81393b52.js.map"
+    "main.8a975b61.css.map": "/cloud-ide/static/css/main.8a975b61.css.map",
+    "main.2e37d4ad.js.map": "/cloud-ide/static/js/main.2e37d4ad.js.map"
   },
   "entrypoints": [
-    "static/css/main.6ae29097.css",
-    "static/js/main.81393b52.js"
+    "static/css/main.8a975b61.css",
+    "static/js/main.2e37d4ad.js"
   ]
 }
