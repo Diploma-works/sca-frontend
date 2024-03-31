@@ -50,7 +50,12 @@ export const lightTheme = createTheme({
             styleOverrides: {
                 tooltip: {
                     height: 28,
+                    paddingLeft: 8,
+                    paddingRight: 8,
+                    display: 'flex',
+                    alignItems: 'center',
                     fontSize: '0.875rem',
+                    fontWeight: 500,
                     backgroundColor: grey[300],
                     color: '#283646',
                     boxShadow: '0 0 10px 2px #f5f6fa',

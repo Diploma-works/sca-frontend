@@ -45,7 +45,12 @@ export const darkTheme = createTheme({
             styleOverrides: {
                 tooltip: {
                     height: 28,
+                    paddingLeft: 8,
+                    paddingRight: 8,
+                    display: 'flex',
+                    alignItems: 'center',
                     fontSize: '0.875rem',
+                    fontWeight: 500,
                     backgroundColor: grey[800],
                     boxShadow: '0 0 10px 2px #0a0a0a',
                 },

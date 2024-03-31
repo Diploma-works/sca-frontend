@@ -13,13 +13,13 @@ const PathBreadcrumbs = () => {
 
     return (
         <Breadcrumbs
-            separator={<NavigateNextIcon sx={{ width: 18, height: 18 }}/>}
+            separator={<NavigateNextIcon sx={{ width: 16, height: 16 }}/>}
             sx={{
                 px: 1,
                 py: 4 / 8,
-                height: 26,
+                height: 24,
                 fontWeight: 500,
-                fontSize: '0.875em',
+                fontSize: 'small',
                 lineHeight: 'normal',
                 textWrap: 'nowrap',
                 userSelect: 'none',

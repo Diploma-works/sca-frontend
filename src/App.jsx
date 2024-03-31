@@ -4,6 +4,8 @@ import { createTheme, CssBaseline, Divider, Stack, ThemeProvider } from "@mui/ma
 import { lightTheme } from "./themes/light";
 import { darkTheme } from "./themes/dark";
 
+import "overlayscrollbars/overlayscrollbars.css";
+
 import Navbar from "./components/Navbar";
 import Editor from "./components/Editor";
 import LeftSidebar from "./components/LeftSidebar";

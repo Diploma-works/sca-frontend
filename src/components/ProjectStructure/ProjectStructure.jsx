@@ -2,7 +2,9 @@ import { cloneElement, memo } from "react";
 
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
-import { Box, Stack, SvgIcon, useTheme } from "@mui/material";
+import { Box, Divider, Stack, SvgIcon, useTheme } from "@mui/material";
+
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 import { useTabsContext } from "../../contexts/TabsContext";
@@ -71,8 +73,10 @@ const ProjectStructureItem = ({ itemId, label, children }) => {
 };
 
 const ProjectStructure = () => {
+    const theme = useTheme();
+
     return (
-        <Stack flex={1} spacing={1 / 8}>
+        <Stack flex={1} overflow={"hidden"}>
             <Box sx={{
                 px: 1.5,
                 height: 36,
@@ -87,7 +91,20 @@ const ProjectStructure = () => {
             }}>
                 Файлы проекта
             </Box>
-            <RichTreeView items={ITEMS} slots={{ item: ProjectStructureItem }}/>
+            <Divider/>
+            <OverlayScrollbarsComponent
+                options={{
+                    scrollbars: {
+                        theme: theme.palette.mode === "light" ? "os-theme-dark os-custom" : "os-theme-light os-custom",
+                        clickScroll: true,
+                    }
+                }}
+                style={{ flex: 1 }}
+            >
+                <Box display="flex">
+                    <RichTreeView items={ITEMS} slots={{ item: ProjectStructureItem }} sx={{ flex: 1 }}/>
+                </Box>
+            </OverlayScrollbarsComponent>
         </Stack>
     );
 }

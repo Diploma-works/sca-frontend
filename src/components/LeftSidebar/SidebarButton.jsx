@@ -8,6 +8,8 @@ const SidebarButton = ({ title, icon, onClick, renderDivider, isActive }) => {
                 placement="right"
                 disableInteractive
                 enterDelay={300}
+                enterNextDelay={300}
+                enterTouchDelay={300}
                 TransitionComponent={Zoom}
                 slotProps={{
                     popper: {

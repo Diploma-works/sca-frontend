@@ -43,7 +43,7 @@ const HorizontallyResizableBox = ({
 
     return (
         <>
-            {dividerPosition === "before" && <InteractiveDivider ref={resizeHandleRef} activationArea={5}/>}
+            {dividerPosition === "before" && <InteractiveDivider ref={resizeHandleRef} activationArea={3}/>}
             <Box ref={resizeableElementRef} sx={{
                 display: 'flex',
                 overflow: 'auto',
@@ -53,7 +53,7 @@ const HorizontallyResizableBox = ({
             }}>
                 {children}
             </Box>
-            {dividerPosition === "after" && <InteractiveDivider ref={resizeHandleRef} activationArea={5}/>}
+            {dividerPosition === "after" && <InteractiveDivider ref={resizeHandleRef} activationArea={3}/>}
         </>
     )
 }
