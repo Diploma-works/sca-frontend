@@ -1,33 +1,58 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { Breadcrumbs } from "@mui/material";
+import { Breadcrumbs, Button, SvgIcon } from "@mui/material";
 import { useTabsContext } from "../contexts/TabsContext";
+import { useProjectStructureContext } from "../contexts/ProjectStructureContext";
+import { fileTypeIcons, getFileType } from "../utils/fileTypes";
 
 const PathBreadcrumbs = () => {
     const { activeTab } = useTabsContext();
+    const { expandedItems, setExpandedItems, setSelectedItems } = useProjectStructureContext();
 
-    const children = useMemo(() => activeTab?.label.split("/").map((pathElement, index) =>
-        <span key={index}>{pathElement}</span>
-    ), [activeTab]);
+    const handleClick = useCallback((index, pathElements) => {
+        const itemsToExpand = pathElements.slice(0, index === pathElements.length - 1 ? index : index + 1)
+            .map((pathElement) => pathElement.id);
+        setExpandedItems([...new Set([...expandedItems, ...itemsToExpand])]);
+        setSelectedItems(pathElements[index].id);
+    }, [expandedItems, setExpandedItems, setSelectedItems]);
+
+    const children = useMemo(() => activeTab && [...activeTab.path, activeTab].map((pathElement, index, pathElements) =>
+        <Button
+            key={index}
+            color="inherit"
+            sx={{
+                px: 4 / 8,
+                py: 2 / 8,
+                gap: 4 / 8,
+                minWidth: 0,
+                fontSize: 'small',
+                lineHeight: 'normal',
+                textTransform: 'none',
+            }}
+            onClick={() => handleClick(index, pathElements)}
+        >
+            {index === pathElements.length - 1 &&
+                <SvgIcon sx={{ width: 16, height: 16 }}>
+                    {fileTypeIcons[getFileType(pathElement.label)] ?? fileTypeIcons.unknown}
+                </SvgIcon>
+            }
+            {pathElement.label}
+        </Button>
+    ), [activeTab, handleClick]);
 
     return (
         <Breadcrumbs
             separator={<NavigateNextIcon sx={{ width: 16, height: 16 }}/>}
             sx={{
-                px: 1,
-                py: 4 / 8,
-                height: 24,
-                fontWeight: 500,
-                fontSize: 'small',
-                lineHeight: 'normal',
-                textWrap: 'nowrap',
-                userSelect: 'none',
+                height: 28,
+                p: 4 / 8,
+                lineHeight: 0,
                 '.MuiBreadcrumbs-ol': {
                     flexWrap: 'nowrap',
                 },
                 '.MuiBreadcrumbs-separator': {
-                    mx: 4 / 8,
+                    mx: 0,
                 },
             }}
         >

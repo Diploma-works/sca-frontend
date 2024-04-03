@@ -9,29 +9,37 @@ import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 import { useTabsContext } from "../../contexts/TabsContext";
 import ITEMS from "./items";
+import { useProjectStructureContext } from "../../contexts/ProjectStructureContext";
 
-const ProjectStructureItemLabel = memo(({ id, label, isFolder, addTab }) => {
-    const filename = label.split("/").pop();
-    const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(filename)] ?? fileTypeIcons.unknown);
+const ProjectStructureItemLabel = memo(({ id, label, path, isFolder, addTab }) => {
+    const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
 
-    const handleDoubleClick = () => addTab({ id, label });
+    const handleDoubleClick = () => addTab({ id, label, path });
 
     return (
         <Stack direction="row" spacing={1} onDoubleClick={!isFolder ? handleDoubleClick : null}>
             <SvgIcon sx={{ width: 18, height: 18 }}>{icon}</SvgIcon>
-            <span>{filename}</span>
+            <span>{label}</span>
         </Stack>
     )
 });
 
-const ProjectStructureItem = ({ itemId, label, children }) => {
+const ProjectStructureItem = ({ itemId, label, path, children }) => {
     const theme = useTheme();
     const { addTab } = useTabsContext();
 
     return (
         <TreeItem
             itemId={itemId}
-            label={<ProjectStructureItemLabel id={itemId} label={label} isFolder={children?.length} addTab={addTab}/>}
+            label={
+                <ProjectStructureItemLabel
+                    id={itemId}
+                    label={label}
+                    path={path}
+                    isFolder={children?.length}
+                    addTab={addTab}
+                />
+            }
             sx={{
                 '.MuiTreeItem-iconContainer': {
                     color: 'text.disabled',
@@ -56,24 +64,27 @@ const ProjectStructureItem = ({ itemId, label, children }) => {
                 '.MuiTreeItem-groupTransition': {
                     ml: 2,
                     pl: 0,
-                    position: 'relative',
-                    '::before': {
-                        content: '""',
-                        position: 'absolute',
-                        width: '1px',
-                        height: '100%',
-                        borderLeft: `1px solid ${theme.palette.divider}`,
-                    },
+                    borderLeft: `1px solid ${theme.palette.divider}`,
                 },
             }}
         >
-            {children?.map((child) => cloneElement(child, { label: label + "/" + child.props.label }))}
+            {children?.map((child) => cloneElement(child, {
+                slotProps: {
+                    item: {
+                        path: path ? [...path, { id: itemId, label }] : [{ id: itemId, label }]
+                    }
+                }
+            }))}
         </TreeItem>
     );
 };
 
 const ProjectStructure = () => {
     const theme = useTheme();
+    const { expandedItems, setExpandedItems, selectedItems, setSelectedItems } = useProjectStructureContext();
+
+    const handleExpandedItemsChange = (e, itemIds) => setExpandedItems(itemIds);
+    const handleSelectedItemsChange = (e, itemIds) => setSelectedItems(itemIds);
 
     return (
         <Stack flex={1} overflow={"hidden"}>
@@ -102,7 +113,15 @@ const ProjectStructure = () => {
                 style={{ flex: 1 }}
             >
                 <Box display="flex">
-                    <RichTreeView items={ITEMS} slots={{ item: ProjectStructureItem }} sx={{ flex: 1 }}/>
+                    <RichTreeView
+                        items={ITEMS}
+                        selectedItems={selectedItems}
+                        expandedItems={expandedItems}
+                        slots={{ item: ProjectStructureItem }}
+                        sx={{ flex: 1 }}
+                        onExpandedItemsChange={handleExpandedItemsChange}
+                        onSelectedItemsChange={handleSelectedItemsChange}
+                    />
                 </Box>
             </OverlayScrollbarsComponent>
         </Stack>

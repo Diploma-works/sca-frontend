@@ -8,7 +8,7 @@ const tabsReducer = (state, action) => {
         case "ADD_TAB":
             const existingTab = state.tabs.find((tab) => tab.id === action.tab.id);
             if (existingTab) {
-                return { ...state, activeTab: existingTab };
+                return { ...state, activeTab: { ...existingTab, path: action.tab.path } };
             }
             return { ...state, tabs: [...state.tabs, action.tab], activeTab: action.tab };
         case "MOVE_TAB":

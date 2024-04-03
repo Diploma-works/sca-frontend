@@ -11,18 +11,113 @@ import Editor from "./components/Editor";
 import LeftSidebar from "./components/LeftSidebar";
 import { TabsContextProvider } from "./contexts/TabsContext";
 import PathBreadcrumbs from "./components/PathBreadcrumbs";
+import { ProjectStructureContextProvider } from "./contexts/ProjectStructureContext";
 
 const defaultTabs = [
-    { id: "Editor.jsx", label: "src/components/Editor/Editor.jsx" },
-    { id: "index.js", label: "src/components/Editor/index.js" },
-    { id: "utils", label: "src/themes/utils.ts" },
-    { id: "RightSidebar", label: "src/components/Sidebars/RightSidebar.tsx" },
-    { id: "index.html", label: "public/index.html" },
-    { id: "logo512.jpg", label: "public/logo512.jpg" },
-    { id: "manifest.json", label: "public/manifest.json" },
-    { id: "robots.txt", label: "public/robots.txt" },
-    { id: "main.css", label: "styles/css/main.css" },
-    { id: "Montserrat-Bold.ttf", label: "src/assets/fonts/Montserrat-Bold.ttf" },
+    {
+        id: "Editor.jsx",
+        label: "Editor.jsx",
+        path: [
+            {
+                id: "src",
+                label: "src"
+            },
+            {
+                id: "components",
+                label: "components"
+            },
+            {
+                id: "Editor",
+                label: "Editor"
+            }
+        ]
+    },
+    {
+        id: "index1.js",
+        label: "index.js",
+        path: [
+            {
+                id: "src",
+                label: "src"
+            },
+            {
+                id: "components",
+                label: "components"
+            },
+            {
+                id: "Editor",
+                label: "Editor"
+            }
+        ]
+    },
+    {
+        id: "utils",
+        label: "utils.ts",
+        path: [
+            {
+                id: "src",
+                label: "src"
+            },
+            {
+                id: "themes",
+                label: "themes"
+            }
+        ]
+    },
+    {
+        id: "index.html",
+        label: "index.html",
+        path: [
+            {
+                id: "public",
+                label: "public"
+            }
+        ]
+    },
+    {
+        id: "logo512.jpg",
+        label: "logo512.jpg",
+        path: [
+            {
+                id: "public",
+                label: "public"
+            }
+        ]
+    },
+    {
+        id: "manifest.json",
+        label: "manifest.json",
+        path: [
+            {
+                id: "public",
+                label: "public"
+            }
+        ]
+    },
+    {
+        id: "robots.txt",
+        label: "robots.txt",
+        path: [
+            {
+                id: "public",
+                label: "public"
+            }
+        ]
+    },
+    {
+        id: "main.css",
+        label: "main.css",
+        path: [
+            {
+                id: "styles",
+                label: "styles"
+            },
+            {
+                id: "css",
+                label: "css"
+            }
+        ]
+    },
 ];
 
 const App = () => {
@@ -44,12 +139,14 @@ const App = () => {
             <Navbar mode={mode} switchMode={switchMode}/>
             <Divider/>
             <TabsContextProvider tabs={defaultTabs} activeTab={defaultTabs[0]}>
-                <PathBreadcrumbs/>
-                <Divider/>
-                <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
-                    <LeftSidebar/>
-                    <Editor/>
-                </Stack>
+                <ProjectStructureContextProvider>
+                    <PathBreadcrumbs/>
+                    <Divider/>
+                    <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
+                        <LeftSidebar/>
+                        <Editor/>
+                    </Stack>
+                </ProjectStructureContextProvider>
             </TabsContextProvider>
         </ThemeProvider>
     );
