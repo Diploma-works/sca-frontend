@@ -77,6 +77,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                         },
                         '& .MuiTabScrollButton-root': {
                             position: 'absolute',
+                            width: 36,
                             height: 36,
                             zIndex: 3,
                             opacity: 1,

@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { Box, Divider } from "@mui/material";
 import useHorizontalResizing from "./useHorizontalResizing";
 
-const InteractiveDivider = forwardRef(({ activationArea, ...props }, ref) => {
+const InteractiveVerticalDivider = forwardRef(({ activationArea, ...props }, ref) => {
     return (
         <Divider ref={ref}
                  orientation="vertical"
@@ -28,32 +28,32 @@ const InteractiveDivider = forwardRef(({ activationArea, ...props }, ref) => {
 })
 
 const HorizontallyResizableBox = ({
+                                      sx,
                                       getMinWidth,
                                       getMaxWidth,
                                       prevWidth,
                                       updatePrevWidth,
                                       dividerPosition,
-                                      children
+                                      children,
                                   }) => {
     const {
         width,
-        resizeableElementRef,
+        resizableElementRef,
         resizeHandleRef
     } = useHorizontalResizing(getMinWidth, getMaxWidth, prevWidth, updatePrevWidth);
 
     return (
         <>
-            {dividerPosition === "before" && <InteractiveDivider ref={resizeHandleRef} activationArea={3}/>}
-            <Box ref={resizeableElementRef} sx={{
-                display: 'flex',
-                overflow: 'auto',
+            {dividerPosition === "before" && <InteractiveVerticalDivider ref={resizeHandleRef} activationArea={3}/>}
+            <Box ref={resizableElementRef} sx={{
+                ...sx,
                 width: width ?? 'auto',
                 minWidth: getMinWidth(),
                 maxWidth: getMaxWidth(),
             }}>
                 {children}
             </Box>
-            {dividerPosition === "after" && <InteractiveDivider ref={resizeHandleRef} activationArea={3}/>}
+            {dividerPosition === "after" && <InteractiveVerticalDivider ref={resizeHandleRef} activationArea={3}/>}
         </>
     )
 }

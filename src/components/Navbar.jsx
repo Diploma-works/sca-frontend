@@ -27,7 +27,7 @@ const Navbar = ({ mode, switchMode }) => {
             boxShadow: 'none',
         }}>
             <Toolbar variant={"dense"} disableGutters sx={{ px: 1 }}>
-                <Typography variant="h4" fontWeight="bold" color="primary">IDE</Typography>
+                <Typography variant="h4" fontWeight="bold" color="primary">SCA</Typography>
                 <Stack ml={2} direction="row" spacing={1}>
                     <NavbarButton>Home</NavbarButton>
                     <NavbarButton>Help</NavbarButton>

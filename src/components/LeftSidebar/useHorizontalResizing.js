@@ -51,7 +51,7 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
 
     /* Handler for window resize */
     const handleResize = useCallback(() => {
-        setWidth((prevWidth) => Math.min(prevWidth, getMaxWidth()));
+        setWidth(Math.min(resizableElementRef.current.offsetWidth, getMaxWidth()));
     }, [getMaxWidth]);
 
     /* Effect for updating prev width */
@@ -96,7 +96,7 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
         return () => window.removeEventListener("resize", handleResize);
     }, [handleResize]);
 
-    return { width, resizeableElementRef: resizableElementRef, resizeHandleRef };
+    return { width, resizableElementRef, resizeHandleRef };
 }
 
 export default useHorizontalResizing;
