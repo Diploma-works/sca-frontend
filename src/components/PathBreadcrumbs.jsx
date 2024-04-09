@@ -2,20 +2,24 @@ import { useCallback, useMemo } from "react";
 
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Breadcrumbs, Button, SvgIcon } from "@mui/material";
+
+import { useSidebarUpdateContext } from "../contexts/SidebarContext";
 import { useTabsContext } from "../contexts/TabsContext";
 import { useProjectStructureContext } from "../contexts/ProjectStructureContext";
 import { fileTypeIcons, getFileType } from "../utils/fileTypes";
 
 const PathBreadcrumbs = () => {
+    const setActiveTool = useSidebarUpdateContext();
     const { activeTab } = useTabsContext();
     const { expandedItems, setExpandedItems, setSelectedItems } = useProjectStructureContext();
 
     const handleClick = useCallback((index, pathElements) => {
         const itemsToExpand = pathElements.slice(0, index === pathElements.length - 1 ? index : index + 1)
             .map((pathElement) => pathElement.id);
+        setActiveTool(0);
         setExpandedItems([...new Set([...expandedItems, ...itemsToExpand])]);
         setSelectedItems(pathElements[index].id);
-    }, [expandedItems, setExpandedItems, setSelectedItems]);
+    }, [expandedItems, setActiveTool, setExpandedItems, setSelectedItems]);
 
     const children = useMemo(() => activeTab && [...activeTab.path, activeTab].map((pathElement, index, pathElements) =>
         <Button

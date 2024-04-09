@@ -1,15 +1,10 @@
-// TODO: Заменить на получение объекта по API!
 const ITEMS = [
     {
         id: "public",
         label: "public",
+        needsLoading: true,
         children: [
-            { id: "favicon.ico", label: "favicon.ico" },
-            { id: "index.html", label: "index.html" },
-            { id: "logo192.png", label: "logo192.png" },
-            { id: "logo512.jpg", label: "logo512.jpg" },
-            { id: "manifest.json", label: "manifest.json" },
-            { id: "robots.txt", label: "robots.txt" },
+            { id: "_public", label: "Загрузка..." },
         ],
     },
     {

@@ -8,6 +8,7 @@ import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import SidebarButton from "./SidebarButton";
 import HorizontallyResizableBox from "./HorizontallyResizableBox";
 import ProjectStructure from "../ProjectStructure";
+import { useSidebarContext } from "../../contexts/SidebarContext";
 
 const tools = [
     {
@@ -30,11 +31,11 @@ const tools = [
 const MIN_WIDTH = 36;
 
 const LeftSidebar = () => {
-    const [activeValue, setActiveValue] = useState(null);
+    const [activeTool, setActiveTool] = useSidebarContext();
     const [prevWidths, setPrevWidths] = useState(Array(tools.length));
 
     const handleClick = (value) => {
-        setActiveValue((prevValue) => prevValue === value ? null : value);
+        setActiveTool((prevValue) => prevValue === value ? null : value);
     };
 
     const getMinWidth = useCallback(() => MIN_WIDTH, []);
@@ -42,9 +43,9 @@ const LeftSidebar = () => {
 
     const updatePrevWidth = useCallback((newWidth) => {
         const updatedPrevWidths = [...prevWidths];
-        updatedPrevWidths[activeValue] = newWidth;
+        updatedPrevWidths[activeTool] = newWidth;
         setPrevWidths(updatedPrevWidths);
-    }, [prevWidths, activeValue]);
+    }, [prevWidths, activeTool]);
 
     return (
         <>
@@ -55,22 +56,22 @@ const LeftSidebar = () => {
                         title={tool.title}
                         icon={tool.icon}
                         onClick={() => handleClick(index)}
-                        isActive={activeValue === index}
+                        isActive={activeTool === index}
                     />
                 ))}
             </Stack>
             <Divider orientation="vertical"/>
-            {activeValue !== null &&
+            {activeTool !== null &&
                 <HorizontallyResizableBox
-                    key={activeValue}
+                    key={activeTool}
                     sx={{ display: 'flex' }}
                     getMinWidth={getMinWidth}
                     getMaxWidth={getMaxWidth}
-                    prevWidth={prevWidths[activeValue]}
+                    prevWidth={prevWidths[activeTool]}
                     updatePrevWidth={updatePrevWidth}
                     dividerPosition="after"
                 >
-                    {tools[activeValue]?.component}
+                    {tools[activeTool]?.component}
                 </HorizontallyResizableBox>
             }
         </>

@@ -4,6 +4,7 @@ import { Divider, Stack } from "@mui/material";
 import LeftSidebar from "./LeftSidebar";
 import Editor from "./Editor";
 import { TabsContextProvider } from "../contexts/TabsContext";
+import { SidebarContextProvider } from "../contexts/SidebarContext";
 
 const defaultTabs = [
     {
@@ -115,14 +116,16 @@ const defaultTabs = [
 const Main = () => {
     return (
         <TabsContextProvider tabs={defaultTabs} activeTab={defaultTabs[0]}>
-            <ProjectStructureContextProvider>
-                <PathBreadcrumbs/>
-                <Divider/>
-                <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
-                    <LeftSidebar/>
-                    <Editor/>
-                </Stack>
-            </ProjectStructureContextProvider>
+            <SidebarContextProvider>
+                <ProjectStructureContextProvider>
+                    <PathBreadcrumbs/>
+                    <Divider/>
+                    <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
+                        <LeftSidebar/>
+                        <Editor/>
+                    </Stack>
+                </ProjectStructureContextProvider>
+            </SidebarContextProvider>
         </TabsContextProvider>
     );
 }

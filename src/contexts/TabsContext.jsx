@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useReducer } from "react";
 import { arrayMove } from "@dnd-kit/sortable";
 
+// TODO: разделить на два контекста?
 const TabsContext = createContext();
 
 const tabsReducer = (state, action) => {
