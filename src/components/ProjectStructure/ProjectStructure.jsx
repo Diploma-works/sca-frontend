@@ -2,15 +2,14 @@ import { cloneElement, memo, useState } from "react";
 
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
+import { useTreeViewApiRef } from "@mui/x-tree-view";
 import { Box, Divider, Skeleton, Stack, SvgIcon, useTheme } from "@mui/material";
 
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
-
+import ITEMS from "./items";
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 import { useTabsContext } from "../../contexts/TabsContext";
-import ITEMS from "./items";
 import { useProjectStructureContext } from "../../contexts/ProjectStructureContext";
-import { useTreeViewApiRef } from "@mui/x-tree-view";
+import ScrollableContainer from "../ScrollableContainer";
 
 const ProjectStructureItemLabel = memo(({ id, label, path, isFolder, addTab }) => {
     const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
@@ -84,7 +83,6 @@ const ProjectStructureItem = ({ itemId, label, path, children }) => {
 };
 
 const ProjectStructure = () => {
-    const theme = useTheme();
     const [items, setItems] = useState(ITEMS)
     const { expandedItems, setExpandedItems, selectedItems, setSelectedItems } = useProjectStructureContext();
     const treeViewApiRef = useTreeViewApiRef();
@@ -134,15 +132,7 @@ const ProjectStructure = () => {
                 Файлы проекта
             </Box>
             <Divider/>
-            <OverlayScrollbarsComponent
-                options={{
-                    scrollbars: {
-                        theme: theme.palette.mode === "light" ? "os-theme-dark os-custom" : "os-theme-light os-custom",
-                        clickScroll: true,
-                    }
-                }}
-                style={{ flex: 1 }}
-            >
+            <ScrollableContainer style={{ flex: 1 }}>
                 <Box display="flex">
                     <RichTreeView
                         apiRef={treeViewApiRef}
@@ -156,7 +146,7 @@ const ProjectStructure = () => {
                         onItemExpansionToggle={handleItemExpansionToggle}
                     />
                 </Box>
-            </OverlayScrollbarsComponent>
+            </ScrollableContainer>
         </Stack>
     );
 }

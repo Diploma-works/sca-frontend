@@ -1,7 +1,11 @@
-import { Box, Stack, useTheme } from "@mui/material";
+import { Stack, useTheme } from "@mui/material";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { darcula, prism } from "react-syntax-highlighter/dist/esm/styles/prism"
 
 import EditorTabsRoot from "./EditorTabsRoot";
 import { useTabsContext } from "../../contexts/TabsContext";
+import ScrollableContainer from "../ScrollableContainer";
+import jsxCode from "./jsxCode";
 
 const Editor = () => {
     const theme = useTheme();
@@ -19,13 +23,21 @@ const Editor = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
             />}
-            <Box sx={{
-                flex: 1,
-                overflow: 'auto',
-                bgcolor: 'background.paper',
-            }}>
-                <div style={{ width: 1920, height: 1920 }}></div>
-            </Box>
+            <ScrollableContainer style={{ flex: 1, backgroundColor: theme.palette.background.paper }}>
+                <SyntaxHighlighter
+                    language="jsx"
+                    showLineNumbers
+                    style={theme.palette.mode === "dark" ? darcula : prism}
+                    customStyle={{
+                        margin: 0,
+                        padding: 4,
+                        background: 'transparent',
+                        overflow: 'visible',
+                    }}
+                >
+                    {jsxCode}
+                </SyntaxHighlighter>
+            </ScrollableContainer>
         </Stack>
     );
 }
