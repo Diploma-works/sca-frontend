@@ -49,15 +49,15 @@ export const lightTheme = createTheme({
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    height: 28,
+                    //height: 28,
                     paddingLeft: 8,
                     paddingRight: 8,
-                    display: 'flex',
-                    alignItems: 'center',
+                    //display: 'flex',
+                    //alignItems: 'center',
                     fontSize: '0.875rem',
                     fontWeight: 500,
-                    backgroundColor: grey[300],
-                    color: '#283646',
+                    //backgroundColor: grey[300],
+                    //color: '#283646',
                     boxShadow: '0 0 10px 2px #f5f6fa',
                 },
                 tooltipPlacementRight: {
@@ -65,5 +65,19 @@ export const lightTheme = createTheme({
                 }
             },
         },
+        MuiMenu: {
+            styleOverrides: {
+                paper: {
+                    color: '#283646',
+                    border: '1px solid #e0e0e0',
+                    //boxShadow: '0 0 10px 2px #f5f6fa',
+                    boxShadow: 'none',
+                },
+                list: {
+                    //backgroundColor: grey[300],
+
+                }
+            }
+        }
     },
 });

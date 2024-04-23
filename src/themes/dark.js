@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
-export const darkTheme = createTheme({
+const dark = createTheme({
     typography: {
         fontFamily: 'Montserrat',
     },
@@ -19,6 +19,9 @@ export const darkTheme = createTheme({
         },
         divider: '#282828',
     },
+});
+
+export const darkTheme = createTheme(dark,{
     components: {
         MuiCssBaseline: {
             styleOverrides: {
@@ -44,20 +47,51 @@ export const darkTheme = createTheme({
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    height: 28,
+                    //height: 28,
+                    margin: '0 !important',
                     paddingLeft: 8,
                     paddingRight: 8,
-                    display: 'flex',
-                    alignItems: 'center',
+                    //display: 'flex',
+                    //alignItems: 'center',
                     fontSize: '0.875rem',
                     fontWeight: 500,
-                    backgroundColor: grey[800],
+                    backgroundColor: grey[900],
+                    border: '1px solid',
+                    borderColor: grey[800],
                     boxShadow: '0 0 10px 2px #0a0a0a',
+                    borderRadius: 0,
                 },
                 tooltipPlacementRight: {
                     marginLeft: '14px !important',
                 }
             },
         },
+        MuiMenu: {
+            styleOverrides: {
+                paper: {
+                    border: `1px solid ${dark.palette.divider}`,
+                    boxShadow: `0 0 10px 2px ${dark.palette.background.default}`,
+                    //boxShadow: 'none',
+                },
+                list: {
+                    padding: 0,
+                    backgroundColor: dark.palette.background.paper,
+                    //backgroundColor: grey[100],
+                },
+            }
+        },
+        MuiMenuItem: {
+            styleOverrides: {
+                root: {
+                    paddingTop: 4,
+                    paddingBottom: 4,
+                    paddingLeft: 8,
+                    paddingRight: 8,
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    lineHeight: 'normal',
+                }
+            }
+        }
     },
 });
