@@ -50,6 +50,7 @@ export const lightTheme = createTheme({
             styleOverrides: {
                 tooltip: {
                     //height: 28,
+                    margin: '0 !important',
                     paddingLeft: 8,
                     paddingRight: 8,
                     //display: 'flex',
@@ -58,7 +59,12 @@ export const lightTheme = createTheme({
                     fontWeight: 500,
                     //backgroundColor: grey[300],
                     //color: '#283646',
+                    backgroundColor: 'white',
+                    color: '#283646',
+                    border: '1px solid',
+                    borderColor: grey[300],
                     boxShadow: '0 0 10px 2px #f5f6fa',
+                    borderRadius: 0,
                 },
                 tooltipPlacementRight: {
                     marginLeft: '14px !important',

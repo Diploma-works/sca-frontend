@@ -1,14 +1,11 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
-import { alpha, Box, Menu, MenuItem, Stack, Tooltip, Typography, useTheme } from "@mui/material";
-import { yellow } from "@mui/material/colors";
-
-import { createElement, Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { darcula, prism } from "react-syntax-highlighter/dist/esm/styles/prism"
+import { Menu, MenuItem, Stack, Typography, useTheme } from "@mui/material";
 
 import EditorTabsRoot from "./EditorTabsRoot";
 import { useTabsContext } from "../../contexts/TabsContext";
 import ScrollableContainer from "../ScrollableContainer";
+import HighlightedCodeBox from "./HighlightedCodeBox";
 import jsxCode from "./jsxCode";
 
 // TODO: убрать совсем или дописать
@@ -78,69 +75,12 @@ const ContextMenu = () => {
     );
 }
 
-const CodeLine = ({ node, stylesheet, useInlineStyles, showTooltip }) => {
-    const popperRef = useRef(null);
-    const [popperProps, setPopperProps] = useState({ popperRef })
-
-    const handleMouseMove = (event) => {
-        if (!popperRef.current) {
-            const offsetX = event.clientX - event.currentTarget.getBoundingClientRect().x;
-            setPopperProps({ ...popperProps, modifiers: [{ name: 'offset', options: { offset: [offsetX, 0] } }] });
-        }
-    };
-
-    return (
-        showTooltip ?
-            <Tooltip
-                //open={true}
-                title={<>В данной строке кода ошибка!<br/>Предлагаемый вариант
-                    исправления: <br/>TEST<br/>TEST<br/>TEST<br/>TEST</>}
-                placement={"bottom-start"}
-                enterDelay={300}
-                enterNextDelay={300}
-                enterTouchDelay={300}
-                leaveDelay={300}
-                PopperProps={popperProps}
-            >
-                <span
-                    onMouseMove={handleMouseMove}
-                >
-                {createElement({
-                    node,
-                    stylesheet,
-                    style: {
-                        display: 'block',
-                        background: alpha(yellow[700], 0.2)
-                    },
-                    useInlineStyles,
-                })}
-                </span>
-            </Tooltip> :
-            createElement({
-                node,
-                stylesheet,
-                useInlineStyles,
-            })
-    );
-}
-
-const CustomRenderer = ({ rows, stylesheet, useInlineStyles }) => {
-    const [highlightLines, setHighlightLines] = useState([0, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]);
-
-    return rows.map((node, index) =>
-        <CodeLine
-            key={index}
-            node={node}
-            stylesheet={stylesheet}
-            useInlineStyles={useInlineStyles}
-            showTooltip={highlightLines.includes(index)}
-        />
-    );
-}
-
 const Editor = () => {
     const theme = useTheme();
-    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext();
+    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext(); // TODO: переместить часть внутрь EditorTabsRoot
+
+    const language = "jsx";
+    const code = jsxCode;
 
     return (
         <Stack sx={{
@@ -153,27 +93,11 @@ const Editor = () => {
                 removeTab={removeTab}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                wrapLines={true}
             />}
             <ScrollableContainer style={{ flex: 1, backgroundColor: theme.palette.background.paper }}>
-                <Box display="flex">
-                    <SyntaxHighlighter
-                        language="jsx"
-                        showLineNumbers
-                        wrapLines
-                        style={theme.palette.mode === "dark" ? darcula : prism}
-                        customStyle={{
-                            flex: 1,
-                            margin: 0,
-                            padding: 0,
-                            background: 'transparent',
-                            overflow: 'visible',
-                        }}
-                        renderer={CustomRenderer}
-                    >
-                        {jsxCode}
-                    </SyntaxHighlighter>
-                </Box>
+                <HighlightedCodeBox language={language}>
+                    {code}
+                </HighlightedCodeBox>
             </ScrollableContainer>
         </Stack>
     );
