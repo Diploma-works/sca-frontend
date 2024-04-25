@@ -6,17 +6,17 @@ const SidebarButton = ({ title, icon, onClick, isActive }) => {
             title={title}
             placement="right"
             disableInteractive
-            enterDelay={300}
-            enterNextDelay={300}
-            enterTouchDelay={300}
             TransitionComponent={Zoom}
             slotProps={{
                 popper: {
                     modifiers: [{
                         name: 'offset',
-                        options: { offset: [0, -5] },
+                        options: { offset: [0, 9] }
                     }],
                 },
+                tooltip: {
+                    sx: { lineHeight: '18px' }
+                }
             }}
         >
             <Button

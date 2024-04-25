@@ -1,11 +1,16 @@
-import { Box, Stack, useTheme } from "@mui/material";
+import { Stack, useTheme } from "@mui/material";
 
 import EditorTabsRoot from "./EditorTabsRoot";
 import { useTabsContext } from "../../contexts/TabsContext";
+import HighlightedCodeBox from "./HighlightedCodeBox";
+import jsxCode from "./jsxCode";
 
 const Editor = () => {
     const theme = useTheme();
-    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext();
+    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext(); // TODO: переместить часть внутрь EditorTabsRoot
+
+    const language = "jsx";
+    const code = jsxCode;
 
     return (
         <Stack sx={{
@@ -19,13 +24,9 @@ const Editor = () => {
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
             />}
-            <Box sx={{
-                flex: 1,
-                overflow: 'auto',
-                bgcolor: 'background.paper',
-            }}>
-                <div style={{ width: 1920, height: 1920 }}></div>
-            </Box>
+            <HighlightedCodeBox language={language}>
+                {code}
+            </HighlightedCodeBox>
         </Stack>
     );
 }

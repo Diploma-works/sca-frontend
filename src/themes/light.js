@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
-export const lightTheme = createTheme({
+const light = createTheme({
     typography: {
         fontFamily: 'Montserrat',
     },
@@ -23,7 +23,10 @@ export const lightTheme = createTheme({
             disabled: '#939ea8'
         },
         divider: '#e0e0e0',
-    },
+    }
+});
+
+export const lightTheme = createTheme(light, {
     components: {
         MuiCssBaseline: {
             styleOverrides: {
@@ -47,23 +50,51 @@ export const lightTheme = createTheme({
             },
         },
         MuiTooltip: {
+            defaultProps: {
+                enterDelay: 300,
+                enterNextDelay: 300,
+                enterTouchDelay: 300,
+            },
             styleOverrides: {
                 tooltip: {
-                    height: 28,
+                    margin: '0 !important',
+                    paddingTop: 4,
+                    paddingBottom: 4,
                     paddingLeft: 8,
                     paddingRight: 8,
-                    display: 'flex',
-                    alignItems: 'center',
                     fontSize: '0.875rem',
-                    fontWeight: 500,
-                    backgroundColor: grey[300],
-                    color: '#283646',
-                    boxShadow: '0 0 10px 2px #f5f6fa',
+                    color: light.palette.text.primary,
+                    border: '1px solid',
+                    borderColor: grey[300],
+                    backgroundColor: 'white',
+                    boxShadow: `0 0 10px 2px ${light.palette.background.default}`,
                 },
-                tooltipPlacementRight: {
-                    marginLeft: '14px !important',
-                }
             },
         },
+        MuiMenu: {
+            styleOverrides: {
+                paper: {
+                    border: '1px solid',
+                    borderColor: grey[300],
+                    boxShadow: `0 0 10px 2px ${light.palette.background.default}`,
+                },
+                list: {
+                    padding: 0,
+                }
+            }
+        },
+        MuiMenuItem: {
+            styleOverrides: {
+                root: {
+                    paddingTop: 4,
+                    paddingBottom: 4,
+                    paddingLeft: 8,
+                    paddingRight: 8,
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    lineHeight: 'normal',
+                }
+            }
+        }
     },
 });
