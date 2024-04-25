@@ -1,10 +1,15 @@
 import { memo, useRef, useState } from "react";
 
-import { alpha, Box, Link, Tooltip, useTheme } from "@mui/material";
+import { alpha, Box, Button, Link, Menu, MenuItem, SvgIcon, Tooltip, useTheme } from "@mui/material";
 import { yellow } from "@mui/material/colors";
+
+import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 import { createElement, Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula, prism } from "react-syntax-highlighter/dist/cjs/styles/prism";
+
+import ScrollableContainer from "../ScrollableContainer";
 
 const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => {
     const popperRef = useRef(null);
@@ -57,10 +62,7 @@ const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => 
                 <Tooltip
                     title={problem}
                     placement={"bottom-start"}
-                    enterDelay={300}
                     leaveDelay={300}
-                    enterNextDelay={300}
-                    enterTouchDelay={300}
                     PopperProps={popperProps}
                 >
                     {element}
@@ -75,9 +77,13 @@ const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => 
 const HighlightedCodeBox = memo(({ language, children }) => {
     const theme = useTheme();
 
+    const [leaveSpaceForScrollbar, setLeaveSpaceForScrollbar] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+
     const [showInfo, setShowInfo] = useState(false);
     const [showProblems, setShowProblems] = useState(true);
-    const [highlightLines, setHighlightLines] = useState([20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 150]);
+    const [highlightLines, setHighlightLines] = useState([0, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 150]);
 
     const info = {
         user: {
@@ -98,6 +104,12 @@ const HighlightedCodeBox = memo(({ language, children }) => {
         </>
     );
 
+    const updated = (instance) => setLeaveSpaceForScrollbar(instance.state().hasOverflow.y);
+
+    const handleClick = (e) => setAnchorEl(e.currentTarget);
+
+    const handleClose = () => setAnchorEl(null);
+
     const renderer = ({ rows, stylesheet, useInlineStyles }) => rows.map((node, index) => (
         <CodeLine
             key={index}
@@ -110,24 +122,69 @@ const HighlightedCodeBox = memo(({ language, children }) => {
     ));
 
     return (
-        <Box display="flex">
-            <SyntaxHighlighter
-                language={language}
-                renderer={renderer}
-                showLineNumbers
-                style={theme.palette.mode === "dark" ? darcula : prism}
-                lineNumberStyle={{ minWidth: '3em' }}
-                customStyle={{
-                    flex: 1,
-                    margin: 0,
-                    padding: 0,
-                    background: 'transparent',
-                    overflow: 'visible',
-                }}
-            >
-                {children}
-            </SyntaxHighlighter>
-        </Box>
+        <ScrollableContainer events={{ updated }} style={{ flex: 1, backgroundColor: theme.palette.background.paper }}>
+            <Box display="flex">
+                <Tooltip
+                    title="Внешний вид"
+                    placement="bottom-end"
+                    PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
+                >
+                    <Box sx={{
+                        position: 'fixed',
+                        right: 0,
+                        mt: 1,
+                        mr: leaveSpaceForScrollbar ? 2 : 1,
+                        color: 'text.secondary',
+                        bgcolor: 'background.paper',
+                        borderRadius: 1,
+                    }}>
+                        <Button
+                            color="inherit"
+                            disableElevation
+                            variant={open ? "contained" : "text"}
+                            onClick={handleClick}
+                            sx={{
+                                p: 2 / 8,
+                                minWidth: 0,
+                                display: 'flex',
+                            }}
+                        >
+                            <MoreVertRoundedIcon sx={{ width: 18, height: 18 }}/>
+                        </Button>
+                    </Box>
+                </Tooltip>
+                <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
+                    <MenuItem onClick={() => setShowProblems((prevState) => !prevState)}>
+                        <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
+                            {showProblems && <CheckRoundedIcon/>}
+                        </SvgIcon>
+                        Подсвечивать проблемы
+                    </MenuItem>
+                    <MenuItem onClick={() => setShowInfo((prevState) => !prevState)}>
+                        <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
+                            {showInfo && <CheckRoundedIcon/>}
+                        </SvgIcon>
+                        Показывать авторов строк
+                    </MenuItem>
+                </Menu>
+                <SyntaxHighlighter
+                    language={language}
+                    renderer={renderer}
+                    showLineNumbers
+                    style={theme.palette.mode === "dark" ? darcula : prism}
+                    lineNumberStyle={{ minWidth: '3em' }}
+                    customStyle={{
+                        flex: 1,
+                        margin: 0,
+                        padding: 0,
+                        background: 'transparent',
+                        overflow: 'visible',
+                    }}
+                >
+                    {children}
+                </SyntaxHighlighter>
+            </Box>
+        </ScrollableContainer>
     );
 });
 
