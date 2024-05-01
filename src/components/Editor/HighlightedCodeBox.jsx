@@ -106,10 +106,7 @@ const HighlightedCodeBox = memo(({ language, children }) => {
 
     const updated = (instance) => setLeaveSpaceForScrollbar(instance.state().hasOverflow.y);
 
-    const handleClick = (e) => {
-        e.stopPropagation();
-        setAnchorEl(e.currentTarget);
-    };
+    const handleClick = (e) => setAnchorEl(e.currentTarget);
 
     const handleClose = () => setAnchorEl(null);
 
@@ -162,6 +159,24 @@ const HighlightedCodeBox = memo(({ language, children }) => {
                     </Button>
                 </Box>
             </Tooltip>
+            <Box display="flex">
+                <SyntaxHighlighter
+                    language={language}
+                    renderer={renderer}
+                    showLineNumbers
+                    style={theme.palette.mode === "dark" ? darcula : prism}
+                    lineNumberStyle={{ minWidth: '3em' }}
+                    customStyle={{
+                        flex: 1,
+                        margin: 0,
+                        padding: 0,
+                        background: 'transparent',
+                        overflow: 'visible',
+                    }}
+                >
+                    {children}
+                </SyntaxHighlighter>
+            </Box>
             <Menu
                 open={open}
                 anchorEl={anchorEl}
@@ -189,24 +204,6 @@ const HighlightedCodeBox = memo(({ language, children }) => {
                     Показывать авторов строк
                 </MenuItem>
             </Menu>
-            <Box display="flex">
-                <SyntaxHighlighter
-                    language={language}
-                    renderer={renderer}
-                    showLineNumbers
-                    style={theme.palette.mode === "dark" ? darcula : prism}
-                    lineNumberStyle={{ minWidth: '3em' }}
-                    customStyle={{
-                        flex: 1,
-                        margin: 0,
-                        padding: 0,
-                        background: 'transparent',
-                        overflow: 'visible',
-                    }}
-                >
-                    {children}
-                </SyntaxHighlighter>
-            </Box>
         </ScrollableContainer>
     );
 });

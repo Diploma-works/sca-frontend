@@ -5,10 +5,14 @@ import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
 import { Skeleton, Stack, SvgIcon, useTheme } from "@mui/material";
 
+import UnfoldLessRoundedIcon from "@mui/icons-material/UnfoldLessRounded";
+import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
+
 import ITEMS from "./items";
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 import { useTabsContext } from "../../contexts/TabsContext";
 import { useProjectStructureContext } from "../../contexts/ProjectStructureContext";
+import SidebarTool from "../LeftSidebar/SidebarTool";
 
 const ProjectStructureItemLabel = memo(({ id, label, path, isFolder, addTab }) => {
     const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
@@ -81,11 +85,30 @@ const ProjectStructureItem = ({ itemId, label, path, children }) => {
     );
 };
 
-const ProjectStructure = () => {
+const ProjectStructure = memo(({ title, disableResizing, setDisableResizing }) => {
     const [items, setItems] = useState(ITEMS)
     const { expandedItems, setExpandedItems, selectedItems, setSelectedItems } = useProjectStructureContext();
     const treeViewApiRef = useTreeViewApiRef();
 
+    // TODO: добавить полноценные функции
+    const additionalActions = [
+        {
+            title: "Развернуть все",
+            icon: <UnfoldMoreRoundedIcon/>,
+            props: {
+                onClick: () => console.log(treeViewApiRef.current)
+            }
+        },
+        {
+            title: "Свернуть все",
+            icon: <UnfoldLessRoundedIcon/>,
+            props: {
+                onClick: () => console.log(treeViewApiRef.current)
+            }
+        }
+    ];
+
+    // TODO: обернуть в useCallback?
     const handleExpandedItemsChange = (e, itemIds) => setExpandedItems(itemIds);
     const handleSelectedItemsChange = (e, itemIds) => setSelectedItems(itemIds);
 
@@ -115,18 +138,25 @@ const ProjectStructure = () => {
     }
 
     return (
-        <RichTreeView
-            apiRef={treeViewApiRef}
-            items={items}
-            selectedItems={selectedItems}
-            expandedItems={expandedItems}
-            slots={{ item: ProjectStructureItem }}
-            sx={{ flex: 1 }}
-            onExpandedItemsChange={handleExpandedItemsChange}
-            onSelectedItemsChange={handleSelectedItemsChange}
-            onItemExpansionToggle={handleItemExpansionToggle}
-        />
+        <SidebarTool
+            title={title}
+            additionalActions={additionalActions}
+            disableResizing={disableResizing}
+            setDisableResizing={setDisableResizing}
+        >
+            <RichTreeView
+                apiRef={treeViewApiRef}
+                items={items}
+                selectedItems={selectedItems}
+                expandedItems={expandedItems}
+                slots={{ item: ProjectStructureItem }}
+                sx={{ flex: 1 }}
+                onExpandedItemsChange={handleExpandedItemsChange}
+                onSelectedItemsChange={handleSelectedItemsChange}
+                onItemExpansionToggle={handleItemExpansionToggle}
+            />
+        </SidebarTool>
     );
-}
+});
 
 export default ProjectStructure;

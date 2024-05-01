@@ -6,9 +6,8 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
     const [width, setWidth] = useState(prevWidth);
     const [startPos, setStartPos] = useState({ x: 0, width: 0 });
 
-    /* Refs for resizable element and resize handle */
+    /* Ref for resizable element */
     const resizableElementRef = useRef(null);
-    const resizeHandleRef = useRef(null);
 
     /* Resizing logic */
     const startResizing = useCallback(({ clientX }) => {
@@ -20,7 +19,7 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
         if (!isResizing) {
             return;
         }
-        const newWidth = startPos.width + clientX - startPos.x; // TODO: если делать RightSidebar, то инвертировать
+        const newWidth = startPos.width + clientX - startPos.x;
         if (newWidth >= getMinWidth() && newWidth <= getMaxWidth()) {
             setWidth(newWidth);
             updatePrevWidth(newWidth);
@@ -61,19 +60,7 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
         }
     }, [width, prevWidth, updatePrevWidth]);
 
-    /* Effects for setting up event listeners */
-    useEffect(() => {
-        const resizeHandle = resizeHandleRef?.current;
-        if (resizeHandle) {
-            resizeHandle.addEventListener("mousedown", handleMouseDown);
-            resizeHandle.addEventListener("touchstart", handleTouchStart);
-            return () => {
-                resizeHandle.removeEventListener("mousedown", handleMouseDown);
-                resizeHandle.removeEventListener("touchstart", handleTouchStart);
-            };
-        }
-    }, [handleMouseDown, handleTouchStart]);
-
+    /* Effects for setting up window event listeners */
     useEffect(() => {
         if (isResizing) {
             window.addEventListener("mousemove", handleMouseMove);
@@ -96,7 +83,13 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
         return () => window.removeEventListener("resize", handleResize);
     }, [handleResize]);
 
-    return { width, resizableElementRef, resizeHandleRef };
+    /* Listeners for resize handle */
+    const listeners = {
+        onMouseDown: handleMouseDown,
+        onTouchStart: handleTouchStart,
+    }
+
+    return { width, listeners, resizableElementRef };
 }
 
 export default useHorizontalResizing;

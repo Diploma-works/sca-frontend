@@ -1,110 +1,123 @@
-import { forwardRef } from "react";
+import { useState } from "react";
 
-import { Box, Button, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography } from "@mui/material";
+
+import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 import { useSidebarUpdateContext } from "../../contexts/SidebarContext";
-import useHorizontalResizing from "./useHorizontalResizing";
 import ScrollableContainer from "../ScrollableContainer";
 
-const InteractiveVerticalDivider = forwardRef(({ activationArea, ...props }, ref) => {
-    return (
-        <Divider ref={ref}
-                 orientation="vertical"
-                 sx={{
-                     position: 'relative',
-                     cursor: 'ew-resize',
-                     touchAction: 'none',
-                     overflow: 'visible',
-                     '::before, ::after': {
-                         zIndex: 1000,
-                         content: '""',
-                         position: 'absolute',
-                         top: 0,
-                         width: activationArea,
-                         height: '100%',
-                     },
-                     '::before': { left: -activationArea, },
-                     '::after': { right: -activationArea - 1, },
-                 }}
-                 {...props}
-        />
-    );
-});
-
-const SidebarTool = ({ title, getMinWidth, getMaxWidth, prevWidth, updatePrevWidth, children }) => {
-    const {
-        width,
-        resizableElementRef,
-        resizeHandleRef
-    } = useHorizontalResizing(getMinWidth, getMaxWidth, prevWidth, updatePrevWidth);
-
+const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisableResizing, children }) => {
     const setActiveTool = useSidebarUpdateContext();
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
 
-    const handleClick = () => setActiveTool(null);
+    const handleOptionsButtonClick = (e) => setAnchorEl(e.currentTarget);
+
+    const handleHideButtonClick = () => setActiveTool(null);
+
+    const handleClose = () => setAnchorEl(null);
+
+    const actions = [
+        ...additionalActions,
+        {
+            title: "Настройки",
+            icon: <MoreVertRoundedIcon/>,
+            props: {
+                variant: open ? "contained" : "text",
+                onClick: handleOptionsButtonClick,
+            }
+        },
+        {
+            title: "Скрыть",
+            icon: <RemoveRoundedIcon/>,
+            props: {
+                onClick: handleHideButtonClick,
+            }
+        }
+    ];
 
     return (
-        <>
+        <Stack
+            divider={<Divider/>}
+            sx={{
+                flex: 1,
+                overflow: 'hidden',
+            }}
+        >
             <Stack
-                ref={resizableElementRef}
-                divider={<Divider/>}
+                direction="row"
                 sx={{
-                    width,
-                    minWidth: getMinWidth(),
-                    maxWidth: getMaxWidth(),
-                    overflow: 'hidden',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
                 }}
             >
-                <Box sx={{
-                    position: 'relative',
-                    pl: 1.5,
-                    height: 36,
-                    display: 'flex',
-                    alignItems: 'center',
-                }}>
-                    <Typography
-                        variant={"button"}
-                        sx={{
-                            fontWeight: 600,
-                            lineHeight: 'normal',
-                            textWrap: 'nowrap',
-                            textTransform: 'none',
-                        }}
-                    >
-                        {title}
-                    </Typography>
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={{
-                            position: 'absolute',
-                            p: 1,
-                            right: 0,
-                            color: 'text.secondary',
-                            bgcolor: 'background.default',
-                        }}
-                    >
-                        <Button
-                            color="inherit"
-                            disableElevation
-                            onClick={handleClick}
-                            sx={{
-                                p: 0,
-                                minWidth: 0,
-                            }}
+                <Typography
+                    variant={"button"}
+                    sx={{
+                        pl: 1.5,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        fontWeight: 600,
+                        lineHeight: 'normal',
+                        textWrap: 'nowrap',
+                        textTransform: 'none',
+                    }}
+                >
+                    {title}
+                </Typography>
+                <Box flex={1}/>
+                <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                        p: 1,
+                        color: 'text.secondary',
+                    }}
+                >
+                    {actions.map(({ title, icon, props }, index) => (
+                        <Tooltip
+                            title={title}
+                            placement="bottom"
+                            PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
                         >
-                            <RemoveRoundedIcon sx={{ width: 20, height: 20 }}/>
-                        </Button>
-                    </Stack>
-                </Box>
-                <ScrollableContainer style={{ flex: 1 }}>
-                    <Box display="flex">
-                        {children}
-                    </Box>
-                </ScrollableContainer>
+                            <Button
+                                key={index}
+                                color="inherit"
+                                disableElevation
+                                sx={{
+                                    p: 2 / 8,
+                                    minWidth: 0,
+                                }}
+                                {...props}
+                            >
+                                <SvgIcon sx={{ width: 16, height: 16 }}>{icon}</SvgIcon>
+                            </Button>
+                        </Tooltip>
+                    ))}
+                </Stack>
             </Stack>
-            <InteractiveVerticalDivider ref={resizeHandleRef} activationArea={3}/>
-        </>
+            <ScrollableContainer style={{ flex: 1 }}>
+                <Box display="flex">
+                    {children}
+                </Box>
+            </ScrollableContainer>
+            <Menu
+                open={open}
+                anchorEl={anchorEl}
+                marginThreshold={null}
+                onClose={handleClose}
+            >
+                <MenuItem onClick={() => setDisableResizing((prevState) => !prevState)}>
+                    <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
+                        {disableResizing && <CheckRoundedIcon/>}
+                    </SvgIcon>
+                    Оптимальная ширина панели
+                </MenuItem>
+            </Menu>
+        </Stack>
     );
 }
 

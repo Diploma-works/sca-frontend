@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { cloneElement, useCallback, useState } from "react";
 
 import { Divider, Stack } from "@mui/material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
@@ -7,8 +7,9 @@ import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 
 import { useSidebarContext } from "../../contexts/SidebarContext";
 import SidebarButton from "./SidebarButton";
-import SidebarTool from "./SidebarTool";
+import HorizontallyResizableBox from "./HorizontallyResizableBox";
 import ProjectStructure from "../ProjectStructure";
+import SidebarTool from "./SidebarTool";
 
 const tools = [
     {
@@ -19,12 +20,12 @@ const tools = [
     {
         title: "Статистика",
         icon: <QueryStatsRoundedIcon/>,
-        component: <div style={{ width: 187, height: 1 }}></div>
+        component: <SidebarTool><div style={{ width: 187, height: 1 }}></div></SidebarTool>
     },
     {
         title: "Проблемы",
         icon: <ErrorOutlineRoundedIcon/>,
-        component: <div style={{ width: 500, height: 1 }}></div>
+        component: <SidebarTool><div style={{ width: 500, height: 1 }}></div></SidebarTool>
     },
 ];
 
@@ -33,6 +34,7 @@ const MIN_WIDTH = 36;
 const LeftSidebar = () => {
     const [activeTool, setActiveTool] = useSidebarContext();
     const [prevWidths, setPrevWidths] = useState(Array(tools.length));
+    const [disableResizing, setDisableResizing] = useState(false);
 
     const handleClick = (value) => {
         setActiveTool((prevValue) => prevValue === value ? null : value);
@@ -62,16 +64,21 @@ const LeftSidebar = () => {
             </Stack>
             <Divider orientation="vertical"/>
             {activeTool !== null && (
-                <SidebarTool
-                    key={activeTool}
-                    title={tools[activeTool].title}
+                <HorizontallyResizableBox
+                    key={activeTool} // TODO: поискать другое решение?
+                    sx={{ display: 'flex' }}
                     getMinWidth={getMinWidth}
                     getMaxWidth={getMaxWidth}
                     prevWidth={prevWidths[activeTool]}
                     updatePrevWidth={updatePrevWidth}
+                    disable={disableResizing}
                 >
-                    {tools[activeTool]?.component}
-                </SidebarTool>
+                    {cloneElement(tools[activeTool].component, {
+                        title: tools[activeTool].title,
+                        disableResizing,
+                        setDisableResizing
+                    })}
+                </HorizontallyResizableBox>
             )}
         </>
     );
