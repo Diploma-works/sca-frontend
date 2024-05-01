@@ -106,7 +106,10 @@ const HighlightedCodeBox = memo(({ language, children }) => {
 
     const updated = (instance) => setLeaveSpaceForScrollbar(instance.state().hasOverflow.y);
 
-    const handleClick = (e) => setAnchorEl(e.currentTarget);
+    const handleClick = (e) => {
+        e.stopPropagation();
+        setAnchorEl(e.currentTarget);
+    };
 
     const handleClose = () => setAnchorEl(null);
 
@@ -122,51 +125,71 @@ const HighlightedCodeBox = memo(({ language, children }) => {
     ));
 
     return (
-        <ScrollableContainer events={{ updated }} style={{ flex: 1, backgroundColor: theme.palette.background.paper }}>
+        <ScrollableContainer
+            events={{ updated }}
+            style={{
+                flex: 1,
+                transform: 'translateX(0)',
+                backgroundColor: theme.palette.background.paper,
+            }}
+        >
+            <Tooltip
+                title="Внешний вид"
+                placement="bottom-end"
+                PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
+            >
+                <Box sx={{
+                    position: 'fixed',
+                    right: 0,
+                    mt: 1,
+                    mr: leaveSpaceForScrollbar ? 2 : 1,
+                    color: 'text.secondary',
+                    bgcolor: 'background.paper',
+                    borderRadius: 1,
+                }}>
+                    <Button
+                        color="inherit"
+                        disableElevation
+                        variant={open ? "contained" : "text"}
+                        onClick={handleClick}
+                        sx={{
+                            p: 2 / 8,
+                            minWidth: 0,
+                            display: 'flex',
+                        }}
+                    >
+                        <MoreVertRoundedIcon sx={{ width: 16, height: 16 }}/>
+                    </Button>
+                </Box>
+            </Tooltip>
+            <Menu
+                open={open}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                }}
+                marginThreshold={null}
+                onClose={handleClose}
+            >
+                <MenuItem onClick={() => setShowProblems((prevState) => !prevState)}>
+                    <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
+                        {showProblems && <CheckRoundedIcon/>}
+                    </SvgIcon>
+                    Подсвечивать проблемы
+                </MenuItem>
+                <MenuItem onClick={() => setShowInfo((prevState) => !prevState)}>
+                    <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
+                        {showInfo && <CheckRoundedIcon/>}
+                    </SvgIcon>
+                    Показывать авторов строк
+                </MenuItem>
+            </Menu>
             <Box display="flex">
-                <Tooltip
-                    title="Внешний вид"
-                    placement="bottom-end"
-                    PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
-                >
-                    <Box sx={{
-                        position: 'fixed',
-                        right: 0,
-                        mt: 1,
-                        mr: leaveSpaceForScrollbar ? 2 : 1,
-                        color: 'text.secondary',
-                        bgcolor: 'background.paper',
-                        borderRadius: 1,
-                    }}>
-                        <Button
-                            color="inherit"
-                            disableElevation
-                            variant={open ? "contained" : "text"}
-                            onClick={handleClick}
-                            sx={{
-                                p: 2 / 8,
-                                minWidth: 0,
-                                display: 'flex',
-                            }}
-                        >
-                            <MoreVertRoundedIcon sx={{ width: 18, height: 18 }}/>
-                        </Button>
-                    </Box>
-                </Tooltip>
-                <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
-                    <MenuItem onClick={() => setShowProblems((prevState) => !prevState)}>
-                        <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
-                            {showProblems && <CheckRoundedIcon/>}
-                        </SvgIcon>
-                        Подсвечивать проблемы
-                    </MenuItem>
-                    <MenuItem onClick={() => setShowInfo((prevState) => !prevState)}>
-                        <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
-                            {showInfo && <CheckRoundedIcon/>}
-                        </SvgIcon>
-                        Показывать авторов строк
-                    </MenuItem>
-                </Menu>
                 <SyntaxHighlighter
                     language={language}
                     renderer={renderer}

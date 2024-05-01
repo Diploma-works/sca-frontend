@@ -5,10 +5,10 @@ import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 
-import SidebarButton from "./SidebarButton";
-import HorizontallyResizableBox from "./HorizontallyResizableBox";
-import ProjectStructure from "../ProjectStructure";
 import { useSidebarContext } from "../../contexts/SidebarContext";
+import SidebarButton from "./SidebarButton";
+import SidebarTool from "./SidebarTool";
+import ProjectStructure from "../ProjectStructure";
 
 const tools = [
     {
@@ -61,19 +61,18 @@ const LeftSidebar = () => {
                 ))}
             </Stack>
             <Divider orientation="vertical"/>
-            {activeTool !== null &&
-                <HorizontallyResizableBox
+            {activeTool !== null && (
+                <SidebarTool
                     key={activeTool}
-                    sx={{ display: 'flex' }}
+                    title={tools[activeTool].title}
                     getMinWidth={getMinWidth}
                     getMaxWidth={getMaxWidth}
                     prevWidth={prevWidths[activeTool]}
                     updatePrevWidth={updatePrevWidth}
-                    dividerPosition="after"
                 >
                     {tools[activeTool]?.component}
-                </HorizontallyResizableBox>
-            }
+                </SidebarTool>
+            )}
         </>
     );
 }

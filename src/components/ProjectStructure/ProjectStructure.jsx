@@ -3,13 +3,12 @@ import { cloneElement, memo, useState } from "react";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
-import { Box, Divider, Skeleton, Stack, SvgIcon, useTheme } from "@mui/material";
+import { Skeleton, Stack, SvgIcon, useTheme } from "@mui/material";
 
 import ITEMS from "./items";
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 import { useTabsContext } from "../../contexts/TabsContext";
 import { useProjectStructureContext } from "../../contexts/ProjectStructureContext";
-import ScrollableContainer from "../ScrollableContainer";
 
 const ProjectStructureItemLabel = memo(({ id, label, path, isFolder, addTab }) => {
     const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
@@ -116,38 +115,17 @@ const ProjectStructure = () => {
     }
 
     return (
-        <Stack flex={1} overflow={"hidden"}>
-            <Box sx={{
-                px: 1.5,
-                height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                flexShrink: 0,
-                fontWeight: 600,
-                fontSize: '0.875rem',
-                lineHeight: 'normal',
-                textWrap: 'nowrap',
-                userSelect: 'none',
-            }}>
-                Файлы проекта
-            </Box>
-            <Divider/>
-            <ScrollableContainer style={{ flex: 1 }}>
-                <Box display="flex">
-                    <RichTreeView
-                        apiRef={treeViewApiRef}
-                        items={items}
-                        selectedItems={selectedItems}
-                        expandedItems={expandedItems}
-                        slots={{ item: ProjectStructureItem }}
-                        sx={{ flex: 1 }}
-                        onExpandedItemsChange={handleExpandedItemsChange}
-                        onSelectedItemsChange={handleSelectedItemsChange}
-                        onItemExpansionToggle={handleItemExpansionToggle}
-                    />
-                </Box>
-            </ScrollableContainer>
-        </Stack>
+        <RichTreeView
+            apiRef={treeViewApiRef}
+            items={items}
+            selectedItems={selectedItems}
+            expandedItems={expandedItems}
+            slots={{ item: ProjectStructureItem }}
+            sx={{ flex: 1 }}
+            onExpandedItemsChange={handleExpandedItemsChange}
+            onSelectedItemsChange={handleSelectedItemsChange}
+            onItemExpansionToggle={handleItemExpansionToggle}
+        />
     );
 }
 

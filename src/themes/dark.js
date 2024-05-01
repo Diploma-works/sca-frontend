@@ -81,6 +81,7 @@ export const darkTheme = createTheme(dark, {
         MuiMenuItem: {
             styleOverrides: {
                 root: {
+                    minHeight: 0,
                     paddingTop: 4,
                     paddingBottom: 4,
                     paddingLeft: 8,

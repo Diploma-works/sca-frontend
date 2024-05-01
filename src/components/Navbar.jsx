@@ -6,6 +6,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 
+// TODO: убрать?
 const NavbarButton = ({ children }) => {
     return (
         <Button color={"inherit"} sx={{
@@ -28,10 +29,6 @@ const Navbar = ({ mode, switchMode }) => {
         }}>
             <Toolbar variant={"dense"} disableGutters sx={{ px: 1 }}>
                 <Typography variant="h4" fontWeight="bold" color="primary">SCA</Typography>
-                <Stack ml={2} direction="row" spacing={1}>
-                    <NavbarButton>Home</NavbarButton>
-                    <NavbarButton>Help</NavbarButton>
-                </Stack>
                 <Box sx={{ flexGrow: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <IconButton size="small">
