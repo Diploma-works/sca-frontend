@@ -18,6 +18,7 @@ const dark = createTheme({
             dark: grey[700],
         },
         divider: '#282828',
+        altDivider: 'rgba(255, 255, 255, 0.12)',
     },
 });
 

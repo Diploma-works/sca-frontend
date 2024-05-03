@@ -5,6 +5,8 @@ import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
 import { Skeleton, Stack, SvgIcon, useTheme } from "@mui/material";
 
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import UnfoldLessRoundedIcon from "@mui/icons-material/UnfoldLessRounded";
 import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
 
@@ -47,10 +49,10 @@ const ProjectStructureItem = ({ itemId, label, path, children }) => {
             }
             sx={{
                 '.MuiTreeItem-iconContainer': {
-                    color: 'text.disabled',
+                    color: 'text.secondary',
                 },
                 '.MuiTreeItem-content': {
-                    gap: 6 / 8,
+                    gap: 1,
                     borderRadius: 0,
                     userSelect: 'none',
                     '&.Mui-selected, &.Mui-selected.Mui-focused': {
@@ -149,7 +151,11 @@ const ProjectStructure = memo(({ title, disableResizing, setDisableResizing }) =
                 items={items}
                 selectedItems={selectedItems}
                 expandedItems={expandedItems}
-                slots={{ item: ProjectStructureItem }}
+                slots={{
+                    item: ProjectStructureItem,
+                    expandIcon: KeyboardArrowRightRoundedIcon,
+                    collapseIcon: KeyboardArrowDownRoundedIcon
+                }}
                 sx={{ flex: 1 }}
                 onExpandedItemsChange={handleExpandedItemsChange}
                 onSelectedItemsChange={handleSelectedItemsChange}

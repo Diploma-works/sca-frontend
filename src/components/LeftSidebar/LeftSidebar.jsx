@@ -10,6 +10,7 @@ import SidebarButton from "./SidebarButton";
 import HorizontallyResizableBox from "./HorizontallyResizableBox";
 import ProjectStructure from "../ProjectStructure";
 import SidebarTool from "./SidebarTool";
+import Problems from "../Problems";
 
 const tools = [
     {
@@ -25,7 +26,7 @@ const tools = [
     {
         title: "Проблемы",
         icon: <ErrorOutlineRoundedIcon/>,
-        component: <SidebarTool><div style={{ width: 500, height: 1 }}></div></SidebarTool>
+        component: <Problems/>
     },
 ];
 

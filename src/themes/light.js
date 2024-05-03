@@ -23,6 +23,7 @@ const light = createTheme({
             disabled: '#939ea8'
         },
         divider: '#e0e0e0',
+        altDivider: 'rgba(0, 0, 0, 0.12)',
     }
 });
 

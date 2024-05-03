@@ -55,14 +55,13 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                 }}
             >
                 <Typography
+                    noWrap
                     variant={"button"}
                     sx={{
                         pl: 1.5,
                         minWidth: 0,
-                        overflow: 'hidden',
                         fontWeight: 600,
                         lineHeight: 'normal',
-                        textWrap: 'nowrap',
                         textTransform: 'none',
                     }}
                 >
@@ -79,12 +78,12 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                 >
                     {actions.map(({ title, icon, props }, index) => (
                         <Tooltip
+                            key={index}
                             title={title}
                             placement="bottom"
                             PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
                         >
                             <Button
-                                key={index}
                                 color="inherit"
                                 disableElevation
                                 sx={{
