@@ -49,11 +49,10 @@ const PathBreadcrumbs = () => {
         <Breadcrumbs
             separator={<NavigateNextIcon sx={{ width: 16, height: 16 }}/>}
             sx={{
-                height: 28,
                 p: 4 / 8,
                 lineHeight: 0,
                 '.MuiBreadcrumbs-ol': {
-                    flexWrap: 'nowrap',
+                    rowGap: 4 / 8,
                 },
                 '.MuiBreadcrumbs-separator': {
                     mx: 0,

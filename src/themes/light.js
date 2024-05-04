@@ -22,8 +22,7 @@ const light = createTheme({
             secondary: '#5b5d6c',
             disabled: '#939ea8'
         },
-        divider: '#e0e0e0',
-        altDivider: 'rgba(0, 0, 0, 0.12)',
+        altDivider: '#e0e0e0',
     }
 });
 
@@ -66,7 +65,7 @@ export const lightTheme = createTheme(light, {
                     fontSize: '0.875rem',
                     color: light.palette.text.primary,
                     border: '1px solid',
-                    borderColor: grey[300],
+                    borderColor: light.palette.divider,
                     backgroundColor: 'white',
                     boxShadow: `0 0 10px 2px ${light.palette.background.default}`,
                 },
@@ -76,7 +75,7 @@ export const lightTheme = createTheme(light, {
             styleOverrides: {
                 paper: {
                     border: '1px solid',
-                    borderColor: grey[300],
+                    borderColor: light.palette.divider,
                     boxShadow: `0 0 10px 2px ${light.palette.background.default}`,
                 },
                 list: {

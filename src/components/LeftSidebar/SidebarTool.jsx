@@ -7,7 +7,6 @@ import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 import { useSidebarUpdateContext } from "../../contexts/SidebarContext";
-import ScrollableContainer from "../ScrollableContainer";
 
 const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisableResizing, children }) => {
     const setActiveTool = useSidebarUpdateContext();
@@ -26,6 +25,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
             title: "Настройки",
             icon: <MoreVertRoundedIcon/>,
             props: {
+                color: open ? "bg" : "inherit",
                 variant: open ? "contained" : "text",
                 onClick: handleOptionsButtonClick,
             }
@@ -40,13 +40,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
     ];
 
     return (
-        <Stack
-            divider={<Divider/>}
-            sx={{
-                flex: 1,
-                overflow: 'hidden',
-            }}
-        >
+        <Stack sx={{ flex: 1, overflow: 'hidden' }}>
             <Stack
                 direction="row"
                 sx={{
@@ -98,11 +92,8 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                     ))}
                 </Stack>
             </Stack>
-            <ScrollableContainer style={{ flex: 1 }}>
-                <Box display="flex">
-                    {children}
-                </Box>
-            </ScrollableContainer>
+            <Divider/>
+            {children}
             <Menu
                 open={open}
                 anchorEl={anchorEl}

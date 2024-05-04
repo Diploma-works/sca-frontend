@@ -35,14 +35,14 @@ const MIN_WIDTH = 36;
 const LeftSidebar = () => {
     const [activeTool, setActiveTool] = useSidebarContext();
     const [prevWidths, setPrevWidths] = useState(Array(tools.length));
-    const [disableResizing, setDisableResizing] = useState(false);
+    const [disableResizing, setDisableResizing] = useState(true);
 
     const handleClick = (value) => {
         setActiveTool((prevValue) => prevValue === value ? null : value);
     };
 
     const getMinWidth = useCallback(() => MIN_WIDTH, []);
-    const getMaxWidth = useCallback(() => window.innerWidth - MIN_WIDTH * 2 - 2, []);
+    const getMaxWidth = useCallback(() => window.innerWidth - MIN_WIDTH - 2, []);
 
     const updatePrevWidth = useCallback((newWidth) => {
         const updatedPrevWidths = [...prevWidths];
