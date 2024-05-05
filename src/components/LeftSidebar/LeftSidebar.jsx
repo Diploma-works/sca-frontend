@@ -10,6 +10,7 @@ import SidebarButton from "./SidebarButton";
 import HorizontallyResizableBox from "./HorizontallyResizableBox";
 import ProjectStructure from "../ProjectStructure";
 import SidebarTool from "./SidebarTool";
+import Problems from "../Problems";
 
 const tools = [
     {
@@ -25,7 +26,7 @@ const tools = [
     {
         title: "Проблемы",
         icon: <ErrorOutlineRoundedIcon/>,
-        component: <SidebarTool><div style={{ width: 500, height: 1 }}></div></SidebarTool>
+        component: <Problems/>
     },
 ];
 
@@ -34,14 +35,14 @@ const MIN_WIDTH = 36;
 const LeftSidebar = () => {
     const [activeTool, setActiveTool] = useSidebarContext();
     const [prevWidths, setPrevWidths] = useState(Array(tools.length));
-    const [disableResizing, setDisableResizing] = useState(false);
+    const [disableResizing, setDisableResizing] = useState(true);
 
     const handleClick = (value) => {
         setActiveTool((prevValue) => prevValue === value ? null : value);
     };
 
     const getMinWidth = useCallback(() => MIN_WIDTH, []);
-    const getMaxWidth = useCallback(() => window.innerWidth - MIN_WIDTH * 2 - 2, []);
+    const getMaxWidth = useCallback(() => window.innerWidth - MIN_WIDTH - 2, []);
 
     const updatePrevWidth = useCallback((newWidth) => {
         const updatedPrevWidths = [...prevWidths];

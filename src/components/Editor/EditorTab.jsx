@@ -57,8 +57,8 @@ const EditorTabWrapper = memo(({ value, label, removeTab, ...rest }) => {
                 ':hover': {
                     bgcolor: 'action.hover',
                     boxShadow: `
-                        1px 0 ${theme.palette.divider},
-                        -1px 0 ${theme.palette.divider}
+                        1px 0 ${theme.palette.altDivider},
+                        -1px 0 ${theme.palette.altDivider}
                     `,
                     '.MuiIconButton-root': {
                         visibility: 'visible',
@@ -68,8 +68,8 @@ const EditorTabWrapper = memo(({ value, label, removeTab, ...rest }) => {
                     color: 'text.primary',
                     bgcolor: 'background.paper',
                     boxShadow: `
-                        1px 0 ${theme.palette.divider},
-                        -1px 0 ${theme.palette.divider},
+                        1px 0 ${theme.palette.altDivider},
+                        -1px 0 ${theme.palette.altDivider},
                         inset 0 2px ${theme.palette.primary.main},
                         0 1px ${theme.palette.background.paper}
                     `,

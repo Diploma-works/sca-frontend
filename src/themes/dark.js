@@ -17,7 +17,7 @@ const dark = createTheme({
             main: grey[800],
             dark: grey[700],
         },
-        divider: '#282828',
+        altDivider: '#282828',
     },
 });
 
@@ -59,7 +59,7 @@ export const darkTheme = createTheme(dark, {
                     paddingRight: 8,
                     fontSize: '0.875rem',
                     border: '1px solid',
-                    borderColor: grey[800],
+                    borderColor: dark.palette.divider,
                     backgroundColor: grey[900],
                     boxShadow: `0 0 10px 2px ${dark.palette.background.default}`,
                 },
@@ -69,7 +69,7 @@ export const darkTheme = createTheme(dark, {
             styleOverrides: {
                 paper: {
                     border: '1px solid',
-                    borderColor: grey[800],
+                    borderColor: dark.palette.divider,
                     boxShadow: `0 0 10px 2px ${dark.palette.background.default}`,
                 },
                 list: {

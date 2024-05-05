@@ -5,6 +5,7 @@ import LeftSidebar from "./LeftSidebar";
 import Editor from "./Editor";
 import { TabsContextProvider } from "../contexts/TabsContext";
 import { SidebarContextProvider } from "../contexts/SidebarContext";
+import { ProblemsContextProvider } from "../contexts/ProblemsContext";
 
 const defaultTabs = [
     {
@@ -118,12 +119,14 @@ const Main = () => {
         <TabsContextProvider tabs={defaultTabs} activeTab={defaultTabs[0]}>
             <SidebarContextProvider>
                 <ProjectStructureContextProvider>
-                    <PathBreadcrumbs/>
-                    <Divider/>
-                    <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
-                        <LeftSidebar/>
-                        <Editor/>
-                    </Stack>
+                    <ProblemsContextProvider>
+                        <PathBreadcrumbs/>
+                        <Divider/>
+                        <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
+                            <LeftSidebar/>
+                            <Editor/>
+                        </Stack>
+                    </ProblemsContextProvider>
                 </ProjectStructureContextProvider>
             </SidebarContextProvider>
         </TabsContextProvider>

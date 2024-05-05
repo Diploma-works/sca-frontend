@@ -68,7 +68,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                     sx={{
                         position: 'relative',
                         minHeight: 0,
-                        boxShadow: `inset 0 -1px ${theme.palette.divider}`,
+                        boxShadow: `inset 0 -1px ${theme.palette.altDivider}`,
                         '& .MuiTabs-indicator': {
                             display: 'none',
                         },
@@ -83,7 +83,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                             opacity: 1,
                             boxSizing: 'content-box',
                             backdropFilter: 'blur(5px)',
-                            borderBottom: `thin solid ${theme.palette.divider}`,
+                            borderBottom: `thin solid ${theme.palette.altDivider}`,
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
                             },
@@ -97,7 +97,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                             },
                             ':first-of-type': {
                                 left: 0,
-                                borderRight: `thin solid ${theme.palette.divider}`,
+                                borderRight: `1px solid ${theme.palette.altDivider}`,
                                 '::after': {
                                     right: -41,
                                     boxShadow: `inset 40px 0 40px -40px ${theme.palette.background.default}`,
@@ -105,7 +105,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                             },
                             ':last-of-type': {
                                 right: 0,
-                                borderLeft: `thin solid ${theme.palette.divider}`,
+                                borderLeft: `thin solid ${theme.palette.altDivider}`,
                                 '::before': {
                                     left: -41,
                                     boxShadow: `inset -40px 0 40px -40px ${theme.palette.background.default}`,

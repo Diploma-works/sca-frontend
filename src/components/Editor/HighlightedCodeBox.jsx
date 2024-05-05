@@ -1,6 +1,6 @@
-import { memo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 
-import { alpha, Box, Button, Link, Menu, MenuItem, SvgIcon, Tooltip, useTheme } from "@mui/material";
+import { alpha, Box, Button, Divider, Link, Menu, MenuItem, SvgIcon, Tooltip, useTheme } from "@mui/material";
 import { yellow } from "@mui/material/colors";
 
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
@@ -10,6 +10,7 @@ import { createElement, Prism as SyntaxHighlighter } from "react-syntax-highligh
 import { darcula, prism } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 import ScrollableContainer from "../ScrollableContainer";
+import { useProblemsStateContext } from "../../contexts/ProblemsContext";
 
 const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => {
     const popperRef = useRef(null);
@@ -60,7 +61,13 @@ const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => 
             )}
             {problem ? (
                 <Tooltip
-                    title={problem}
+                    title={
+                        <>
+                            {problem.description}
+                            <Divider sx={{ borderColor: 'divider', my: 4 / 8 }}/>
+                            {problem.solution}
+                        </>
+                    }
                     placement={"bottom-start"}
                     leaveDelay={300}
                     PopperProps={popperProps}
@@ -81,9 +88,19 @@ const HighlightedCodeBox = memo(({ language, children }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
+    const problems = useProblemsStateContext();
     const [showInfo, setShowInfo] = useState(false);
     const [showProblems, setShowProblems] = useState(true);
-    const [highlightLines, setHighlightLines] = useState([0, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 150]);
+
+    const linesWithProblems = useMemo(() => {
+        const map = {};
+        problems?.forEach((problem) => {
+            for (let i = problem.lines.start; i <= problem.lines.end; i++) {
+                map[i] = problem;
+            }
+        })
+        return map;
+    }, [problems]);
 
     const info = {
         user: {
@@ -92,17 +109,6 @@ const HighlightedCodeBox = memo(({ language, children }) => {
         },
         time: '24.04.2024 18:00',
     };
-
-    const problem = (
-        <>
-            В данном блоке кода есть дефект!<br/>
-            Предлагаемый вариант исправления:<br/>
-            TEST<br/>
-            TEST<br/>
-            TEST<br/>
-            TEST
-        </>
-    );
 
     const updated = (instance) => setLeaveSpaceForScrollbar(instance.state().hasOverflow.y);
 
@@ -117,7 +123,7 @@ const HighlightedCodeBox = memo(({ language, children }) => {
             stylesheet={stylesheet}
             useInlineStyles={useInlineStyles}
             info={showInfo && info}
-            problem={showProblems && highlightLines.includes(index) && problem}
+            problem={showProblems && linesWithProblems[index + 1]}
         />
     ));
 
@@ -145,8 +151,8 @@ const HighlightedCodeBox = memo(({ language, children }) => {
                     borderRadius: 1,
                 }}>
                     <Button
-                        color="inherit"
                         disableElevation
+                        color={open ? "bg" : "inherit"}
                         variant={open ? "contained" : "text"}
                         onClick={handleClick}
                         sx={{

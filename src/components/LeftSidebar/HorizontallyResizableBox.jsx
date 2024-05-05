@@ -41,9 +41,9 @@ const HorizontallyResizableBox = ({ sx, getMinWidth, getMaxWidth, prevWidth, upd
                     ...sx,
                     ...(!disable && {
                         width,
-                        minWidth: getMinWidth(),
                         maxWidth: getMaxWidth(),
-                    })
+                    }),
+                    minWidth: getMinWidth(),
                 }}
             >
                 {children}
