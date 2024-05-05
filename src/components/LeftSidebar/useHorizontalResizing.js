@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWidth) => {
+const useHorizontalResizing = (prevWidth, updatePrevWidth) => {
     /* State variables for resizing logic  */
     const [isResizing, setIsResizing] = useState(false);
     const [width, setWidth] = useState(prevWidth);
@@ -20,11 +20,13 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
             return;
         }
         const newWidth = startPos.width + clientX - startPos.x;
-        if (newWidth >= getMinWidth() && newWidth <= getMaxWidth()) {
-            setWidth(newWidth);
-            updatePrevWidth(newWidth);
+        const { minWidth, maxWidth } = window.getComputedStyle(resizableElementRef.current);
+        if (newWidth < 0 || newWidth < parseFloat(minWidth) || newWidth > parseFloat(maxWidth)) {
+            return;
         }
-    }, [isResizing, getMaxWidth, getMinWidth, startPos, updatePrevWidth]);
+        setWidth(newWidth);
+        updatePrevWidth(newWidth);
+    }, [isResizing, startPos, updatePrevWidth]);
 
     const endResizing = useCallback(() => setIsResizing(false), []);
 
@@ -48,18 +50,6 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
 
     const handleTouchEnd = useCallback(() => endResizing(), [endResizing]);
 
-    /* Handler for window resize */
-    const handleResize = useCallback(() => {
-        setWidth(Math.min(resizableElementRef.current.offsetWidth, getMaxWidth()));
-    }, [getMaxWidth]);
-
-    /* Effect for updating prev width */
-    useEffect(() => {
-        if (width && width !== prevWidth) {
-            updatePrevWidth(width);
-        }
-    }, [width, prevWidth, updatePrevWidth]);
-
     /* Effects for setting up window event listeners */
     useEffect(() => {
         if (isResizing) {
@@ -78,18 +68,13 @@ const useHorizontalResizing = (getMinWidth, getMaxWidth, prevWidth, updatePrevWi
         }
     }, [isResizing, handleMouseMove, handleTouchMove, handleMouseUp, handleTouchEnd]);
 
-    useEffect(() => {
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [handleResize]);
-
     /* Listeners for resize handle */
     const listeners = {
         onMouseDown: handleMouseDown,
         onTouchStart: handleTouchStart,
     }
 
-    return { width, listeners, resizableElementRef };
+    return { width, listeners, isResizing, resizableElementRef };
 }
 
 export default useHorizontalResizing;

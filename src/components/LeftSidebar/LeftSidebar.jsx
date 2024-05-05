@@ -1,6 +1,6 @@
 import { cloneElement, useCallback, useState } from "react";
 
-import { Divider, Stack } from "@mui/material";
+import { Stack, useTheme } from "@mui/material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
@@ -11,6 +11,7 @@ import HorizontallyResizableBox from "./HorizontallyResizableBox";
 import ProjectStructure from "../ProjectStructure";
 import SidebarTool from "./SidebarTool";
 import Problems from "../Problems";
+import useWindowSize from "./useWindowSize";
 
 const tools = [
     {
@@ -33,16 +34,17 @@ const tools = [
 const MIN_WIDTH = 36;
 
 const LeftSidebar = () => {
+    const theme = useTheme();
+
     const [activeTool, setActiveTool] = useSidebarContext();
+
+    const { innerWidth } = useWindowSize();
     const [prevWidths, setPrevWidths] = useState(Array(tools.length));
     const [disableResizing, setDisableResizing] = useState(true);
 
     const handleClick = (value) => {
         setActiveTool((prevValue) => prevValue === value ? null : value);
     };
-
-    const getMinWidth = useCallback(() => MIN_WIDTH, []);
-    const getMaxWidth = useCallback(() => window.innerWidth - MIN_WIDTH - 2, []);
 
     const updatePrevWidth = useCallback((newWidth) => {
         const updatedPrevWidths = [...prevWidths];
@@ -52,7 +54,16 @@ const LeftSidebar = () => {
 
     return (
         <>
-            <Stack spacing={4 / 8} alignItems="center" sx={{ p: 4 / 8 }} divider={<Divider flexItem/>}>
+            <Stack
+                spacing={4 / 8}
+                alignItems="center"
+                sx={{
+                    p: 4 / 8,
+                    bgcolor: 'background.paper',
+                    borderRadius: 1,
+                    alignSelf: 'flex-start',
+                }}
+            >
                 {tools.map((tool, index) => (
                     <SidebarButton
                         key={index}
@@ -63,13 +74,17 @@ const LeftSidebar = () => {
                     />
                 ))}
             </Stack>
-            <Divider orientation="vertical"/>
             {activeTool !== null && (
                 <HorizontallyResizableBox
                     key={activeTool} // TODO: поискать другое решение?
-                    sx={{ display: 'flex' }}
-                    getMinWidth={getMinWidth}
-                    getMaxWidth={getMaxWidth}
+                    sx={{
+                        display: 'flex',
+                        minWidth: MIN_WIDTH,
+                        maxWidth: {
+                            xs: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(4 / 8)),
+                            sm: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(1)),
+                        },
+                    }}
                     prevWidth={prevWidths[activeTool]}
                     updatePrevWidth={updatePrevWidth}
                     disable={disableResizing}

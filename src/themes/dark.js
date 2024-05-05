@@ -11,7 +11,8 @@ const dark = createTheme({
             main: '#4489FF',
         },
         background: {
-            default: '#0a0a0a'
+            //default: '#0a0a0a'
+            default: 'black',
         },
         bg: {
             main: grey[800],

@@ -72,7 +72,6 @@ const Problems = ({ title, disableResizing, setDisableResizing }) => {
                             square
                             disableGutters
                             sx={{
-                                bgcolor: 'background.default',
                                 '&::before': {
                                     display: 'none',
                                 },

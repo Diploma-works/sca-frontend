@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Box, Button, Divider, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography } from "@mui/material";
 
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -40,7 +40,12 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
     ];
 
     return (
-        <Stack sx={{ flex: 1, overflow: 'hidden' }}>
+        <Stack sx={{
+            flex: 1,
+            overflow: 'hidden',
+            borderRadius: 1,
+            bgcolor: 'background.paper',
+        }}>
             <Stack
                 direction="row"
                 sx={{
@@ -86,13 +91,12 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                                 }}
                                 {...props}
                             >
-                                <SvgIcon sx={{ width: 16, height: 16 }}>{icon}</SvgIcon>
+                                <SvgIcon sx={{ fontSize: 16 }}>{icon}</SvgIcon>
                             </Button>
                         </Tooltip>
                     ))}
                 </Stack>
             </Stack>
-            <Divider/>
             {children}
             <Menu
                 open={open}
@@ -101,7 +105,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                 onClose={handleClose}
             >
                 <MenuItem onClick={() => setDisableResizing((prevState) => !prevState)}>
-                    <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
+                    <SvgIcon sx={{ fontSize: 18, mr: 1 }}>
                         {disableResizing && <CheckRoundedIcon/>}
                     </SvgIcon>
                     Оптимальная ширина панели

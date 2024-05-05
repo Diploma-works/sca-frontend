@@ -1,59 +1,66 @@
-import { Box, Divider } from "@mui/material";
+import { Box, Divider, Stack, useTheme } from "@mui/material";
 import useHorizontalResizing from "./useHorizontalResizing";
 
-const InteractiveVerticalDivider = ({ activationArea, ...props }) => {
+const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
+    const theme = useTheme();
+
     return (
         <Divider
+            flexItem
             orientation="vertical"
             sx={{
                 position: 'relative',
+                my: 4 / 8,
+                left: {
+                    xs: theme.spacing(2 / 8),
+                    sm: theme.spacing(4 / 8)
+                },
                 cursor: 'ew-resize',
                 touchAction: 'none',
                 overflow: 'visible',
+                '::before': { right: 0 },
+                '::after': { left: 1 },
                 '::before, ::after': {
                     position: 'absolute',
-                    top: 0,
-                    width: activationArea,
+                    // TODO: убрать этот "хак" с увеличением ширины (сделать что-то с pointerEvents соседей?)
+                    width: isResizing ? 100 : {
+                        xs: theme.spacing(1),
+                        sm: theme.spacing(4 / 8)
+                    },
                     height: '100%',
-                    zIndex: 1000,
+                    zIndex: 'modal',
                     content: '""',
                 },
-                '::before': { left: -activationArea, },
-                '::after': { right: -activationArea - 1, },
+                borderColor: isResizing ? 'action.active' : 'background.default',
+                '@media (hover: hover)': {
+                    ':hover': {
+                        borderColor: isResizing ? 'action.active' : 'bg.main',
+                    },
+                },
             }}
             {...props}
         />
     );
 }
 
-const HorizontallyResizableBox = ({ sx, getMinWidth, getMaxWidth, prevWidth, updatePrevWidth, disable, children }) => {
-    const {
-        width,
-        listeners,
-        resizableElementRef
-    } = useHorizontalResizing(getMinWidth, getMaxWidth, prevWidth, updatePrevWidth);
+const HorizontallyResizableBox = ({ sx, prevWidth, updatePrevWidth, disable, children }) => {
+    const { width, listeners, isResizing, resizableElementRef } = useHorizontalResizing(prevWidth, updatePrevWidth);
 
     return (
-        <>
+        <Stack direction={"row"}>
             <Box
                 ref={resizableElementRef}
                 sx={{
                     ...sx,
                     ...(!disable && {
-                        width,
-                        maxWidth: getMaxWidth(),
-                    }),
-                    minWidth: getMinWidth(),
+                        width: width + 'px',
+                    })
                 }}
             >
                 {children}
             </Box>
-            {disable ? (
-                <Divider orientation="vertical"/>
-            ) : (
-                <InteractiveVerticalDivider activationArea={3} {...listeners}/>
-            )}
-        </>
+            {!disable && <InteractiveVerticalDivider isResizing={isResizing} {...listeners}/>}
+        </Stack>
     )
 }
 

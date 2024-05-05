@@ -1,20 +1,21 @@
-import { Stack, useTheme } from "@mui/material";
+import { Stack } from "@mui/material";
 
 import EditorTabsRoot from "./EditorTabsRoot";
 import { useTabsContext } from "../../contexts/TabsContext";
 import HighlightedCodeBox from "./HighlightedCodeBox";
-import jsxCode from "./jsxCode";
+//import jsxCode from "./jsxCode";
 
 const Editor = () => {
-    const theme = useTheme();
     const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext(); // TODO: переместить часть внутрь EditorTabsRoot
 
     const language = "jsx";
-    const code = jsxCode;
+    //const code = jsxCode;
+    const code = null; // TODO: разобраться, почему происходят тормоза
 
     return (
         <Stack sx={{
             flex: 1,
+            borderRadius: 1,
             overflow: 'hidden',
         }}>
             {tabs && <EditorTabsRoot

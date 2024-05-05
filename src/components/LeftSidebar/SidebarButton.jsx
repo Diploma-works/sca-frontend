@@ -7,16 +7,15 @@ const SidebarButton = ({ title, icon, onClick, isActive }) => {
             placement="right"
             disableInteractive
             TransitionComponent={Zoom}
-            slotProps={{
-                popper: {
-                    modifiers: [{
-                        name: 'offset',
-                        options: { offset: [0, 9] }
-                    }],
+            PopperProps={{
+                sx: {
+                    lineHeight: '18px',
+                    pl: { xs: 4 / 8, sm: 1 },
                 },
-                tooltip: {
-                    sx: { lineHeight: '18px' }
-                }
+                modifiers: [{
+                    name: 'offset',
+                    options: { offset: [0, 8] },
+                }],
             }}
         >
             <Button
@@ -30,7 +29,7 @@ const SidebarButton = ({ title, icon, onClick, isActive }) => {
                     color: 'text.secondary',
                 }}
             >
-                <SvgIcon sx={{ width: 20, height: 20, }}>{icon}</SvgIcon>
+                <SvgIcon sx={{ fontSize: 20 }}>{icon}</SvgIcon>
             </Button>
         </Tooltip>
     )

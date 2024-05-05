@@ -122,7 +122,15 @@ const Main = () => {
                     <ProblemsContextProvider>
                         <PathBreadcrumbs/>
                         <Divider/>
-                        <Stack direction="row" sx={{ flex: 1, overflow: 'hidden' }}>
+                        <Stack
+                            direction="row"
+                            spacing={{ xs: 4 / 8, sm: 1 }}
+                            sx={{
+                                flex: 1,
+                                overflow: 'hidden',
+                                p: { xs: 4 / 8, sm: 1 },
+                            }}
+                        >
                             <LeftSidebar/>
                             <Editor/>
                         </Stack>
