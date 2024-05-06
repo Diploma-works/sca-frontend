@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Box, Button, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Divider, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography } from "@mui/material";
 
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -97,6 +97,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                     ))}
                 </Stack>
             </Stack>
+            <Divider/>
             {children}
             <Menu
                 open={open}

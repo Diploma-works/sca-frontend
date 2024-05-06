@@ -13,7 +13,7 @@ import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordin
 
 import { Tabs, useTheme } from "@mui/material";
 
-import { EditorTab, EditorTabOverlay } from "./EditorTab";
+import { EditorTabOverlay, SortableEditorTab } from "./EditorTab";
 
 const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) => {
     const theme = useTheme();
@@ -67,57 +67,56 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                     onChange={handleChange}
                     sx={{
                         position: 'relative',
+                        p: 4 / 8,
+                        pb: 0,
                         minHeight: 0,
-                        boxShadow: `inset 0 -1px ${theme.palette.altDivider}`,
+                        boxShadow: `inset 0 -1px ${theme.palette.divider}`,
+                        '& .MuiTabs-scroller': {
+                            borderTopLeftRadius: theme.shape.borderRadius,
+                            borderTopRightRadius: theme.shape.borderRadius,
+                        },
                         '& .MuiTabs-indicator': {
                             display: 'none',
                         },
                         '& .MuiTabs-flexContainer': {
-                            gap: '1px',
+                            gap: 4 / 8,
                         },
                         '& .MuiTabScrollButton-root': {
+                            color: 'text.secondary',
                             position: 'absolute',
-                            width: 36,
-                            height: 36,
-                            zIndex: 3,
+                            p: 4 / 8,
+                            zIndex: 2,
                             opacity: 1,
-                            boxSizing: 'content-box',
+                            width: 'auto',
+                            borderRadius: 1,
                             backdropFilter: 'blur(5px)',
-                            borderBottom: `thin solid ${theme.palette.altDivider}`,
+                            ':first-of-type': {
+                                left: theme.spacing(4 / 8),
+                            },
+                            ':last-of-type': {
+                                right: theme.spacing(4 / 8),
+                            },
+                            ...(draggedTab && {
+                                visibility: 'hidden',
+                            }),
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
                             },
-                            '::before, ::after': {
-                                position: 'absolute',
-                                top: 0,
-                                width: 40,
-                                height: '100%',
-                                content: '""',
-                                pointerEvents: 'none',
-                            },
-                            ':first-of-type': {
-                                left: 0,
-                                borderRight: `1px solid ${theme.palette.altDivider}`,
-                                '::after': {
-                                    right: -41,
-                                    boxShadow: `inset 40px 0 40px -40px ${theme.palette.background.default}`,
+                            '@media(hover: hover)': {
+                                ':hover': {
+                                    bgcolor: 'action.hover',
                                 },
                             },
-                            ':last-of-type': {
-                                right: 0,
-                                borderLeft: `thin solid ${theme.palette.altDivider}`,
-                                '::before': {
-                                    left: -41,
-                                    boxShadow: `inset -40px 0 40px -40px ${theme.palette.background.default}`,
-                                },
-                            },
+                            boxShadow: `0 0 10px 2px ${theme.palette.background.paper}`,
                         },
                     }}
                 >
-                    {tabs.map(({ id, label }) => <EditorTab key={id} value={id} label={label} removeTab={removeTab}/>)}
+                    {tabs.map(({ id, label }) => (
+                        <SortableEditorTab key={id} value={id} label={label} removeTab={removeTab}/>
+                    ))}
                 </Tabs>
             </SortableContext>
-            <EditorTabOverlay draggedTab={draggedTab} isSelected={draggedTab?.id === activeTab?.id}/>
+            <EditorTabOverlay draggedTab={draggedTab}/>
         </DndContext>
     );
 };

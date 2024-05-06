@@ -82,7 +82,7 @@ const LeftSidebar = () => {
                         minWidth: MIN_WIDTH,
                         maxWidth: {
                             xs: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(4 / 8)),
-                            sm: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(1)),
+                            md: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(1)),
                         },
                     }}
                     prevWidth={prevWidths[activeTool]}

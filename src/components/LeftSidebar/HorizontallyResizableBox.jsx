@@ -13,7 +13,7 @@ const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
                 my: 4 / 8,
                 left: {
                     xs: theme.spacing(2 / 8),
-                    sm: theme.spacing(4 / 8)
+                    md: theme.spacing(4 / 8)
                 },
                 cursor: 'ew-resize',
                 touchAction: 'none',
@@ -25,7 +25,7 @@ const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
                     // TODO: убрать этот "хак" с увеличением ширины (сделать что-то с pointerEvents соседей?)
                     width: isResizing ? 100 : {
                         xs: theme.spacing(1),
-                        sm: theme.spacing(4 / 8)
+                        md: theme.spacing(4 / 8)
                     },
                     height: '100%',
                     zIndex: 'modal',

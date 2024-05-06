@@ -10,7 +10,7 @@ const SidebarButton = ({ title, icon, onClick, isActive }) => {
             PopperProps={{
                 sx: {
                     lineHeight: '18px',
-                    pl: { xs: 4 / 8, sm: 1 },
+                    pl: { xs: 4 / 8, md: 1 },
                 },
                 modifiers: [{
                     name: 'offset',

@@ -10,12 +10,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 
 const commonTabSx = {
-    p: 1,
-    gap: 1,
+    p: 4 / 8,
     minHeight: 0,
+    borderRadius: 1,
     flexDirection: 'row',
     lineHeight: 'normal',
     textTransform: 'none',
+    color: 'text.primary',
+    bgcolor: 'background.paper',
 }
 
 const EditorTabLabel = memo(({ label, handleClose }) => {
@@ -23,22 +25,23 @@ const EditorTabLabel = memo(({ label, handleClose }) => {
 
     return (
         <>
-            <SvgIcon sx={{ width: 20, height: 20 }}>{fileTypeIcon}</SvgIcon>
+            <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>{fileTypeIcon}</SvgIcon>
             <span>{label}</span>
-            {handleClose &&
-                <IconButton component="div" color="inherit" sx={{ p: 0 }} onClick={handleClose}>
-                    <CloseIcon fontSize="small"/>
-                </IconButton>
-            }
+            <Box sx={{ ml: 4 / 8, width: 20, height: 20 }}>
+                {handleClose && (
+                    <IconButton component="div" onClick={handleClose} sx={{ p: 2 / 8 }}>
+                        <CloseIcon sx={{ fontSize: 16 }}/>
+                    </IconButton>
+                )}
+            </Box>
         </>
     );
 });
 
-const EditorTabWrapper = memo(({ value, label, removeTab, ...rest }) => {
+const EditorTab = memo(({ value, label, removeTab, ...rest }) => {
     const theme = useTheme();
 
-    const handleClose = useCallback((event) => {
-        event.stopPropagation();
+    const handleClose = useCallback(() => {
         removeTab(value);
     }, [removeTab, value]);
 
@@ -49,32 +52,37 @@ const EditorTabWrapper = memo(({ value, label, removeTab, ...rest }) => {
             label={<EditorTabLabel label={label} handleClose={handleClose}/>}
             sx={{
                 ...commonTabSx,
-                color: 'text.primary',
-                bgcolor: 'background.default',
+                overflow: 'visible',
                 '.MuiIconButton-root': {
                     visibility: 'hidden',
                 },
-                ':hover': {
-                    bgcolor: 'action.hover',
-                    boxShadow: `
-                        1px 0 ${theme.palette.altDivider},
-                        -1px 0 ${theme.palette.altDivider}
-                    `,
-                    '.MuiIconButton-root': {
-                        visibility: 'visible',
+                '@media(hover: hover)': {
+                    ':hover': {
+                        bgcolor: 'action.hover',
+                        '.MuiIconButton-root': {
+                            visibility: 'visible',
+                        },
                     },
                 },
                 '&.Mui-selected': {
                     color: 'text.primary',
-                    bgcolor: 'background.paper',
-                    boxShadow: `
-                        1px 0 ${theme.palette.altDivider},
-                        -1px 0 ${theme.palette.altDivider},
-                        inset 0 2px ${theme.palette.primary.main},
-                        0 1px ${theme.palette.background.paper}
-                    `,
                     '.MuiIconButton-root': {
                         visibility: 'visible',
+                    },
+                    '@media(hover: hover)': {
+                        ':hover::before': {
+                            width: 1,
+                        },
+                    },
+                    '::before': {
+                        position: 'absolute',
+                        bottom: `calc(-${theme.spacing(4 / 8)} - 1px)`,
+                        width: `calc(100% - 2*${theme.spacing(4 / 8)})`,
+                        height: 2,
+                        content: '""',
+                        pointerEvents: 'none',
+                        bgcolor: 'primary.main',
+                        transition: 'width 0.2s',
                     },
                 },
             }}
@@ -82,7 +90,7 @@ const EditorTabWrapper = memo(({ value, label, removeTab, ...rest }) => {
     );
 });
 
-const EditorTab = (props) => {
+const SortableEditorTab = (props) => {
     const theme = useTheme();
     const {
         isDragging,
@@ -99,17 +107,13 @@ const EditorTab = (props) => {
             {...attributes}
             {...listeners}
             sx={{
-                mb: '1px',
-                flexShrink: 0,
                 transition,
+                borderRadius: 1,
                 transform: CSS.Transform.toString(transform),
+                mb: `calc(${theme.spacing(4 / 8)} + 1px)`,
                 ...(isDragging ? {
                     zIndex: 0,
                     bgcolor: 'action.focus',
-                    boxShadow: `
-                        1px 0 ${theme.palette.action.focus},
-                        -1px 0 ${theme.palette.action.focus}
-                    `,
                     '.MuiTab-root': {
                         opacity: 0,
                     }
@@ -118,34 +122,29 @@ const EditorTab = (props) => {
                 }),
             }}
         >
-            <EditorTabWrapper {...props}/>
+            <EditorTab {...props}/>
         </Box>
     );
 }
 
-const EditorTabOverlay = ({ draggedTab, isSelected }) => {
+const EditorTabOverlay = ({ draggedTab }) => {
     const theme = useTheme();
 
     return (
         <DragOverlay>
-            {draggedTab &&
+            {draggedTab && (
                 <Tab
                     label={<EditorTabLabel label={draggedTab.label}/>}
                     sx={{
                         ...commonTabSx,
-                        pr: 4.5,
-                        bgcolor: 'background.paper',
-                        boxShadow: `
-                            0 0 10px 2px ${theme.palette.background.default}
-                            ${isSelected ? `, inset 0 2px ${theme.palette.primary.main}` : ''}
-                        `,
                         opacity: 1,
                         cursor: 'grab',
+                        boxShadow: `0 0 10px 2px ${theme.palette.background.default}`,
                     }}
                 />
-            }
+            )}
         </DragOverlay>
     );
 };
 
-export { EditorTab, EditorTabOverlay };
+export { EditorTab, SortableEditorTab, EditorTabOverlay };

@@ -120,15 +120,13 @@ const Main = () => {
             <SidebarContextProvider>
                 <ProjectStructureContextProvider>
                     <ProblemsContextProvider>
-                        <PathBreadcrumbs/>
-                        <Divider/>
                         <Stack
                             direction="row"
-                            spacing={{ xs: 4 / 8, sm: 1 }}
+                            spacing={{ xs: 4 / 8, md: 1 }}
                             sx={{
                                 flex: 1,
                                 overflow: 'hidden',
-                                p: { xs: 4 / 8, sm: 1 },
+                                p: { xs: 4 / 8, md: 1 },
                             }}
                         >
                             <LeftSidebar/>

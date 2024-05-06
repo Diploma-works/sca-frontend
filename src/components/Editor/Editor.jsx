@@ -1,33 +1,39 @@
-import { Stack } from "@mui/material";
+import { Divider, Stack } from "@mui/material";
 
 import EditorTabsRoot from "./EditorTabsRoot";
 import { useTabsContext } from "../../contexts/TabsContext";
 import HighlightedCodeBox from "./HighlightedCodeBox";
-//import jsxCode from "./jsxCode";
+import jsxCode from "./jsxCode";
+import PathBreadcrumbs from "../PathBreadcrumbs";
 
 const Editor = () => {
     const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext(); // TODO: переместить часть внутрь EditorTabsRoot
 
     const language = "jsx";
-    //const code = jsxCode;
-    const code = null; // TODO: разобраться, почему происходят тормоза
+    const code = jsxCode;
+    //const code = null; // TODO: разобраться, почему происходят тормоза
 
     return (
         <Stack sx={{
             flex: 1,
             borderRadius: 1,
             overflow: 'hidden',
+            bgcolor: 'background.paper',
         }}>
-            {tabs && <EditorTabsRoot
-                tabs={tabs}
-                moveTab={moveTab}
-                removeTab={removeTab}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-            />}
+            {tabs && (
+                <EditorTabsRoot
+                    tabs={tabs}
+                    moveTab={moveTab}
+                    removeTab={removeTab}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                />
+            )}
             <HighlightedCodeBox language={language}>
                 {code}
             </HighlightedCodeBox>
+            <Divider/>
+            <PathBreadcrumbs/>
         </Stack>
     );
 }
