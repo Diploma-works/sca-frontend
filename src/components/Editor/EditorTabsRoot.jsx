@@ -96,9 +96,6 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
                             ':last-of-type': {
                                 right: theme.spacing(4 / 8),
                             },
-                            ...(draggedTab && {
-                                visibility: 'hidden',
-                            }),
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
                             },

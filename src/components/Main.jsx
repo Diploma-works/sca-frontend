@@ -1,11 +1,12 @@
-import { ProjectStructureContextProvider } from "../contexts/ProjectStructureContext";
-import PathBreadcrumbs from "./PathBreadcrumbs";
-import { Divider, Stack } from "@mui/material";
-import LeftSidebar from "./LeftSidebar";
+import { Stack } from "@mui/material";
+
 import Editor from "./Editor";
+import LeftSidebar from "./LeftSidebar";
+
 import { TabsContextProvider } from "../contexts/TabsContext";
 import { SidebarContextProvider } from "../contexts/SidebarContext";
 import { ProblemsContextProvider } from "../contexts/ProblemsContext";
+import { ProjectStructureContextProvider } from "../contexts/ProjectStructureContext";
 
 const defaultTabs = [
     {
