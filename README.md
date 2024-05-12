@@ -1,2 +1,2 @@
-Ссылка на текущую версию проекта:
-https://diploma-works.github.io/cloud-ide/
+Link to deployed application:
+https://diploma-works.github.io/sca-frontend/

@@ -57,6 +57,7 @@ const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) =
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             collisionDetection={closestCenter}
+            autoScroll={{ acceleration: 1, layoutShiftCompensation: false }}
         >
             <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
                 <Tabs

@@ -15,6 +15,7 @@ const commonTabSx = {
     borderRadius: 1,
     flexDirection: 'row',
     lineHeight: 'normal',
+    textWrap: 'nowrap',
     textTransform: 'none',
     color: 'text.primary',
     bgcolor: 'background.paper',
