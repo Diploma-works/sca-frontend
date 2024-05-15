@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Skeleton, Stack } from "@mui/material";
 
 import Editor from "./Editor";
 import LeftSidebar from "./LeftSidebar";
@@ -7,6 +7,7 @@ import { TabsContextProvider } from "../contexts/TabsContext";
 import { SidebarContextProvider } from "../contexts/SidebarContext";
 import { ProblemsContextProvider } from "../contexts/ProblemsContext";
 import { ProjectStructureContextProvider } from "../contexts/ProjectStructureContext";
+import { useEffect, useState } from "react";
 
 const defaultTabs = [
     {
@@ -116,6 +117,12 @@ const defaultTabs = [
 ];
 
 const Main = () => {
+    const [isLoading, setIsLoading] = useState(true); // TODO: заменить?
+
+    useEffect(() => {
+        setTimeout(() => setIsLoading(false), 1000);
+    }, []);
+
     return (
         <TabsContextProvider tabs={defaultTabs} activeTab={defaultTabs[0]}>
             <SidebarContextProvider>
@@ -130,8 +137,17 @@ const Main = () => {
                                 p: { xs: 4 / 8, md: 1 },
                             }}
                         >
-                            <LeftSidebar/>
-                            <Editor/>
+                            {isLoading ? (
+                                <>
+                                    <Skeleton animation="wave" sx={{ width: 36, height: 100, transform: 'none' }}/>
+                                    <Skeleton animation="wave" sx={{ flex: 1, transform: 'none' }}/>
+                                </>
+                            ) : (
+                                <>
+                                    <LeftSidebar/>
+                                    <Editor/>
+                                </>
+                            )}
                         </Stack>
                     </ProblemsContextProvider>
                 </ProjectStructureContextProvider>
