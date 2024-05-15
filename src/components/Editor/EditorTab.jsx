@@ -9,6 +9,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 
+// TODO: переопределить стили button в теме?
 const commonTabSx = {
     p: 4 / 8,
     minHeight: 0,

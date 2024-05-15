@@ -31,7 +31,7 @@ const PathBreadcrumbs = () => {
                 gap: 4 / 8,
                 minWidth: 0,
                 fontSize: 'small',
-                lineHeight: 'normal',
+                lineHeight: 'normal', // TODO: переопределить стили button в теме?
                 textTransform: 'none',
             }}
             onClick={() => handleClick(index, pathElements)}

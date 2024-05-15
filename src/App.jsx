@@ -1,26 +1,18 @@
-import { useMemo, useState } from "react";
-
-import { createTheme, CssBaseline, Divider, ThemeProvider } from "@mui/material";
-import { lightTheme } from "./themes/light";
-import { darkTheme } from "./themes/dark";
+import { useState } from "react";
 
 import "overlayscrollbars/overlayscrollbars.css";
 
+import { CssBaseline, Divider, ThemeProvider } from "@mui/material";
+
+import { darkTheme, lightTheme } from "./themes";
 import Navbar from "./components/Navbar";
 import Main from "./components/Main";
 
 const App = () => {
     const [mode, setMode] = useState("dark");
 
-    const switchMode = (prev) => {
-        const next = prev === "light" ? "dark" : "light";
-        setMode(next);
-    }
-
-    const theme = useMemo(
-        () => createTheme(mode === "light" ? lightTheme : darkTheme),
-        [mode]
-    );
+    const theme = mode === "light" ? lightTheme : darkTheme;
+    const switchMode = () => setMode(prevState => prevState === "light" ? "dark" : "light");
 
     return (
         <ThemeProvider theme={theme}>

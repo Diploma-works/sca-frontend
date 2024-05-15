@@ -43,7 +43,7 @@ const LeftSidebar = () => {
     const [disableResizing, setDisableResizing] = useState(true);
 
     const handleClick = (value) => {
-        setActiveTool((prevValue) => prevValue === value ? null : value);
+        setActiveTool((prevState) => prevState === value ? null : value);
     };
 
     const updatePrevWidth = useCallback((newWidth) => {

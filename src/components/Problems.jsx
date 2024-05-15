@@ -101,14 +101,7 @@ const Problems = ({ title, disableResizing, setDisableResizing }) => {
                                     },
                                 }}
                             >
-                                <Typography
-                                    noWrap
-                                    variant="button"
-                                    sx={{
-                                        pl: 1,
-                                        textTransform: 'none',
-                                    }}
-                                >
+                                <Typography noWrap variant="button" pl={1}>
                                     {description}
                                 </Typography>
                                 <Typography
@@ -126,7 +119,7 @@ const Problems = ({ title, disableResizing, setDisableResizing }) => {
                             <AccordionDetails sx={{
                                 py: 1,
                                 pr: 0,
-                                fontSize: '0.875rem',
+                                fontSize: 'subtitle2.fontSize'
                             }}>
                                 <Box sx={{
                                     px: 2,

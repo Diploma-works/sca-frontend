@@ -64,9 +64,7 @@ const ProjectStructureItem = ({ itemId, label, path, children }) => {
                         }
                     },
                     '.MuiTreeItem-label': {
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        lineHeight: 'normal',
+                        ...theme.typography.button,
                         textWrap: 'nowrap',
                     },
                 },

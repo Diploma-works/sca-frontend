@@ -133,13 +133,12 @@ const HighlightedCodeBox = memo(({ language, children }) => {
             style={{
                 flex: 1,
                 transform: 'translateX(0)',
-                backgroundColor: theme.palette.background.paper,
             }}
         >
             <Tooltip
                 title="Внешний вид"
                 placement="bottom-end"
-                PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
+                PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, parseInt(theme.spacing(1))] } }] }}
             >
                 <Box sx={{
                     position: 'fixed',
@@ -165,24 +164,21 @@ const HighlightedCodeBox = memo(({ language, children }) => {
                     </Button>
                 </Box>
             </Tooltip>
-            <Box display="flex">
-                <SyntaxHighlighter
-                    language={language}
-                    renderer={renderer}
-                    showLineNumbers
-                    style={theme.palette.mode === "dark" ? darcula : prism}
-                    lineNumberStyle={{ minWidth: '3em' }}
-                    customStyle={{
-                        flex: 1,
-                        margin: 0,
-                        padding: 0,
-                        background: 'transparent',
-                        overflow: 'visible',
-                    }}
-                >
-                    {children}
-                </SyntaxHighlighter>
-            </Box>
+            <SyntaxHighlighter
+                language={language}
+                renderer={renderer}
+                showLineNumbers
+                style={theme.palette.mode === "dark" ? darcula : prism}
+                lineNumberStyle={{ minWidth: '3em' }}
+                customStyle={{
+                    margin: 0,
+                    padding: 0,
+                    background: 'transparent',
+                    overflow: 'visible',
+                }}
+            >
+                {children}
+            </SyntaxHighlighter>
             <Menu
                 open={open}
                 anchorEl={anchorEl}

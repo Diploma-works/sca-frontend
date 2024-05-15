@@ -1,9 +1,17 @@
 import { createTheme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
-const dark = createTheme({
+const globalStyles = createTheme({
     typography: {
         fontFamily: 'Montserrat',
+        button: {
+            lineHeight: 'normal',
+            textTransform: 'none',
+        },
+        subtitle2: {
+            lineHeight: 'normal',
+            fontWeight: 600,
+        }
     },
     palette: {
         mode: 'dark',
@@ -11,40 +19,17 @@ const dark = createTheme({
             main: '#4489FF',
         },
         background: {
-            //default: '#0a0a0a'
             default: 'black',
         },
         bg: {
             main: grey[800],
             dark: grey[700],
         },
-        altDivider: '#282828',
     },
 });
 
-export const darkTheme = createTheme(dark, {
+const darkTheme = createTheme(globalStyles, {
     components: {
-        MuiCssBaseline: {
-            styleOverrides: {
-                body: {
-                    scrollbarColor: 'rgba(255, 255, 255, 0.16) transparent',
-                    '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
-                        backgroundColor: 'transparent',
-                        width: 10,
-                        height: 10,
-                    },
-                    '&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.24)',
-                    },
-                    '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.16)',
-                    },
-                    '&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner': {
-                        backgroundColor: 'transparent',
-                    },
-                },
-            },
-        },
         MuiTooltip: {
             defaultProps: {
                 enterDelay: 300,
@@ -54,15 +39,15 @@ export const darkTheme = createTheme(dark, {
             styleOverrides: {
                 tooltip: {
                     margin: '0 !important',
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    paddingLeft: 8,
-                    paddingRight: 8,
-                    fontSize: '0.875rem',
+                    paddingLeft: globalStyles.spacing(1),
+                    paddingRight: globalStyles.spacing(1),
+                    paddingTop: globalStyles.spacing(4 / 8),
+                    paddingBottom: globalStyles.spacing(4 / 8),
                     border: '1px solid',
-                    borderColor: dark.palette.divider,
+                    borderColor: globalStyles.palette.divider,
                     backgroundColor: grey[900],
-                    boxShadow: `0 0 10px 2px ${dark.palette.background.default}`,
+                    fontSize: globalStyles.typography.body2.fontSize,
+                    boxShadow: `0 0 10px 2px ${globalStyles.palette.background.default}`,
                 },
             },
         },
@@ -70,8 +55,8 @@ export const darkTheme = createTheme(dark, {
             styleOverrides: {
                 paper: {
                     border: '1px solid',
-                    borderColor: dark.palette.divider,
-                    boxShadow: `0 0 10px 2px ${dark.palette.background.default}`,
+                    borderColor: globalStyles.palette.divider,
+                    boxShadow: `0 0 10px 2px ${globalStyles.palette.background.default}`,
                 },
                 list: {
                     padding: 0,
@@ -82,16 +67,16 @@ export const darkTheme = createTheme(dark, {
         MuiMenuItem: {
             styleOverrides: {
                 root: {
+                    ...globalStyles.typography.button,
                     minHeight: 0,
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    paddingLeft: 8,
-                    paddingRight: 8,
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    lineHeight: 'normal',
+                    paddingLeft: globalStyles.spacing(1),
+                    paddingRight: globalStyles.spacing(1),
+                    paddingTop: globalStyles.spacing(4 / 8),
+                    paddingBottom: globalStyles.spacing(4 / 8),
                 }
             }
         }
     },
 });
+
+export default darkTheme;

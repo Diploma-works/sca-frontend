@@ -28,7 +28,7 @@ const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
                         md: theme.spacing(4 / 8)
                     },
                     height: '100%',
-                    zIndex: 'modal',
+                    zIndex: '3',
                     content: '""',
                 },
                 borderColor: isResizing ? 'action.active' : 'background.default',

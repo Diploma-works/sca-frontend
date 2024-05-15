@@ -1,50 +1,32 @@
-import { AppBar, Badge, Box, Button, IconButton, Stack, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, IconButton, Stack, Toolbar, Typography } from "@mui/material";
 
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
-
-// TODO: убрать?
-const NavbarButton = ({ children }) => {
-    return (
-        <Button color={"inherit"} sx={{
-            textTransform: 'none',
-            color: 'text.secondary',
-            fontSize: 'larger',
-            py: 0,
-        }}>
-            {children}
-        </Button>
-    )
-}
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 
 const Navbar = ({ mode, switchMode }) => {
     return (
-        <AppBar position="static" sx={{
-            bgcolor: 'background.paper',
-            backgroundImage: 'none',
-            boxShadow: 'none',
-        }}>
-            <Toolbar variant={"dense"} disableGutters sx={{ px: 1 }}>
+        <AppBar
+            position="static"
+            elevation={0}
+            sx={{
+                bgcolor: 'background.paper',
+                backgroundImage: 'none',
+            }}
+        >
+            <Toolbar variant="dense" disableGutters sx={{ px: 1 }}>
                 <Typography variant="h4" fontWeight="bold" color="primary">SCA</Typography>
-                <Box sx={{ flexGrow: 1 }}/>
+                <Box sx={{ flex: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <IconButton size="small">
-                        <Badge color="error" variant="dot">
-                            <NotificationsOutlinedIcon sx={{ color: 'text.disabled' }}/>
-                        </Badge>
-                    </IconButton>
-                    <IconButton size="small">
-                        <SettingsOutlinedIcon sx={{ color: 'text.disabled' }}/>
-                    </IconButton>
-                    <IconButton size="small" onClick={() => switchMode(mode)}>
-                        {mode === "light" ? <DarkModeOutlinedIcon sx={{ color: 'text.disabled' }}/> :
-                            <LightModeOutlinedIcon sx={{ color: 'text.disabled' }}/>}
+                    <IconButton size="small" onClick={switchMode}>
+                        {mode === "light" ? (
+                            <DarkModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
+                        ) : (
+                            <LightModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
+                        )}
                     </IconButton>
                     <IconButton sx={{ p: 0 }}>
-                        <AccountCircleIcon sx={{ color: 'text.primary', width: 34, height: 34 }}/>
+                        <AccountCircleIcon sx={{ color: 'text.primary', fontSize: 34 }}/>
                     </IconButton>
                 </Stack>
             </Toolbar>

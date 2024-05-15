@@ -1,9 +1,17 @@
 import { createTheme } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
-const light = createTheme({
+const globalStyles = createTheme({
     typography: {
         fontFamily: 'Montserrat',
+        button: {
+            lineHeight: 'normal',
+            textTransform: 'none',
+        },
+        subtitle2: {
+            lineHeight: 'normal',
+            fontWeight: 600,
+        }
     },
     palette: {
         mode: 'light',
@@ -22,33 +30,11 @@ const light = createTheme({
             secondary: '#5b5d6c',
             disabled: '#939ea8'
         },
-        altDivider: '#e0e0e0',
     }
 });
 
-export const lightTheme = createTheme(light, {
+const lightTheme = createTheme(globalStyles, {
     components: {
-        MuiCssBaseline: {
-            styleOverrides: {
-                body: {
-                    scrollbarColor: 'rgba(0, 0, 0, 0.16) transparent',
-                    '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
-                        backgroundColor: 'transparent',
-                        width: 10,
-                        height: 10,
-                    },
-                    '&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.24)',
-                    },
-                    '&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.16)',
-                    },
-                    '&::-webkit-scrollbar-corner, & *::-webkit-scrollbar-corner': {
-                        backgroundColor: 'transparent',
-                    },
-                },
-            },
-        },
         MuiTooltip: {
             defaultProps: {
                 enterDelay: 300,
@@ -58,16 +44,16 @@ export const lightTheme = createTheme(light, {
             styleOverrides: {
                 tooltip: {
                     margin: '0 !important',
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    paddingLeft: 8,
-                    paddingRight: 8,
-                    fontSize: '0.875rem',
-                    color: light.palette.text.primary,
+                    paddingLeft: globalStyles.spacing(1),
+                    paddingRight: globalStyles.spacing(1),
+                    paddingTop: globalStyles.spacing(4 / 8),
+                    paddingBottom: globalStyles.spacing(4 / 8),
                     border: '1px solid',
-                    borderColor: light.palette.divider,
+                    borderColor: globalStyles.palette.divider,
                     backgroundColor: 'white',
-                    boxShadow: `0 0 10px 2px ${light.palette.background.default}`,
+                    color: globalStyles.palette.text.primary,
+                    fontSize: globalStyles.typography.body2.fontSize,
+                    boxShadow: `0 0 10px 2px ${globalStyles.palette.background.default}`,
                 },
             },
         },
@@ -75,8 +61,8 @@ export const lightTheme = createTheme(light, {
             styleOverrides: {
                 paper: {
                     border: '1px solid',
-                    borderColor: light.palette.divider,
-                    boxShadow: `0 0 10px 2px ${light.palette.background.default}`,
+                    borderColor: globalStyles.palette.divider,
+                    boxShadow: `0 0 10px 2px ${globalStyles.palette.background.default}`,
                 },
                 list: {
                     padding: 0,
@@ -86,16 +72,16 @@ export const lightTheme = createTheme(light, {
         MuiMenuItem: {
             styleOverrides: {
                 root: {
+                    ...globalStyles.typography.button,
                     minHeight: 0,
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    paddingLeft: 8,
-                    paddingRight: 8,
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    lineHeight: 'normal',
+                    paddingLeft: globalStyles.spacing(1),
+                    paddingRight: globalStyles.spacing(1),
+                    paddingTop: globalStyles.spacing(4 / 8),
+                    paddingBottom: globalStyles.spacing(4 / 8),
                 }
             }
         }
     },
 });
+
+export default lightTheme;

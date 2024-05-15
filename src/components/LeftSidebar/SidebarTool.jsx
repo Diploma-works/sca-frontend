@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Box, Button, Divider, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Divider, Menu, MenuItem, Stack, SvgIcon, Tooltip, Typography, useTheme } from "@mui/material";
 
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
@@ -9,14 +9,14 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { useSidebarUpdateContext } from "../../contexts/SidebarContext";
 
 const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisableResizing, children }) => {
+    const theme = useTheme();
     const setActiveTool = useSidebarUpdateContext();
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
     const handleOptionsButtonClick = (e) => setAnchorEl(e.currentTarget);
-
     const handleHideButtonClick = () => setActiveTool(null);
-
+    const handleOptionClick = () => setDisableResizing((prevState) => !prevState);
     const handleClose = () => setAnchorEl(null);
 
     const actions = [
@@ -42,45 +42,25 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
     return (
         <Stack sx={{
             flex: 1,
-            overflow: 'hidden',
             borderRadius: 1,
+            overflow: 'hidden',
             bgcolor: 'background.paper',
         }}>
-            <Stack
-                direction="row"
-                sx={{
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                }}
-            >
-                <Typography
-                    noWrap
-                    variant={"button"}
-                    sx={{
-                        pl: 1.5,
-                        minWidth: 0,
-                        fontWeight: 600,
-                        lineHeight: 'normal',
-                        textTransform: 'none',
-                    }}
-                >
-                    {title}
-                </Typography>
+            <Stack direction="row" sx={{ pl: 1.5, alignItems: 'center', justifyContent: 'flex-end' }}>
+                <Typography noWrap variant="subtitle2">{title}</Typography>
                 <Box flex={1}/>
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{
-                        p: 1,
-                        color: 'text.secondary',
-                    }}
-                >
+                <Stack direction="row" spacing={1} sx={{ p: 1, color: 'text.secondary' }}>
                     {actions.map(({ title, icon, props }, index) => (
                         <Tooltip
                             key={index}
                             title={title}
                             placement="bottom"
-                            PopperProps={{ modifiers: [{ name: 'offset', options: { offset: [0, 8] } }] }}
+                            PopperProps={{
+                                modifiers: [{
+                                    name: 'offset',
+                                    options: { offset: [0, parseInt(theme.spacing(1))] }
+                                }]
+                            }}
                         >
                             <Button
                                 color="inherit"
@@ -105,7 +85,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                 marginThreshold={null}
                 onClose={handleClose}
             >
-                <MenuItem onClick={() => setDisableResizing((prevState) => !prevState)}>
+                <MenuItem onClick={handleOptionClick}>
                     <SvgIcon sx={{ fontSize: 18, mr: 1 }}>
                         {disableResizing && <CheckRoundedIcon/>}
                     </SvgIcon>
