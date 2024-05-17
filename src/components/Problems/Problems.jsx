@@ -14,40 +14,24 @@ const defaultProblems = [
             start: 1,
             end: 10
         },
-        description: "Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla",
+        description: "Импорты можно записать более оптимально",
+        solution: "Используйте сокращенную запись: import { Accordion, AccordionDetails, AccordionSummary, alpha, Box, Typography } from '@mui/material'"
+    },
+    {
+        lines: {
+            start: 12,
+            end: 19
+        },
+        description: "Пример краткого описания следующей проблемы",
         solution: "Do this, do that"
     },
     {
         lines: {
-            start: 11,
-            end: 12
+            start: 25,
+            end: 28
         },
-        description: "Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla",
-        solution: "Do this, do that"
-    },
-    {
-        lines: {
-            start: 13,
-            end: 13
-        },
-        description: "Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla",
-        solution: "Do this, do that"
-    },
-    {
-        lines: {
-            start: 14,
-            end: 18
-        },
-        description: "Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla Problem bla bla",
-        solution: "Do this, do that"
-    },
-    {
-        lines: {
-            start: 19,
-            end: 27
-        },
-        description: "Jesus! Problem bla bla",
-        solution: "Don't do that again"
+        description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        solution: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur."
     },
 ];
 

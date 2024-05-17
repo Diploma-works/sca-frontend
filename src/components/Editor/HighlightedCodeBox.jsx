@@ -64,7 +64,7 @@ const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => 
                     title={
                         <>
                             {problem.description}
-                            <Divider sx={{ borderColor: 'divider', my: 4 / 8 }}/>
+                            <Divider sx={{ my: 4 / 8 }}/>
                             {problem.solution}
                         </>
                     }
@@ -169,7 +169,13 @@ const HighlightedCodeBox = memo(({ language, children }) => {
                 renderer={renderer}
                 showLineNumbers
                 style={theme.palette.mode === "dark" ? darcula : prism}
-                lineNumberStyle={{ minWidth: '3em' }}
+                lineNumberStyle={{
+                    paddingLeft: theme.spacing(4 / 8),
+                    paddingRight: theme.spacing(4 / 8),
+                    marginRight: theme.spacing(4 / 8),
+                    borderRight: `1px solid ${theme.palette.divider}`,
+                    // backgroundColor: theme.palette.background.paper,
+                }}
                 customStyle={{
                     margin: 0,
                     padding: 0,
