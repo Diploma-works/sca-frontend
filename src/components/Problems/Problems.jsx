@@ -1,11 +1,12 @@
+import { useEffect } from "react";
+
 import { Accordion, AccordionDetails, AccordionSummary, alpha, Box, Typography } from "@mui/material";
 import { green, red } from "@mui/material/colors";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 
-import SidebarTool from "./LeftSidebar/SidebarTool";
-import ScrollableContainer from "./ScrollableContainer";
-import { useProblemsContext } from "../contexts/ProblemsContext";
-import { useEffect } from "react";
+import { useProblemsContext } from "./ProblemsContext";
+import { SidebarTool } from "../LeftSidebar";
+import ScrollableContainer from "../ScrollableContainer";
 
 const defaultProblems = [
     {

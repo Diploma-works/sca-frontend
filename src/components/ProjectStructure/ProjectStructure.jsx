@@ -11,10 +11,10 @@ import UnfoldLessRoundedIcon from "@mui/icons-material/UnfoldLessRounded";
 import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
 
 import ITEMS from "./items";
+import { SidebarTool } from "../LeftSidebar/";
+import { useTabsContext } from "../Editor";
+import { useProjectStructureContext } from "./ProjectStructureContext";
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
-import { useTabsContext } from "../../contexts/TabsContext";
-import { useProjectStructureContext } from "../../contexts/ProjectStructureContext";
-import SidebarTool from "../LeftSidebar/SidebarTool";
 import ScrollableContainer from "../ScrollableContainer";
 
 // TODO: упростить (пока нельзя, потому что path собирается здесь)

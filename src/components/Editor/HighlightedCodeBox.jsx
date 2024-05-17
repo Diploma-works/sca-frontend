@@ -9,8 +9,8 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { createElement, Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula, prism } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
+import { useProblemsStateContext } from "../Problems";
 import ScrollableContainer from "../ScrollableContainer";
-import { useProblemsStateContext } from "../../contexts/ProblemsContext";
 
 const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => {
     const popperRef = useRef(null);

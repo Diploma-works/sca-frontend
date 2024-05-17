@@ -7,27 +7,28 @@ import { HiOutlineHashtag } from "react-icons/hi";
 import { TbTextSize } from "react-icons/tb";
 import { amber, blue, cyan, deepPurple } from "@mui/material/colors";
 
-const reactIcon = <FaReact color={cyan[800]}/>;
-const imageIcon = <FaRegImage color={deepPurple[400]}/>;
-
 const fileTypeIcons = {
-    folder: <PiFolderSimpleDuotone/>,
     unknown: <BsTextLeft/>,
+    folder: <PiFolderSimpleDuotone/>,
+    image: <FaRegImage color={deepPurple[400]}/>,
     html: <IoCode color={amber[900]}/>,
     js: <BiLogoJavascript color={amber[400]}/>,
     ts: <BiLogoTypescript color={blue[500]}/>,
     json: <BsBraces color={amber[400]}/>,
     css: <HiOutlineHashtag color={cyan[600]}/>,
-    jsx: reactIcon,
-    tsx: reactIcon,
-    bmp: imageIcon,
-    png: imageIcon,
-    jpg: imageIcon,
-    jpeg: imageIcon,
-    ico: imageIcon,
+    jsx: <FaReact color={cyan[800]}/>,
+    tsx: <FaReact color={cyan[800]}/>,
     ttf: <TbTextSize/>,
 };
 
-const getFileType = (filename) => filename?.includes(".") ? filename.split(".").pop() : null;
+const imageFileTypes = ["bmp", "png", "jpg", "jpeg", "ico"];
+
+const getFileType = (filename) => {
+    if (!filename || !filename.includes(".")) {
+        return null;
+    }
+    const fileType = filename.split(".").pop();
+    return imageFileTypes.includes(fileType) ? "image" : fileType;
+}
 
 export { fileTypeIcons, getFileType }

@@ -3,8 +3,8 @@ import { createContext, useContext, useState } from "react";
 const ProblemsStateContext = createContext();
 const ProblemsUpdateContext = createContext();
 
-const ProblemsContextProvider = ({ defaultProblems, children }) => {
-    const [problems, setProblems] = useState(defaultProblems ?? null);
+const ProblemsContextProvider = ({ defaultProblems = null, children }) => {
+    const [problems, setProblems] = useState(defaultProblems);
 
     return (
         <ProblemsStateContext.Provider value={problems}>

@@ -13,11 +13,13 @@ import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordin
 
 import { Tabs, useTheme } from "@mui/material";
 
+import { useTabsContext } from "./TabsContext";
 import { EditorTabOverlay, SortableEditorTab } from "./EditorTab";
 
-const EditorTabsRoot = ({ tabs, moveTab, removeTab, activeTab, setActiveTab }) => {
+const EditorTabsRoot = () => {
     const theme = useTheme();
     const [draggedTab, setDraggedTab] = useState(null);
+    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext();
 
     const sensors = useSensors(
         useSensor(TouchSensor, {

@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useReducer } from "react";
 import { arrayMove } from "@dnd-kit/sortable";
 
-// TODO: разделить на два контекста?
-const TabsContext = createContext();
+const TabsStateContext = createContext();
+const TabsUpdateContext = createContext();
 
 const tabsReducer = (state, action) => {
     switch (action.type) {
@@ -30,8 +30,8 @@ const tabsReducer = (state, action) => {
     }
 };
 
-const TabsContextProvider = ({ tabs, activeTab, children }) => {
-    const [state, dispatch] = useReducer(tabsReducer, { tabs: tabs ?? [], activeTab: activeTab ?? null });
+const TabsContextProvider = ({ defaultTabs = [], defaultActiveTab = null, children }) => {
+    const [state, dispatch] = useReducer(tabsReducer, { tabs: defaultTabs, activeTab: defaultActiveTab });
 
     const addTab = useCallback((tab) => dispatch({ type: "ADD_TAB", tab }), [dispatch]);
     const moveTab = useCallback((from, to) => dispatch({ type: "MOVE_TAB", from, to }), [dispatch]);
@@ -39,25 +39,35 @@ const TabsContextProvider = ({ tabs, activeTab, children }) => {
     const setActiveTab = useCallback((activeTab) => dispatch({ type: "SET_ACTIVE_TAB", activeTab }), [dispatch]);
 
     return (
-        <TabsContext.Provider value={{
-            tabs: state.tabs,
-            addTab,
-            moveTab,
-            removeTab,
-            activeTab: state.activeTab,
-            setActiveTab
-        }}>
-            {children}
-        </TabsContext.Provider>
+        <TabsStateContext.Provider value={state}>
+            <TabsUpdateContext.Provider value={{
+                addTab,
+                moveTab,
+                removeTab,
+                setActiveTab
+            }}>
+                {children}
+            </TabsUpdateContext.Provider>
+        </TabsStateContext.Provider>
     );
 };
 
-const useTabsContext = () => {
-    const context = useContext(TabsContext);
+const useTabsStateContext = () => {
+    const context = useContext(TabsStateContext);
     if (!context) {
-        throw new Error("useTabsContext must be used within a TabsContextProvider");
+        throw new Error("useTabsStateContext must be used within a TabsContextProvider");
     }
     return context;
 };
 
-export { TabsContextProvider, useTabsContext };
+const useTabsUpdateContext = () => {
+    const context = useContext(TabsUpdateContext);
+    if (!context) {
+        throw new Error("useTabsUpdateContext must be used within a TabsContextProvider");
+    }
+    return context;
+};
+
+const useTabsContext = () => ({ ...useTabsStateContext(), ...useTabsUpdateContext() });
+
+export { TabsContextProvider, useTabsContext, useTabsStateContext, useTabsUpdateContext };

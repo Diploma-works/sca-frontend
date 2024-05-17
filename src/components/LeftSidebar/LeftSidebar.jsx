@@ -1,39 +1,15 @@
 import { cloneElement, useCallback, useState } from "react";
-
 import { Stack, useTheme } from "@mui/material";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
-import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 
-import { useSidebarContext } from "../../contexts/SidebarContext";
+import { useSidebarContext } from "./SidebarContext";
 import SidebarButton from "./SidebarButton";
-import HorizontallyResizableBox from "./HorizontallyResizableBox";
-import ProjectStructure from "../ProjectStructure";
-import SidebarTool from "./SidebarTool";
-import Problems from "../Problems";
-import useWindowSize from "./useWindowSize";
 
-const tools = [
-    {
-        title: "Файлы проекта",
-        icon: <FolderOutlinedIcon/>,
-        component: <ProjectStructure/>
-    },
-    {
-        title: "Статистика",
-        icon: <QueryStatsRoundedIcon/>,
-        component: <SidebarTool><div style={{ width: 187, height: 1 }}></div></SidebarTool>
-    },
-    {
-        title: "Проблемы",
-        icon: <ErrorOutlineRoundedIcon/>,
-        component: <Problems/>
-    },
-];
+import useWindowSize from "../../hooks/useWindowSize";
+import HorizontallyResizableBox from "../HorizontallyResizableBox";
 
 const MIN_WIDTH = 36;
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ tools }) => {
     const theme = useTheme();
 
     const [activeTool, setActiveTool] = useSidebarContext();

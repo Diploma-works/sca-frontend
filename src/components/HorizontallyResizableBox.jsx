@@ -1,5 +1,5 @@
 import { Box, Divider, Stack, useTheme } from "@mui/material";
-import useHorizontalResizing from "./useHorizontalResizing";
+import useHorizontalResizing from "../hooks/useHorizontalResizing";
 
 const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
     const theme = useTheme();

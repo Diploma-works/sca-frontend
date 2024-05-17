@@ -1,16 +1,16 @@
 import { useCallback, useMemo } from "react";
 
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { Breadcrumbs, Button, SvgIcon } from "@mui/material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
-import { useSidebarUpdateContext } from "../contexts/SidebarContext";
-import { useTabsContext } from "../contexts/TabsContext";
-import { useProjectStructureContext } from "../contexts/ProjectStructureContext";
-import { fileTypeIcons, getFileType } from "../utils/fileTypes";
+import { useTabsStateContext } from "./TabsContext";
+import { useSidebarUpdateContext } from "../LeftSidebar";
+import { useProjectStructureContext } from "../ProjectStructure";
+import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 
 const PathBreadcrumbs = () => {
     const setActiveTool = useSidebarUpdateContext();
-    const { activeTab } = useTabsContext();
+    const { activeTab } = useTabsStateContext();
     const { expandedItems, setExpandedItems, setSelectedItems } = useProjectStructureContext();
 
     const handleClick = useCallback((index, pathElements) => {
@@ -31,16 +31,14 @@ const PathBreadcrumbs = () => {
                 gap: 4 / 8,
                 minWidth: 0,
                 fontSize: 'small',
-                lineHeight: 'normal', // TODO: переопределить стили button в теме?
-                textTransform: 'none',
             }}
             onClick={() => handleClick(index, pathElements)}
         >
-            {index === pathElements.length - 1 &&
+            {index === pathElements.length - 1 && (
                 <SvgIcon sx={{ width: 16, height: 16 }}>
                     {fileTypeIcons[getFileType(pathElement.label)] ?? fileTypeIcons.unknown}
                 </SvgIcon>
-            }
+            )}
             {pathElement.label}
         </Button>
     ), [activeTab, handleClick]);

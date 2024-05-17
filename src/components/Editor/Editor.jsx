@@ -1,21 +1,30 @@
+import { useMemo } from "react";
+
 import { Box, Divider, List, ListItem, Stack, Typography } from "@mui/material";
 import FolderIcon from "@mui/icons-material/Folder";
 import WavingHandOutlinedIcon from "@mui/icons-material/WavingHandOutlined";
 
+import { useTabsStateContext } from "./TabsContext";
 import EditorTabsRoot from "./EditorTabsRoot";
-import { useTabsContext } from "../../contexts/TabsContext";
+import PathBreadcrumbs from "./PathBreadcrumbs";
 import HighlightedCodeBox from "./HighlightedCodeBox";
-import jsxCode from "./jsxCode";
-import PathBreadcrumbs from "../PathBreadcrumbs";
+
+import { getFileType } from "../../utils/fileTypes";
 import ScrollableContainer from "../ScrollableContainer";
 
+import jsxCode from "./jsxCode";
 
 const Editor = () => {
-    const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext(); // TODO: переместить часть внутрь EditorTabsRoot
+    const { tabs, activeTab } = useTabsStateContext();
 
-    const language = "jsx";
-    const code = jsxCode;
-    //const code = null; // TODO: разобраться, почему происходят тормоза
+    const fileType = useMemo(() => getFileType(activeTab?.label), [activeTab]);
+
+    const content = useMemo(() => {
+        if (fileType === "jsx") {
+            return jsxCode; // TODO: загружать с бэкенда
+        }
+        return activeTab?.label;
+    }, [activeTab]);
 
     return (
         <Stack sx={{
@@ -26,16 +35,14 @@ const Editor = () => {
         }}>
             {tabs.length ? (
                 <>
-                    <EditorTabsRoot
-                        tabs={tabs}
-                        moveTab={moveTab}
-                        removeTab={removeTab}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                    />
-                    <HighlightedCodeBox language={language}>
-                        {code}
-                    </HighlightedCodeBox>
+                    <EditorTabsRoot/>
+                    {fileType === "image" ? (
+                        <>Image!!!</>
+                    ) : (
+                        <HighlightedCodeBox language={fileType}>
+                            {content}
+                        </HighlightedCodeBox>
+                    )}
                     <Divider/>
                     <PathBreadcrumbs/>
                 </>

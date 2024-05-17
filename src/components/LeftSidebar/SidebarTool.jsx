@@ -6,7 +6,7 @@ import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
-import { useSidebarUpdateContext } from "../../contexts/SidebarContext";
+import { useSidebarUpdateContext } from "./SidebarContext";
 
 const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisableResizing, children }) => {
     const theme = useTheme();

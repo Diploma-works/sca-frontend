@@ -9,7 +9,6 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 
-// TODO: переопределить стили button в теме?
 const commonTabSx = {
     p: 4 / 8,
     minHeight: 0,
@@ -17,7 +16,6 @@ const commonTabSx = {
     flexDirection: 'row',
     lineHeight: 'normal',
     textWrap: 'nowrap',
-    textTransform: 'none',
     color: 'text.primary',
     bgcolor: 'background.paper',
 }
@@ -43,7 +41,8 @@ const EditorTabLabel = memo(({ label, handleClose }) => {
 const EditorTab = memo(({ value, label, removeTab, ...rest }) => {
     const theme = useTheme();
 
-    const handleClose = useCallback(() => {
+    const handleClose = useCallback((e) => {
+        e.stopPropagation(); // ОЧЕНЬ важная строка, если не вызвать эту функцию - контекст сломается!!!
         removeTab(value);
     }, [removeTab, value]);
 

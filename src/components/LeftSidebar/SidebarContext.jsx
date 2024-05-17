@@ -3,8 +3,8 @@ import { createContext, useContext, useState } from "react";
 const SidebarStateContext = createContext();
 const SidebarUpdateContext = createContext();
 
-const SidebarContextProvider = ({ defaultActiveTool, children }) => {
-    const [activeTool, setActiveTool] = useState(defaultActiveTool ?? null);
+const SidebarContextProvider = ({ defaultActiveTool = null, children }) => {
+    const [activeTool, setActiveTool] = useState(defaultActiveTool);
 
     return (
         <SidebarStateContext.Provider value={activeTool}>

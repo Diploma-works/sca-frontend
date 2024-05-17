@@ -1,13 +1,14 @@
-import { Skeleton, Stack } from "@mui/material";
-
-import Editor from "./Editor";
-import LeftSidebar from "./LeftSidebar";
-
-import { TabsContextProvider } from "../contexts/TabsContext";
-import { SidebarContextProvider } from "../contexts/SidebarContext";
-import { ProblemsContextProvider } from "../contexts/ProblemsContext";
-import { ProjectStructureContextProvider } from "../contexts/ProjectStructureContext";
 import { useEffect, useState } from "react";
+
+import { Skeleton, Stack } from "@mui/material";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
+
+import { Editor, TabsContextProvider } from "./Editor";
+import { Problems, ProblemsContextProvider } from "./Problems";
+import { LeftSidebar, SidebarContextProvider } from "./LeftSidebar";
+import { ProjectStructure, ProjectStructureContextProvider } from "./ProjectStructure";
 
 const defaultTabs = [
     {
@@ -116,6 +117,24 @@ const defaultTabs = [
     },
 ];
 
+const tools = [
+    {
+        title: "Файлы проекта",
+        icon: <FolderOutlinedIcon/>,
+        component: <ProjectStructure/>
+    },
+    {
+        title: "Статистика",
+        icon: <QueryStatsRoundedIcon/>,
+        component: <Problems/>
+    },
+    {
+        title: "Проблемы",
+        icon: <ErrorOutlineRoundedIcon/>,
+        component: <Problems/>
+    },
+];
+
 const Main = () => {
     const [isLoading, setIsLoading] = useState(true); // TODO: заменить?
 
@@ -124,7 +143,7 @@ const Main = () => {
     }, []);
 
     return (
-        <TabsContextProvider tabs={defaultTabs} activeTab={defaultTabs[0]}>
+        <TabsContextProvider defaultTabs={defaultTabs} defaultActiveTab={defaultTabs[0]}>
             <SidebarContextProvider>
                 <ProjectStructureContextProvider>
                     <ProblemsContextProvider>
@@ -144,7 +163,7 @@ const Main = () => {
                                 </>
                             ) : (
                                 <>
-                                    <LeftSidebar/>
+                                    <LeftSidebar tools={tools}/>
                                     <Editor/>
                                 </>
                             )}
