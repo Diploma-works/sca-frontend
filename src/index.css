@@ -1,55 +1,29 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
 @font-face {
-  src: url('./assets/fonts/Montserrat-Thin.ttf') format('truetype');
-  font-family: 'Montserrat';
-  font-weight: 100;
-}
-
-@font-face {
-  src: url('./assets/fonts/Montserrat-ExtraLight.ttf') format('truetype');
-  font-family: 'Montserrat';
-  font-weight: 200;
-}
-
-@font-face {
-  src: url('./assets/fonts/Montserrat-Light.ttf') format('truetype');
+  src: local('Montserrat-Light'), url('./assets/fonts/Montserrat-Light.ttf') format('truetype');
   font-family: 'Montserrat';
   font-weight: 300;
 }
 
 @font-face {
-  src: url('./assets/fonts/Montserrat-Regular.ttf') format('truetype');
+  src: local('Montserrat-Regular'), url('./assets/fonts/Montserrat-Regular.ttf') format('truetype');
   font-family: 'Montserrat';
   font-weight: 400;
 }
 
 @font-face {
-  src: url('./assets/fonts/Montserrat-Medium.ttf') format('truetype');
+  src: local('Montserrat-Medium'), url('./assets/fonts/Montserrat-Medium.ttf') format('truetype');
   font-family: 'Montserrat';
   font-weight: 500;
 }
 
 @font-face {
-  src: url('./assets/fonts/Montserrat-SemiBold.ttf') format('truetype');
+  src: local('Montserrat-SemiBold'), url('./assets/fonts/Montserrat-SemiBold.ttf') format('truetype');
   font-family: 'Montserrat';
   font-weight: 600;
 }
 
 @font-face {
-  src: url('./assets/fonts/Montserrat-Bold.ttf') format('truetype');
+  src: local('Montserrat-Bold'), url('./assets/fonts/Montserrat-Bold.ttf') format('truetype');
   font-family: 'Montserrat';
   font-weight: 700;
 }

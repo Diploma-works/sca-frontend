@@ -3,7 +3,19 @@ import { grey } from "@mui/material/colors";
 
 const globalStyles = createTheme({
     typography: {
-        fontFamily: 'Montserrat',
+        fontFamily: [
+            'Montserrat',
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+            'sans-serif',
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
         button: {
             lineHeight: 'normal',
             textTransform: 'none',
