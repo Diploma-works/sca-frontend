@@ -4,6 +4,8 @@ import { Button, IconButton, InputAdornment, Link, Stack, TextField, Typography 
 
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import useSignIn from "react-auth-kit/hooks/useSignIn";
+import { useNavigate } from "react-router-dom";
 
 const VisibilityToggleAdornment = ({ showPassword, setShowPassword }) => {
     const handleClick = () => setShowPassword((prevState) => !prevState);
@@ -17,13 +19,36 @@ const VisibilityToggleAdornment = ({ showPassword, setShowPassword }) => {
     );
 }
 
-const Auth = ({setUser}) => {
+const Auth = () => {
     const [signUpMode, setSignUpMode] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const signIn = useSignIn();
+
+    const navigate = useNavigate();
+
     const switchMode = () => setSignUpMode((prevState) => !prevState);
 
-    const handleClick = () => setUser(true); // TODO: удалить
+    // TODO: использовать нормальный запрос, а не хардкод
+    const handleClick = () => {
+        if (
+            signIn({
+                auth: {
+                    token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTcxNjI5NjI4NSwiZXhwIjoxNzE2Mjk5ODg1fQ.GlZInhtTZGeRU0sSd8bXTQC9OXhHRIB_rfj3oe8awgQ',
+                    type: 'Bearer'
+                },
+                userState: {
+                    sub: "1234567890",
+                    name: "John Doe",
+                    admin: true,
+                }
+            })) {
+            console.log("yup")
+            navigate("/sca-frontend");
+        } else {
+            console.log("yuck :(")
+        }
+    }
 
     return (
         <Stack sx={{
