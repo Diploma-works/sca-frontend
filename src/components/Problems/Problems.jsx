@@ -35,7 +35,7 @@ const defaultProblems = [
     },
 ];
 
-const Problems = ({ title, disableResizing, setDisableResizing }) => {
+const Problems = (props) => {
     const [problems, setProblems] = useProblemsContext();
 
     useEffect(() => {
@@ -43,11 +43,7 @@ const Problems = ({ title, disableResizing, setDisableResizing }) => {
     }, [setProblems]);
 
     return (
-        <SidebarTool
-            title={title}
-            disableResizing={disableResizing}
-            setDisableResizing={setDisableResizing}
-        >
+        <SidebarTool {...props}>
             <ScrollableContainer>
                 <Box sx={{ overflowX: 'hidden', pb: 1 }}>
                     {problems?.map(({ lines, description, solution }, index) => (

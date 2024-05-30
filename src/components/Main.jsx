@@ -9,6 +9,7 @@ import { Editor, TabsContextProvider } from "./Editor";
 import { Problems, ProblemsContextProvider } from "./Problems";
 import { LeftSidebar, SidebarContextProvider } from "./LeftSidebar";
 import { ProjectStructure, ProjectStructureContextProvider } from "./ProjectStructure";
+import { Statistics } from "./Statistics";
 
 const defaultTabs = [
     {
@@ -126,7 +127,7 @@ const tools = [
     {
         title: "Статистика",
         icon: <QueryStatsRoundedIcon/>,
-        component: <Problems/>
+        component: <Statistics/>
     },
     {
         title: "Проблемы",

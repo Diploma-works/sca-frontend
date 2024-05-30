@@ -87,7 +87,7 @@ const ProjectStructureItem = ({ itemId, label, path, children }) => {
     );
 };
 
-const ProjectStructure = memo(({ title, disableResizing, setDisableResizing }) => {
+const ProjectStructure = memo((props) => {
     const [items, setItems] = useState(ITEMS)
     const { expandedItems, setExpandedItems, selectedItems, setSelectedItems } = useProjectStructureContext();
     const treeViewApiRef = useTreeViewApiRef();
@@ -140,12 +140,7 @@ const ProjectStructure = memo(({ title, disableResizing, setDisableResizing }) =
     }
 
     return (
-        <SidebarTool
-            title={title}
-            additionalActions={additionalActions}
-            disableResizing={disableResizing}
-            setDisableResizing={setDisableResizing}
-        >
+        <SidebarTool {...props} additionalActions={additionalActions}>
             <ScrollableContainer style={{ flex: 1 }}>
                 <Box display="flex">
                     <RichTreeView

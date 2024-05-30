@@ -42,7 +42,7 @@ const useHorizontalResizing = (prevWidth, updatePrevWidth) => {
 
     /* Handlers for touch events */
     const handleTouchStart = useCallback((e) => {
-        e.preventDefault();
+        // e.preventDefault(); TODO: понять, нужно ли это
         startResizing(e.touches[0]);
     }, [startResizing]);
 
