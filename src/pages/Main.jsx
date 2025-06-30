@@ -4,12 +4,14 @@ import { Skeleton, Stack } from "@mui/material";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
+import WysiwygIcon from '@mui/icons-material/Wysiwyg';
 
-import { Editor, TabsContextProvider } from "./Editor";
-import { Problems, ProblemsContextProvider } from "./Problems";
-import { LeftSidebar, SidebarContextProvider } from "./LeftSidebar";
-import { ProjectStructure, ProjectStructureContextProvider } from "./ProjectStructure";
-import { Statistics } from "./Statistics";
+import { Editor, TabsContextProvider } from "../components/Editor";
+import { Problems, ProblemsContextProvider } from "../components/Problems";
+import { LeftSidebar, SidebarContextProvider } from "../components/LeftSidebar";
+import { ProjectStructure, ProjectStructureContextProvider } from "../components/ProjectStructure";
+import { Statistics } from "../components/Statistics";
+import SystemDesign from "../components/SystemDesign/SystemDesign"
 
 const defaultTabs = [
     {
@@ -121,19 +123,24 @@ const defaultTabs = [
 const tools = [
     {
         title: "Файлы проекта",
-        icon: <FolderOutlinedIcon/>,
-        component: <ProjectStructure/>
+        icon: <FolderOutlinedIcon />,
+        component: <ProjectStructure />
     },
     {
         title: "Статистика",
-        icon: <QueryStatsRoundedIcon/>,
-        component: <Statistics/>
+        icon: <QueryStatsRoundedIcon />,
+        component: <Statistics />
     },
     {
         title: "Проблемы",
-        icon: <ErrorOutlineRoundedIcon/>,
-        component: <Problems/>
+        icon: <ErrorOutlineRoundedIcon />,
+        component: <Problems />
     },
+    {
+        title: 'Проектирование системы',
+        icon: <WysiwygIcon />,
+        component: <SystemDesign />
+    }
 ];
 
 const Main = () => {
@@ -159,13 +166,13 @@ const Main = () => {
                         >
                             {isLoading ? (
                                 <>
-                                    <Skeleton animation="wave" sx={{ width: 36, height: 100, transform: 'none' }}/>
-                                    <Skeleton animation="wave" sx={{ flex: 1, transform: 'none' }}/>
+                                    <Skeleton animation="wave" sx={{ width: 36, height: 100, transform: 'none' }} />
+                                    <Skeleton animation="wave" sx={{ flex: 1, transform: 'none' }} />
                                 </>
                             ) : (
                                 <>
-                                    <LeftSidebar tools={tools}/>
-                                    <Editor/>
+                                    <LeftSidebar tools={tools} />
+                                    <Editor />
                                 </>
                             )}
                         </Stack>

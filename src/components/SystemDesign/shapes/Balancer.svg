@@ -1,0 +1,14 @@
+<svg width="150" height="64" viewBox="0 0 152 66"
+    xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <foreignObject x="1" y="1" width="150" height="64" class="resizable divider-shape">
+            <div class="svg-text-field svg-background-light">
+            </div>
+            <div class="divider-shape-header svg-background svg-background-divider-label">
+                <p class="svg-p-text svg-flip-text">
+
+                </p>
+            </div>
+        </foreignObject>
+    </g>
+</svg>

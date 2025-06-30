@@ -1,0 +1,14 @@
+<svg width="56" height="22" viewBox="0 0 56 22" fill="none"
+  xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <foreignObject x="0" y="0" class='resizable' width="56" height="22">
+      <div class="svg-hint">
+      </div>
+      <div style="padding: 2px 4px" class="svg-text-field svg-hint-text">
+        <p class="svg-p-text">
+            Текст
+        </p>
+      </div>
+    </foreignObject>
+  </g>
+</svg>

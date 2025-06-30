@@ -1,0 +1,6 @@
+<svg width="84" height="84" viewBox="0 0 84 84">
+    <g>
+        <circle class="svg-background" r="40" cx="42" cy="42" stroke="#B8BEC2" fill="white" stroke-width="2"/>
+        <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">Начало</text>
+    </g>
+</svg>
