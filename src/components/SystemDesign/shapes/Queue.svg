@@ -1,6 +1,9 @@
-<svg width="84" height="84" viewBox="0 0 84 84">
+<svg width="146" height="98" viewBox="0 0 146 98" fill="none">
     <g>
-        <circle class="svg-background" r="36" cx="42" cy="42" fill="white" stroke="#B8BEC2" stroke-width="6"/>
-        <text x="50%" y="50%" class="bold-svg-text" text-anchor="middle" dominant-baseline="middle">Конец</text>
+        <path d="M130.288 97H15.2663C7.38416 97 1 75.5 1 49C1 22.5 7.38416 1 15.2663 1H130.288C138.17 1 145 22.5 145 49C145 75.5 138.17 97 130.288 97Z" fill="black" stroke="#4b4b4b"/>
+        <path d="M130.288 97C122.406 97 116.022 75.5 116.022 49C116.022 22.5 122.406 1 130.288 1" fill="black"/>
+        <path d="M130.288 97C122.406 97 116.022 75.5 116.022 49C116.022 22.5 122.406 1 130.288 1" stroke="#4b4b4b" stroke-width="1.4"/>
+        <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">Queue</text>
     </g>
 </svg>
+

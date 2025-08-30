@@ -1,26 +1,6 @@
-<svg width="150" height="64" viewBox="0 0 150 64"
-    xmlns="http://www.w3.org/2000/svg">
+<svg width="144" height="96" viewBox="0 0 144 96">
     <g>
-        <foreignObject x="0" y="0" width="150" height="64" class="resizable task-shape-container" stroke-width='1.8' stroke='var(--v-token-content-primary-b-hover)'>
-            <div class="svg-text-field px-4 pt-7 pb-4 svg-background svg-background-task transition-fix">
-                <p class="svg-p-text">Описание</p>
-            </div>
-            <div class="svg-text-field px-4 pt-3">
-                <p class="bold-svg-text">
-                    Действие (задача)
-                </p>
-            </div>
-            <div class="svg-time-chip">
-                <div>
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8.99935 15.6667C10.7675 15.6667 12.4632 14.9644 13.7134 13.7141C14.9636 12.4639 15.666 10.7682 15.666 9.00008C15.666 7.23197 14.9636 5.53628 13.7134 4.28604C12.4632 3.03579 10.7675 2.33341 8.99935 2.33341C7.23124 2.33341 5.53555 3.03579 4.2853 4.28604C3.03506 5.53628 2.33268 7.23197 2.33268 9.00008C2.33268 10.7682 3.03506 12.4639 4.2853 13.7141C5.53555 14.9644 7.23124 15.6667 8.99935 15.6667ZM8.99935 0.666748C10.0937 0.666748 11.1773 0.882296 12.1884 1.30109C13.1994 1.71987 14.1181 2.3337 14.8919 3.10752C15.6657 3.88135 16.2796 4.80001 16.6983 5.81105C17.1171 6.8221 17.3327 7.90573 17.3327 9.00008C17.3327 11.2102 16.4547 13.3298 14.8919 14.8926C13.3291 16.4554 11.2095 17.3334 8.99935 17.3334C4.39102 17.3334 0.666016 13.5834 0.666016 9.00008C0.666016 6.78994 1.54399 4.67033 3.10679 3.10752C4.6696 1.54472 6.78921 0.666748 8.99935 0.666748ZM9.41602 4.83342V9.20842L13.166 11.4334L12.541 12.4584L8.16602 9.83342V4.83342H9.41602Z" fill="white"/>
-                    </svg>
-                    <p class="svg-p-time">
-                        1ч 10 мин
-                    </p>
-                </div>
-            </div>
-        </foreignObject>
+      <rect x="0.5" y="0.5" width="143" height="95" rx="7.5" fill="black" stroke-width="2" stroke="rgb(75, 75, 75)"/>
+      <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">Service</text>
     </g>
 </svg>

@@ -47,3 +47,11 @@
   --os-handle-bg-hover: rgba(255, 255, 255, 0.24);
   --os-handle-bg-active: rgba(255, 255, 255, 0.32);
 }
+
+.svg-background{
+    background-color: red !important;
+}
+
+.bold-svg-text{
+  fill: white;
+}

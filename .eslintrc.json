@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "react-app",
+    "react-app/jest"
+  ],
+  "rules": {
+    "react/no-webpack-loader-syntax": "off",
+    "import/no-webpack-loader-syntax": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts?(x)"
+      ],
+      "rules": {
+        "react/no-webpack-loader-syntax": "off",
+        "import/no-webpack-loader-syntax": "off"
+      }
+    }
+  ]
+}
