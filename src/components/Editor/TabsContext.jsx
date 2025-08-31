@@ -1,5 +1,11 @@
 import { createContext, useCallback, useContext, useReducer } from "react";
-import { arrayMove } from "@dnd-kit/sortable";
+// Custom array move function to replace @dnd-kit/sortable
+const arrayMove = (array, from, to) => {
+    const newArray = [...array];
+    const [removed] = newArray.splice(from, 1);
+    newArray.splice(to, 0, removed);
+    return newArray;
+};
 
 const TabsStateContext = createContext();
 const TabsUpdateContext = createContext();

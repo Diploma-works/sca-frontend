@@ -10,7 +10,9 @@
       "mcp__serena__get_symbols_overview",
       "mcp__serena__replace_regex",
       "mcp__serena__create_text_file",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "mcp__serena__replace_symbol_body",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []

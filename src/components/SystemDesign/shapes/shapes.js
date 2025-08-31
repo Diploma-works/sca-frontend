@@ -46,7 +46,7 @@ export const shapesRaw = {
     BALANCER: {
         component: Balancer,
         size: {width: 144, height: 96},
-        tooltip: "Балансировщтк нагрузки",
+        tooltip: "Балансировщик нагрузки",
     },
 };
 
@@ -156,9 +156,6 @@ class ServiceShape extends dia.Element {
                     ...makeLabelOptions("Service"),
                     x: 72,
                 },
-                options: {
-                    resizable: true,
-                },
             },
         };
     }
@@ -171,12 +168,12 @@ class BalancerShape extends dia.Element {
         return {
             ...super.defaults,
             type: BLOCK_TYPES.BALANCER,
-            size: {width: 576, height: 384},
+            size: shapesRaw.BALANCER.size,
             attrs: {
                 label: {
                     ...makeLabelOptions("Balancer"),
                     y: 18,
-                    x: 288,
+                    x: 70,
                 },
                 options: {
                     resizable: true,

@@ -22,8 +22,6 @@ const TEXT_INPUTS = [
 ];
 
 const SystemDesign = (props) => {
-
-
     const canvasRef = useRef();
     const paperRef = useRef();
     const graphRef = useRef();
@@ -106,7 +104,7 @@ const SystemDesign = (props) => {
                         ))}
                     </Grid>
                     <ShapesSelector canvasRef={canvasRef} onCreateShape={createShape}/>
-                    <Scheme canvasRef={canvasRef} />
+                    <Scheme canvasRef={canvasRef}/>
                 </Box>
             </ScrollableContainer>
         </SidebarTool>

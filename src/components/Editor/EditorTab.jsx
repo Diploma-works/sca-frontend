@@ -1,12 +1,6 @@
 import { memo, useCallback } from "react";
-
-import { DragOverlay } from "@dnd-kit/core";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-
 import { Box, IconButton, SvgIcon, Tab, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-
 import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
 
 const commonTabSx = {
@@ -91,61 +85,4 @@ const EditorTab = memo(({ value, label, removeTab, ...rest }) => {
     );
 });
 
-const SortableEditorTab = (props) => {
-    const theme = useTheme();
-    const {
-        isDragging,
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-    } = useSortable({ id: props.value });
-
-    return (
-        <Box
-            ref={setNodeRef}
-            {...attributes}
-            {...listeners}
-            sx={{
-                transition,
-                borderRadius: 1,
-                transform: CSS.Transform.toString(transform),
-                mb: `calc(${theme.spacing(4 / 8)} + 1px)`,
-                ...(isDragging ? {
-                    zIndex: 0,
-                    bgcolor: 'action.focus',
-                    '.MuiTab-root': {
-                        opacity: 0,
-                    }
-                } : {
-                    zIndex: 1,
-                }),
-            }}
-        >
-            <EditorTab {...props}/>
-        </Box>
-    );
-}
-
-const EditorTabOverlay = ({ draggedTab }) => {
-    const theme = useTheme();
-
-    return (
-        <DragOverlay>
-            {draggedTab && (
-                <Tab
-                    label={<EditorTabLabel label={draggedTab.label}/>}
-                    sx={{
-                        ...commonTabSx,
-                        opacity: 1,
-                        cursor: 'grab',
-                        boxShadow: `0 0 10px 2px ${theme.palette.background.default}`,
-                    }}
-                />
-            )}
-        </DragOverlay>
-    );
-};
-
-export { EditorTab, SortableEditorTab, EditorTabOverlay };
+export { EditorTab };
