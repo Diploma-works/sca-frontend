@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база данных
+  postgres:
+    image: postgres:15
+    container_name: sca-postgres-db
+    environment:
+      POSTGRES_DB: sca_ide
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sca-network
+    restart: unless-stopped
+
+  # Redis для кэширования
+  redis:
+    image: redis:7-alpine
+    container_name: sca-redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sca-network
+    restart: unless-stopped
+
+  # SonarQube для анализа кода
+  sonarqube:
+    image: sonarqube:community
+    container_name: sca-sonarqube-analysis
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - sca-network
+    restart: unless-stopped
+
+  # Backend приложение
+  backend:
+    build: ./sca-backend
+    container_name: sca-backend-api
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      DB_HOST: postgres
+      REDIS_HOST: redis
+      DOCKER_HOST: tcp://host.docker.internal:2375
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - sonarqube
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - workspace_data:/app/workspaces
+    networks:
+      - sca-network
+    restart: unless-stopped
+
+  # Frontend приложение
+  frontend:
+    build: ./sca-frontend
+    container_name: sca-frontend-app
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080/api
+      - REACT_APP_WS_URL=ws://localhost:8080/ws
+      - REACT_APP_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - sca-network
+    restart: unless-stopped
+
+  # Nginx для проксирования
+  nginx:
+    image: nginx:alpine
+    container_name: sca-nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./sca-backend/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./sca-backend/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - sca-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  workspace_data:
+
+networks:
+  sca-network:
+    driver: bridge 
