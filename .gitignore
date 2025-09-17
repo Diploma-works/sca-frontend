@@ -4,4 +4,3 @@ user-data/*
 sca-backend/target/*
 sca-backend/.idea/*
 sca-backend/.env
-sca-backend/.mvn/*
