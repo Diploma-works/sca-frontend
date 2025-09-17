@@ -3,14 +3,12 @@ FROM maven:3.9.4-eclipse-temurin-17 AS builder
 
 WORKDIR /build
 
-COPY .mvn .mvn
-COPY mvnw .
 COPY pom.xml .
 
-RUN ./mvnw dependency:go-offline
+RUN mvn dependency:go-offline
 
 COPY src src
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Финальный рантайм-образ
 FROM eclipse-temurin:17-jdk-alpine
