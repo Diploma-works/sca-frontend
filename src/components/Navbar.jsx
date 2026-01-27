@@ -15,18 +15,22 @@ const Navbar = ({ mode, switchMode }) => {
             }}
         >
             <Toolbar variant="dense" disableGutters sx={{ px: 1 }}>
-                <Typography variant="h4" fontWeight="bold" color="primary">SCA</Typography>
-                <Box sx={{ flex: 1 }}/>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography variant="h4" fontWeight="bold" color="primary">SCA</Typography>
+
+                </Stack>
+                <Box sx={{ flex: 1 }} />
                 <Stack direction="row" spacing={1} alignItems="center">
+
                     <IconButton size="small" onClick={switchMode}>
                         {mode === "light" ? (
-                            <DarkModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
+                            <DarkModeOutlinedIcon sx={{ color: 'text.secondary' }} />
                         ) : (
-                            <LightModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
+                            <LightModeOutlinedIcon sx={{ color: 'text.secondary' }} />
                         )}
                     </IconButton>
                     <IconButton sx={{ p: 0 }}>
-                        <AccountCircleIcon sx={{ color: 'text.primary', fontSize: 34 }}/>
+                        <AccountCircleIcon sx={{ color: 'text.primary', fontSize: 34 }} />
                     </IconButton>
                 </Stack>
             </Toolbar>

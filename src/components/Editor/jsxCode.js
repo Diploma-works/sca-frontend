@@ -1,9 +1,5 @@
 const jsxCode = `import { memo, useCallback } from "react";
 
-import { DragOverlay } from "@dnd-kit/core";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-
 import { Box, IconButton, SvgIcon, Tab, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 

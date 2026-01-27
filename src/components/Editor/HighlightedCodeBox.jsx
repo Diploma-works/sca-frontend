@@ -6,7 +6,7 @@ import { yellow } from "@mui/material/colors";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
-import { createElement, Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { createElement, PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import { darcula, prism } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 import { useProblemsStateContext } from "../Problems";
@@ -64,7 +64,7 @@ const CodeLine = memo(({ node, stylesheet, useInlineStyles, info, problem }) => 
                     title={
                         <>
                             {problem.description}
-                            <Divider sx={{ my: 4 / 8 }}/>
+                            <Divider sx={{ my: 4 / 8 }} />
                             {problem.solution}
                         </>
                     }
@@ -160,7 +160,7 @@ const HighlightedCodeBox = memo(({ language, children }) => {
                             display: 'flex',
                         }}
                     >
-                        <MoreVertRoundedIcon sx={{ width: 16, height: 16 }}/>
+                        <MoreVertRoundedIcon sx={{ width: 16, height: 16 }} />
                     </Button>
                 </Box>
             </Tooltip>
@@ -201,13 +201,13 @@ const HighlightedCodeBox = memo(({ language, children }) => {
             >
                 <MenuItem onClick={() => setShowProblems((prevState) => !prevState)}>
                     <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
-                        {showProblems && <CheckRoundedIcon/>}
+                        {showProblems && <CheckRoundedIcon />}
                     </SvgIcon>
                     Подсвечивать проблемы
                 </MenuItem>
                 <MenuItem onClick={() => setShowInfo((prevState) => !prevState)}>
                     <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>
-                        {showInfo && <CheckRoundedIcon/>}
+                        {showInfo && <CheckRoundedIcon />}
                     </SvgIcon>
                     Показывать авторов строк
                 </MenuItem>

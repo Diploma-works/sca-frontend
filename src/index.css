@@ -47,3 +47,56 @@
   --os-handle-bg-hover: rgba(255, 255, 255, 0.24);
   --os-handle-bg-active: rgba(255, 255, 255, 0.32);
 }
+
+:root {
+  --svg-shape-fill: black;
+  --svg-shape-stroke: #4b4b4b;
+  --svg-text-fill: white;
+  --svg-accent-fill: #4b4b4b;
+  --svg-highlight-fill: white;
+  --svg-content-fill: #0f0f0f;
+  --svg-link-stroke: #ffffff;
+}
+
+[data-theme="light"] {
+  --svg-shape-fill: white;
+  --svg-shape-stroke: #9e9e9e;
+  --svg-text-fill: #283646;
+  --svg-accent-fill: #9e9e9e;
+  --svg-highlight-fill: white;
+  --svg-content-fill: #d0d0d0;
+  --svg-link-stroke: #000000;
+}
+
+.svg-shape-fill {
+  fill: var(--svg-shape-fill);
+}
+
+.svg-shape-stroke {
+  stroke: var(--svg-shape-stroke);
+}
+
+.svg-accent-fill {
+  fill: var(--svg-accent-fill);
+}
+
+.svg-highlight-fill {
+  fill: var(--svg-highlight-fill);
+}
+
+.svg-content-fill {
+  fill: var(--svg-content-fill);
+}
+
+.bold-svg-text {
+  fill: var(--svg-text-fill);
+}
+
+.tool-button-bg {
+  fill: var(--svg-shape-fill);
+}
+
+.joint-link path.connection,
+.joint-link path.connection-wrap {
+  stroke: var(--svg-link-stroke) !important;
+}

@@ -1,0 +1,6 @@
+<svg width="120" height="60" viewBox="0 0 120 60">
+    <g>
+        <path class="svg-shape-fill svg-shape-stroke" d="M4,0.5h112c1.9,0,3.5,1.6,3.5,3.5v40c0,1.9-1.6,3.5-3.5,3.5H20l-12,12V47.5H4c-1.9,0-3.5-1.6-3.5-3.5V4C0.5,2.1,2.1,0.5,4,0.5z" stroke-width="1"/>
+        <text x="60" y="24" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">Comment</text>
+    </g>
+</svg>
