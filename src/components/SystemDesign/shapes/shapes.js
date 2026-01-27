@@ -8,6 +8,10 @@ import {ReactComponent as Service} from "./Sevice.svg";
 import ServiceRaw from "!raw-loader!./Sevice.svg"
 import {ReactComponent as Balancer} from "./Balancer.svg";
 import BalancerRaw from "!raw-loader!./Balancer.svg"
+import {ReactComponent as CDN} from "./CDN.svg";
+import CDNRAw from "!raw-loader!./CDN.svg"
+import {ReactComponent as Gateway} from "./Gateway.svg";
+import GatewayRaw from "!raw-loader!./Gateway.svg"
 
 import {dia} from "@joint/core";
 import {util} from "@joint/core";
@@ -18,6 +22,8 @@ const BLOCK_TYPES = {
     QUEUE: "custom.QUEUE",
     SERVICE: "custom.SERVICE",
     BALANCER: "custom.BALANCER",
+    CDN: "custom.CDN",
+    Gateway: "custom.GATEWAY",
 };
 
 const shapes = {};
@@ -47,6 +53,16 @@ export const shapesRaw = {
         component: Balancer,
         size: {width: 144, height: 96},
         tooltip: "Балансировщик нагрузки",
+    },
+    CDN: {
+        component: CDN,
+        size: {width: 96, height: 96},
+        tooltip: "Сеть доставки контента",
+    },
+    GATEWAY: {
+        component: Gateway,
+        size: {width: 96, height: 96},
+        tooltip: "Шлюз",
     },
 };
 
