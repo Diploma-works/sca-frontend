@@ -5,13 +5,14 @@ const Scheme = ({ canvasRef }) => {
     return (
         <Box
             ref={canvasRef}
-            sx={{
+            sx={(theme) => ({
                 width: '100%',
                 height: '600px',
-                border: '1px solid #4b4b4b',
+                border: '1px solid',
+                borderColor: 'divider',
                 position: 'relative',
-                backgroundColor: '#ffffff'
-            }}
+                backgroundColor: theme.palette.mode === 'dark' ? '#1a1a1a' : '#e8e8e8'
+            })}
         />
     );
 };

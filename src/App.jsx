@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import "overlayscrollbars/overlayscrollbars.css";
 
@@ -28,6 +28,10 @@ const App = () => {
 
     const theme = mode === "light" ? lightTheme : darkTheme;
     const switchMode = () => setMode(prevState => prevState === "light" ? "dark" : "light");
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', mode);
+    }, [mode]);
 
     const router = createBrowserRouter([
         {

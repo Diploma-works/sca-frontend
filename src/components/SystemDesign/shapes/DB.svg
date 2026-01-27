@@ -1,8 +1,10 @@
 <svg width="98" height="98" viewBox="0 0 98 98">
     <g>
-      <path d="M97 17V81C97 89.84 75.5 97 49 97C22.5 97 1 89.84 1 81V17C1 8.16 22.5 1 49 1C75.5 1 97 8.16 97 17Z" stroke-width="2" fill="black" stroke="rgb(75, 75, 75)"/>
-      <path d="M97 17C97 25.84 75.5 33 49 33C22.5 33 1 25.84 1 17" fill="black"/>
-      <path d="M97 17C97 25.84 75.5 33 49 33C22.5 33 1 25.84 1 17" stroke="rgb(75, 75, 75)" stroke-width="2"/>
-      <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">DB</text>
+        <path class="svg-shape-fill svg-shape-stroke"
+              d="M97 17V81C97 89.84 75.5 97 49 97C22.5 97 1 89.84 1 81V17C1 8.16 22.5 1 49 1C75.5 1 97 8.16 97 17Z"
+              stroke-width="2"/>
+        <path class="svg-shape-fill" d="M97 17C97 25.84 75.5 33 49 33C22.5 33 1 25.84 1 17"/>
+        <path class="svg-shape-stroke" d="M97 17C97 25.84 75.5 33 49 33C22.5 33 1 25.84 1 17" stroke-width="2" fill="none"/>
+        <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">DB</text>
     </g>
 </svg>

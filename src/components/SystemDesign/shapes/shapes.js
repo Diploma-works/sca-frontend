@@ -12,6 +12,8 @@ import {ReactComponent as CDN} from "./CDN.svg";
 import CDNRAw from "!raw-loader!./CDN.svg"
 import {ReactComponent as Gateway} from "./Gateway.svg";
 import GatewayRaw from "!raw-loader!./Gateway.svg"
+import {ReactComponent as Comment} from "./Comment.svg";
+import CommentRaw from "!raw-loader!./Comment.svg"
 
 import {dia} from "@joint/core";
 import {util} from "@joint/core";
@@ -24,6 +26,7 @@ const BLOCK_TYPES = {
     BALANCER: "custom.BALANCER",
     CDN: "custom.CDN",
     Gateway: "custom.GATEWAY",
+    COMMENT: "custom.COMMENT",
 };
 
 const shapes = {};
@@ -63,6 +66,11 @@ export const shapesRaw = {
         component: Gateway,
         size: {width: 96, height: 96},
         tooltip: "Шлюз",
+    },
+    COMMENT: {
+        component: Comment,
+        size: {width: 120, height: 60},
+        tooltip: "Комментарий",
     },
 };
 
@@ -186,19 +194,119 @@ class BalancerShape extends dia.Element {
             type: BLOCK_TYPES.BALANCER,
             size: shapesRaw.BALANCER.size,
             attrs: {
-                label: {
-                    ...makeLabelOptions("Balancer"),
-                    y: 18,
-                    x: 70,
+                body: {
+                    refWidth: '100%',
+                    refHeight: '100%',
                 },
-                options: {
-                    resizable: true,
+                background: {
+                    refWidth: '100%',
+                    refHeight: '100%',
+                    rx: 7.25,
+                    ry: 7.25,
+                    class: 'svg-shape-fill',
+                },
+                content: {
+                    refWidth: '100%',
+                    refHeight: -33.5,
+                    y: 33.5,
+                    rx: 7.25,
+                    ry: 7.25,
+                    class: 'svg-content-fill',
+                },
+                border: {
+                    refWidth: '100%',
+                    refHeight: '100%',
+                    rx: 7.25,
+                    ry: 7.25,
+                    class: 'svg-shape-stroke',
+                    fill: 'none',
+                    strokeWidth: 1.5,
+                },
+                divider: {
+                    refWidth: '100%',
+                    y: 32,
+                    height: 1.5,
+                    class: 'svg-accent-fill',
+                },
+                label: {
+                    textVerticalAnchor: 'middle',
+                    textAnchor: 'middle',
+                    refX: '50%',
+                    y: 18,
+                    class: 'bold-svg-text',
+                    text: 'Balancer',
                 },
             },
         };
     }
 
-    markup = util.svg`${formatShapeString(BalancerRaw)}`;
+    markup = util.svg`
+        <g @selector="body">
+            <rect @selector="background"/>
+            <rect @selector="content"/>
+            <rect @selector="border"/>
+            <rect @selector="divider"/>
+            <text @selector="label"/>
+        </g>
+    `;
+}
+
+class CDNShape extends dia.Element {
+    defaults() {
+        return {
+            ...super.defaults,
+            type: BLOCK_TYPES.CDN,
+            size: shapesRaw.CDN.size,
+            attrs: {
+                label: {
+                    ...makeLabelOptions("CDN"),
+                    y: 18,
+                },
+                options: {},
+            },
+        };
+    }
+
+    markup = util.svg`${formatShapeString(CDNRAw)}`;
+}
+
+class GatewayShape extends dia.Element {
+    defaults() {
+        return {
+            ...super.defaults,
+            type: BLOCK_TYPES.Gateway,
+            size: shapesRaw.GATEWAY.size,
+            attrs: {
+                label: {
+                    ...makeLabelOptions("Gateway"),
+                    y: 18,
+                },
+                options: {},
+            },
+        };
+    }
+
+    markup = util.svg`${formatShapeString(GatewayRaw)}`;
+}
+
+class CommentShape extends dia.Element {
+    defaults() {
+        return {
+            ...super.defaults,
+            type: BLOCK_TYPES.COMMENT,
+            size: shapesRaw.COMMENT.size,
+            attrs: {
+                label: {
+                    ...makeLabelOptions(""),
+                    x: 60,
+                    y: 24,
+                },
+                options: {},
+            },
+        };
+    }
+
+    markup = util.svg`${formatShapeString(CommentRaw)}`;
 }
 
 Object.assign(shapes, {
@@ -208,6 +316,9 @@ Object.assign(shapes, {
         SERVICE: ServiceShape,
         QUEUE: QueueShape,
         BALANCER: BalancerShape,
+        CDN: CDNShape,
+        GATEWAY: GatewayShape,
+        COMMENT: CommentShape,
     },
 });
 

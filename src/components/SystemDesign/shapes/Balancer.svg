@@ -1,8 +1,9 @@
 <svg width="144" height="96" viewBox="0 0 144 96" fill="none">
     <g>
-        <rect x="0.75" y="0.75" width="142.5" height="94.5" rx="7.25" fill="black"/>
-        <rect x="0.75" y="0.75" width="142.5" height="94.5" rx="7.25" stroke="#4b4b4b" stroke-width="1.5"/>
-        <rect x="0.75" y="32" width="142.5" height="1.5" fill="#4b4b4b"/>
+        <rect class="svg-shape-fill" x="0.75" y="0.75" width="142.5" height="94.5" rx="7.25"/>
+        <rect class="svg-content-fill" x="0.75" y="33.5" width="142.5" height="61.75" rx="7.25"/>
+        <rect class="svg-shape-stroke" x="0.75" y="0.75" width="142.5" height="94.5" rx="7.25" stroke-width="1.5" fill="none"/>
+        <rect class="svg-accent-fill" x="0.75" y="32" width="142.5" height="1.5"/>
         <text x="50%" y="18" text-anchor="middle" dominant-baseline="middle" class="bold-svg-text">Balancer</text>
     </g>
 </svg>
