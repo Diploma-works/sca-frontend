@@ -1,0 +1,92 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: sca-backend
+  
+  datasource:
+    url: jdbc:postgresql://postgres:5432/sca_ide
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST}
+      port: 6379
+      password: ${REDIS_PASSWORD}
+  
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      expiration: 86400000 # 24 hours
+
+# Docker configuration
+docker:
+  host: tcp://localhost:2375
+  registry:
+    url: https://registry.hub.docker.com
+  containers:
+    memory-limit: 512m
+    cpu-limit: 0.5
+    timeout: 300 # 5 minutes
+
+# GitHub API configuration
+github:
+  api:
+    base-url: https://api.github.com
+    token: ${GITHUB_TOKEN:}
+  oauth:
+    client-id: ${GITHUB_CLIENT_ID:}
+    client-secret: ${GITHUB_CLIENT_SECRET:}
+    redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:3000/auth/github/callback}
+
+# File system configuration
+filesystem:
+  workspace:
+    base-path: /tmp/sca-workspaces
+    max-size: 100MB
+  temp:
+    path: /tmp/sca-temp
+
+# WebSocket configuration
+websocket:
+  endpoint: /ws
+  allowed-origins:
+    - http://localhost:3000
+    - http://localhost:3001
+    - https://localhost:3000
+    - https://localhost:3001
+
+# Logging
+logging:
+  level:
+    com.sca: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  server:
+    base-path: /api/actuator 

@@ -1,0 +1,219 @@
+.branch-list {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.branch-list.dark {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.branch-list.light {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.branch-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #404040;
+}
+
+.branch-list.light .branch-list-header {
+  border-bottom-color: #e0e0e0;
+}
+
+.branch-list-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.create-branch-btn {
+  background-color: #0e639c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.create-branch-btn:hover {
+  background-color: #1177bb;
+}
+
+.create-branch-form {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #2d2d30;
+  border-radius: 6px;
+  border: 1px solid #404040;
+}
+
+.branch-list.light .create-branch-form {
+  background-color: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.create-branch-form input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  margin-bottom: 8px;
+}
+
+.branch-list.light .create-branch-form input {
+  background-color: white;
+  color: #333333;
+  border-color: #ccc;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.form-buttons button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.form-buttons button[type="submit"] {
+  background-color: #0e639c;
+  color: white;
+}
+
+.form-buttons button[type="button"] {
+  background-color: #666;
+  color: white;
+}
+
+.form-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.error-message {
+  background-color: #722f37;
+  color: #f48771;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  border-left: 4px solid #f48771;
+}
+
+.branch-list.light .error-message {
+  background-color: #fdf2f2;
+  color: #dc2626;
+  border-left-color: #dc2626;
+}
+
+.branches-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.branch-item {
+  padding: 12px;
+  border: 1px solid #404040;
+  border-radius: 6px;
+  background-color: #2d2d30;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.branch-list.light .branch-item {
+  background-color: #f8f8f8;
+  border-color: #e0e0e0;
+}
+
+.branch-item:hover {
+  border-color: #0e639c;
+  background-color: #383838;
+}
+
+.branch-list.light .branch-item:hover {
+  background-color: #f0f0f0;
+}
+
+.branch-item.current {
+  border-color: #0e639c;
+  background-color: #0e639c15;
+}
+
+.branch-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.branch-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.current-indicator {
+  background-color: #0e639c;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.branch-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.switch-btn {
+  background-color: transparent;
+  color: #0e639c;
+  border: 1px solid #0e639c;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  float: right;
+}
+
+.switch-btn:hover {
+  background-color: #0e639c;
+  color: white;
+}
+
+.switch-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.no-branches {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+  font-style: italic;
+}

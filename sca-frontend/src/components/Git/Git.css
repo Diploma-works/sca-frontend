@@ -1,0 +1,508 @@
+/* Git Panel Styles */
+.git-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.git-tabs {
+    display: flex;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.git-tab {
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.git-tab:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.git-tab.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    background: var(--bg-primary);
+}
+
+.git-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Branch List Styles */
+.branch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.branch-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.branch-list-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.create-branch-button {
+    padding: 8px 16px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.create-branch-button:hover {
+    background: var(--accent-color-dark);
+}
+
+.current-branch h4,
+.local-branches h4,
+.remote-branches h4 {
+    margin: 0 0 12px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.branch-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+}
+
+.branch-item:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.branch-item.current {
+    background: var(--success-bg);
+    border-color: var(--success-color);
+    cursor: default;
+}
+
+.branch-item.current:hover {
+    transform: none;
+}
+
+.branch-item.remote {
+    opacity: 0.8;
+    cursor: default;
+}
+
+.branch-item.remote:hover {
+    transform: none;
+}
+
+.branch-icon {
+    font-size: 16px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.branch-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.branch-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.branch-commit {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    max-width: 80px;
+}
+
+.branch-message {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Branch Graph Styles */
+.branch-graph {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.branch-graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.branch-graph-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.graph-controls label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.graph-controls select {
+    padding: 6px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.graph-container {
+    flex: 1;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.commits-list {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.commit-row {
+    display: flex;
+    margin-bottom: 8px;
+    min-height: 24px;
+}
+
+.graph-column {
+    min-width: 200px;
+    padding-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.git-graph-svg {
+    display: block;
+    overflow: visible;
+}
+
+.graph-char {
+    display: inline-block;
+    width: 12px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.graph-char.commit-node {
+    color: var(--accent-color);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.graph-char.vertical-line {
+    color: var(--text-tertiary);
+}
+
+.graph-char.merge-line {
+    color: var(--warning-color);
+}
+
+.graph-char.horizontal-line {
+    color: var(--text-tertiary);
+}
+
+.commit-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.commit-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.commit-hash {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 12px;
+    color: var(--accent-color);
+    background: var(--bg-tertiary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.commit-hash:hover {
+    background: var(--accent-color);
+    color: white;
+}
+
+.commit-message {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: var(--font-family);
+    flex: 1;
+}
+
+.commit-refs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.branch-ref {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.branch-ref.local {
+    background: var(--success-bg);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.branch-ref.remote {
+    background: var(--info-bg);
+    color: var(--info-color);
+    border: 1px solid var(--info-color);
+}
+
+.commit-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tag-ref {
+    font-size: 11px;
+    background: var(--warning-bg);
+    color: var(--warning-color);
+    border: 1px solid var(--warning-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.commit-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.commit-author,
+.commit-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.graph-footer {
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: var(--bg-primary);
+    border-radius: 8px;
+    padding: 24px;
+    min-width: 400px;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+    margin: 0 0 20px 0;
+    color: var(--text-primary);
+    font-size: 18px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.create-button {
+    padding: 10px 20px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.create-button:hover {
+    background: var(--accent-color-dark);
+}
+
+.cancel-button {
+    padding: 10px 20px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Loading and Error Styles */
+.branch-list-loading,
+.branch-graph-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.branch-list-error,
+.branch-graph-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    color: var(--error-color);
+    text-align: center;
+}
+
+.retry-button {
+    padding: 8px 16px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.retry-button:hover {
+    background: var(--accent-color-dark);
+}
+
+.no-commits {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}

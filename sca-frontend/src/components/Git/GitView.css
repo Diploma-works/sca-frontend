@@ -1,0 +1,313 @@
+/* Git View Styles */
+.git-view-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+    gap: 16px;
+}
+
+.git-sections {
+    display: flex;
+    gap: 16px;
+    height: calc(100vh - 200px);
+}
+
+.git-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card, white);
+    border-radius: 12px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    overflow: hidden;
+}
+
+.git-section-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-secondary, #f8fafc);
+}
+
+.git-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    margin: 0;
+}
+
+.git-section-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Horizontal layout for commit history with graph */
+.commit-history-container {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
+.commit-graph-panel {
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-secondary, #f8fafc);
+    overflow: hidden;
+}
+
+.commit-list-panel {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+}
+
+.commit-item {
+    margin-bottom: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: var(--bg-card, white);
+    transition: background-color 0.2s ease;
+}
+
+.commit-item:hover {
+    background: var(--bg-hover, #f1f5f9);
+}
+
+/* Scrollable content with custom scrollbar like in Statistics */
+.scrollable-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Custom scrollbar styling - copied from Statistics */
+.scrollable-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Firefox scrollbar */
+.scrollable-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Branch list styles */
+.branch-list-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.branch-list-item:hover {
+    background: var(--hover-bg, #f8fafc);
+}
+
+.branch-list-item:last-child {
+    border-bottom: none;
+}
+
+.branch-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary, #64748b);
+}
+
+.branch-name {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary, #1e293b);
+}
+
+.branch-current {
+    background: var(--accent-color, #3b82f6);
+    color: white;
+}
+
+.branch-current .branch-name {
+    color: white;
+}
+
+.branch-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--accent-color, #3b82f6);
+    color: white;
+    font-weight: 600;
+}
+
+.branch-remote-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--text-muted, #94a3b8);
+    color: white;
+    font-weight: 400;
+}
+
+/* Graph styles */
+.commit-graph-container {
+    padding: 16px;
+    min-height: 200px;
+}
+
+.commit-list {
+    padding: 0;
+}
+
+.commit-item {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.commit-item:hover {
+    background: var(--hover-bg, #f8fafc);
+}
+
+.commit-item:last-child {
+    border-bottom: none;
+}
+
+.commit-hash {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-secondary, #f1f5f9);
+    color: var(--text-secondary, #64748b);
+    min-width: 60px;
+    text-align: center;
+}
+
+.commit-message {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-primary, #1e293b);
+    line-height: 1.4;
+}
+
+.commit-author {
+    font-size: 12px;
+    color: var(--text-secondary, #64748b);
+}
+
+.commit-date {
+    font-size: 11px;
+    color: var(--text-muted, #94a3b8);
+}
+
+/* Loading states */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-secondary, #64748b);
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border-color, #e2e8f0);
+    border-top: 3px solid var(--accent-color, #3b82f6);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error states */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    text-align: center;
+    padding: 20px;
+}
+
+.error-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.error-text {
+    color: #dc2626;
+    margin-bottom: 12px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.retry-button {
+    padding: 8px 16px;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+}
+
+.retry-button:hover {
+    background: #b91c1c;
+}
+
+/* Dark theme support */
+[data-theme="dark"] {
+    --bg-card: #1e293b;
+    --bg-secondary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: #334155;
+    --border-subtle: #475569;
+    --hover-bg: #334155;
+    --accent-color: #3b82f6;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .git-sections {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .git-section {
+        min-height: 300px;
+    }
+}
