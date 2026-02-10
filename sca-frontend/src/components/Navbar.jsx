@@ -1,17 +1,17 @@
-import { AppBar, Box, IconButton, Stack, Toolbar, Button } from "@mui/material";
+import { AppBar, Box, Button, Divider, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from "@mui/material";
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import FolderIcon from "@mui/icons-material/Folder";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import { useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Menu, MenuItem, Typography } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const Navbar = ({ mode, switchMode }) => {
+const Navbar = ({ mode, switchMode, setProjectInfoOpen }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const signOut = useSignOut();
@@ -19,6 +19,7 @@ const Navbar = ({ mode, switchMode }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const handleProjectInfoClick = () => setProjectInfoOpen(true);
     const handleAccountClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -39,46 +40,48 @@ const Navbar = ({ mode, switchMode }) => {
         <AppBar
             position="static"
             elevation={0}
+            color="inherit"
             sx={{
-                bgcolor: 'background.paper',
-                backgroundImage: 'none',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
             }}
         >
-            <Toolbar variant="dense" disableGutters sx={{ px: 1 }}>
-                <Typography 
-                    variant="h4" 
-                    fontWeight="bold" 
+            <Toolbar variant="dense" disableGutters sx={{ px: 1, gap: 1 }}>
+                <Typography
+                    variant="h4"
+                    fontWeight="bold"
                     color="primary"
                     sx={{ cursor: 'pointer' }}
                     onClick={() => navigate('/')}
                 >
                     SCA
                 </Typography>
+                <Divider variant="middle" orientation="vertical" flexItem/>
+                <Button
+                    variant={isProjectsPage ? "contained" : "text"}
+                    startIcon={<FolderIcon/>}
+                    onClick={() => navigate('/projects')}
+                >
+                    Проекты
+                </Button>
+                <Button
+                    variant={isGitHubPage ? "contained" : "text"}
+                    startIcon={<GitHubIcon/>}
+                    onClick={() => navigate('/github')}
+                >
+                    GitHub
+                </Button>
+                <Button
+                    variant={isMainPage ? "contained" : "text"}
+                    onClick={() => navigate('/')}
+                >
+                    Редактор
+                </Button>
                 <Box sx={{ flex: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <Button
-                        variant={isProjectsPage ? "contained" : "text"}
-                        startIcon={<FolderIcon />}
-                        onClick={() => navigate('/projects')}
-                        sx={{ mr: 1 }}
-                    >
-                        Проекты
-                    </Button>
-                    <Button
-                        variant={isGitHubPage ? "contained" : "text"}
-                        startIcon={<GitHubIcon />}
-                        onClick={() => navigate('/github')}
-                        sx={{ mr: 1 }}
-                    >
-                        GitHub
-                    </Button>
-                    <Button
-                        variant={isMainPage ? "contained" : "text"}
-                        onClick={() => navigate('/')}
-                        sx={{ mr: 1 }}
-                    >
-                        Редактор
-                    </Button>
+                    <IconButton size="small" onClick={handleProjectInfoClick}>
+                        <QueryStatsRoundedIcon sx={{ color: 'text.secondary' }}/>
+                    </IconButton>
                     <IconButton size="small" onClick={switchMode}>
                         {mode === "light" ? (
                             <DarkModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
