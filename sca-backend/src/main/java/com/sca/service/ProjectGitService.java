@@ -1,7 +1,11 @@
 package com.sca.service;
 
+import com.sca.model.BitbucketToken;
+import com.sca.model.GitLabToken;
 import com.sca.model.Project;
 import com.sca.model.User;
+import com.sca.repository.BitbucketTokenRepository;
+import com.sca.repository.GitLabTokenRepository;
 import com.sca.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +13,14 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,9 +33,296 @@ public class ProjectGitService {
 
     @Autowired
     private GitHubService gitHubService;
+
+    @Autowired
+    private GitLabTokenRepository gitLabTokenRepository;
+
+    @Autowired
+    private BitbucketTokenRepository bitbucketTokenRepository;
     
     @Value("${filesystem.workspace.base-path:/tmp/sca-workspaces}")
     private String workspaceBasePath;
+
+    private Path getUserSshDir(User user) {
+        return Paths.get(workspaceBasePath, "user-" + user.getId(), ".ssh");
+    }
+
+    private Path getBitbucketPrivateKeyPath(User user) {
+        return getUserSshDir(user).resolve("bitbucket_id_ed25519");
+    }
+
+    public Map<String, Object> getBitbucketSshKeyStatus(User user) {
+        try {
+            Path keyPath = getBitbucketPrivateKeyPath(user);
+            boolean exists = Files.exists(keyPath);
+            Map<String, Object> res = new HashMap<>();
+            res.put("configured", exists);
+            res.put("path", keyPath.toString());
+            return res;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get Bitbucket SSH key status: " + e.getMessage());
+        }
+    }
+
+    public Map<String, Object> saveBitbucketSshPrivateKey(User user, String privateKeyPem) {
+        if (privateKeyPem == null || privateKeyPem.trim().isEmpty()) {
+            throw new RuntimeException("SSH private key cannot be empty");
+        }
+
+        try {
+            Path sshDir = getUserSshDir(user);
+            Files.createDirectories(sshDir);
+
+            Path keyPath = getBitbucketPrivateKeyPath(user);
+            Files.writeString(keyPath, privateKeyPem.replace("\r\n", "\n").trim() + "\n", StandardCharsets.UTF_8);
+
+            // Best-effort permissions: on Linux containers set 600; on Windows these calls may fail.
+            try {
+                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+                Files.setPosixFilePermissions(keyPath, perms);
+            } catch (UnsupportedOperationException ignored) {
+            }
+
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("message", "Bitbucket SSH key saved");
+            res.put("path", keyPath.toString());
+            return res;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save Bitbucket SSH key: " + e.getMessage(), e);
+        }
+    }
+
+    public Map<String, Object> removeBitbucketSshPrivateKey(User user) {
+        try {
+            Path keyPath = getBitbucketPrivateKeyPath(user);
+            Files.deleteIfExists(keyPath);
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("message", "Bitbucket SSH key removed");
+            return res;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to remove Bitbucket SSH key: " + e.getMessage(), e);
+        }
+    }
+
+    public Map<String, Object> testBitbucketSsh(User user) {
+        try {
+            Path keyPath = getBitbucketPrivateKeyPath(user);
+            if (!Files.exists(keyPath)) {
+                throw new RuntimeException("Bitbucket SSH key is not configured");
+            }
+
+            // ssh -T returns non-zero for "success" messages sometimes; we will treat output as result.
+            String out = executeCommandWithEnv(null,
+                    Map.of("GIT_SSH_COMMAND", buildGitSshCommand(keyPath)),
+                    "ssh", "-T", "git@bitbucket.org");
+
+            Map<String, Object> resTest = new HashMap<>();
+            resTest.put("success", true);
+            resTest.put("output", out);
+            return resTest;
+        } catch (Exception e) {
+            // Return as error details so the UI can show it.
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", false);
+            res.put("error", e.getMessage());
+            return res;
+        }
+    }
+
+    private String buildGitSshCommand(Path privateKeyPath) {
+        // accept-new avoids interactive prompt on first connect (requires OpenSSH >= 7.6)
+        // IdentitiesOnly forces using the provided key.
+        return "ssh -i \"" + privateKeyPath.toString() + "\" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new";
+    }
+
+    private String toBitbucketSshRemote(String currentRemote) {
+        // Converts:
+        //  - https://bitbucket.org/workspace/repo.git
+        //  - git@bitbucket.org:workspace/repo.git
+        // into git@bitbucket.org:workspace/repo.git
+        if (currentRemote == null) return null;
+        String cleaned = currentRemote.trim().replaceAll("\\s+", "").replaceAll("/+$", "");
+        if (cleaned.startsWith("git@bitbucket.org:")) return cleaned;
+        if (cleaned.startsWith("ssh://")) return cleaned; // already ssh
+        if (cleaned.startsWith("https://bitbucket.org/")) {
+            String path = cleaned.substring("https://bitbucket.org/".length());
+            return "git@bitbucket.org:" + path;
+        }
+        return cleaned;
+    }
+
+    private String runWithBitbucketSsh(User user, String projectPath, String... gitCommand) throws Exception {
+        String originalRemoteUrl = null;
+        try {
+            Path keyPath = getBitbucketPrivateKeyPath(user);
+            if (!Files.exists(keyPath)) {
+                throw new RuntimeException("Bitbucket SSH key not configured. Configure SSH key to use git push/pull without app passwords.");
+            }
+
+            originalRemoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url").trim();
+            String sshRemote = toBitbucketSshRemote(originalRemoteUrl);
+            if (sshRemote != null && !sshRemote.equals(originalRemoteUrl)) {
+                executeGitCommand(projectPath, "git", "remote", "set-url", "origin", sshRemote);
+            }
+
+            Map<String, String> env = new HashMap<>();
+            env.put("GIT_TERMINAL_PROMPT", "0");
+            env.put("GIT_SSH_COMMAND", buildGitSshCommand(keyPath));
+            return executeCommandWithEnv(projectPath, env, gitCommand);
+        } finally {
+            try {
+                if (originalRemoteUrl != null && !originalRemoteUrl.isBlank()) {
+                    executeGitCommand(projectPath, "git", "remote", "set-url", "origin", originalRemoteUrl);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    private String executeCommandWithEnv(String workingDirectory, Map<String, String> env, String... command) throws Exception {
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        if (workingDirectory != null) {
+            processBuilder.directory(new File(workingDirectory));
+        }
+        if (env != null) {
+            processBuilder.environment().putAll(env);
+        }
+        Process process = processBuilder.start();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        StringBuilder output = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            output.append(line).append("\n");
+        }
+
+        BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+        StringBuilder errorOutput = new StringBuilder();
+        while ((line = errorReader.readLine()) != null) {
+            errorOutput.append(line).append("\n");
+        }
+
+        int exitCode = process.waitFor();
+        // ssh -T may return non-zero on success message; for git commands we still want to fail on non-zero.
+        if (exitCode != 0) {
+            throw new RuntimeException("Command failed: " + errorOutput);
+        }
+        return output.toString();
+    }
+
+    private static String encodeUserInfoComponent(String value) {
+        if (value == null) return "";
+        // Percent-encode reserved characters for the userinfo subcomponent (RFC 3986).
+        // Note: URLEncoder is for x-www-form-urlencoded and turns spaces into '+', which is not correct here.
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+                    || c == '-' || c == '.' || c == '_' || c == '~') {
+                sb.append(c);
+            } else {
+                byte[] bytes = String.valueOf(c).getBytes(StandardCharsets.UTF_8);
+                for (byte b : bytes) {
+                    sb.append('%');
+                    String hex = Integer.toHexString(b & 0xFF).toUpperCase(Locale.ROOT);
+                    if (hex.length() == 1) sb.append('0');
+                    sb.append(hex);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    static String withUserInfo(String remoteUrl, String username, String passwordOrToken) {
+        if (remoteUrl == null) return null;
+        URI uri = URI.create(remoteUrl);
+        if (uri.getScheme() == null || uri.getHost() == null) return remoteUrl;
+
+        String user = encodeUserInfoComponent(username);
+        String pass = encodeUserInfoComponent(passwordOrToken);
+
+        String userInfo = user;
+        if (passwordOrToken != null) {
+            userInfo = user + ":" + pass;
+        }
+
+        try {
+            URI rebuilt = new URI(
+                    uri.getScheme(),
+                    userInfo,
+                    uri.getHost(),
+                    uri.getPort(),
+                    uri.getRawPath(),
+                    uri.getRawQuery(),
+                    uri.getRawFragment()
+            );
+            return rebuilt.toString();
+        } catch (java.net.URISyntaxException e) {
+            // If rebuilding fails for any reason, don't break git operations; just return the original.
+            return remoteUrl;
+        }
+    }
+
+    private String embedAuthIntoRemoteUrl(Project project, User user, String remoteUrl) {
+        if (remoteUrl == null) return null;
+        String cleaned = remoteUrl.trim().replaceAll("\\s+", "").replaceAll("/+$", "");
+
+        try {
+            if (project.getType() == Project.ProjectType.GITHUB && cleaned.contains("github.com")) {
+                return gitHubService.getUserToken(user)
+                        .map(t -> withUserInfo(cleaned, "oauth2", t.getAccessToken()))
+                        .orElse(cleaned);
+            }
+
+            if (project.getType() == Project.ProjectType.GITLAB && cleaned.contains("gitlab.com")) {
+                Optional<GitLabToken> tokenOpt = gitLabTokenRepository.findByUser(user);
+                if (tokenOpt.isPresent()) {
+                    return withUserInfo(cleaned, "oauth2", tokenOpt.get().getAccessToken());
+                }
+            }
+
+            if (project.getType() == Project.ProjectType.BITBUCKET && cleaned.contains("bitbucket.org")) {
+                Optional<BitbucketToken> tokenOpt = bitbucketTokenRepository.findByUser(user);
+                if (tokenOpt.isPresent()) {
+                    BitbucketToken bt = tokenOpt.get();
+                    String username = bt.getBitbucketUsername();
+                    if (username == null || username.isBlank()) {
+                        throw new RuntimeException("Bitbucket username не сохранён. Для push/pull по HTTPS Bitbucket требует Basic auth (username + app password). Пожалуйста, сохраните токен вместе с username.");
+                    }
+                    // Bitbucket Cloud git over HTTPS uses Basic auth: https://<username>:<app_password>@bitbucket.org/<workspace>/<repo>.git
+                    return withUserInfo(cleaned, username, bt.getAccessToken());
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        return cleaned;
+    }
+
+    private String runWithAuthenticatedOrigin(Project project, User user, String projectPath, String... gitCommand) throws Exception {
+        // For Bitbucket, HTTPS bearer tokens don't work for git push/pull. Use SSH-based auth.
+        if (project.getType() == Project.ProjectType.BITBUCKET) {
+            return runWithBitbucketSsh(user, projectPath, gitCommand);
+        }
+        String originalRemoteUrl = null;
+        try {
+            originalRemoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url").trim();
+            String authenticated = embedAuthIntoRemoteUrl(project, user, originalRemoteUrl);
+            if (authenticated != null && !authenticated.equals(originalRemoteUrl)) {
+                executeGitCommand(projectPath, "git", "remote", "set-url", "origin", authenticated);
+            }
+            return executeGitCommand(projectPath, gitCommand);
+        } finally {
+            try {
+                if (originalRemoteUrl != null && !originalRemoteUrl.isBlank()) {
+                    executeGitCommand(projectPath, "git", "remote", "set-url", "origin", originalRemoteUrl);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+    }
 
     public Map<String, Object> getRepositoryInfo(Long projectId, User user) {
         System.out.println("ProjectGitService.getRepositoryInfo called with projectId: " + projectId + ", user: " + user.getUsername());
@@ -267,30 +565,8 @@ public class ProjectGitService {
         }
 
         try {
-            // Get GitHub token for authenticated push
-            Optional<com.sca.model.GitHubToken> tokenOpt = gitHubService.getUserToken(user);
-            if (tokenOpt.isEmpty()) {
-                throw new RuntimeException("GitHub token not found. Please configure GitHub integration.");
-            }
-            String token = tokenOpt.get().getAccessToken();
-            
-            // Update remote URL with token for authentication
-            String remoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url").trim();
-            System.out.println("Original remote URL: '" + remoteUrl + "'");
-            
-            if (remoteUrl.contains("github.com")) {
-                // Clean the URL - remove trailing slashes and whitespace
-                remoteUrl = remoteUrl.replaceAll("\\s+", "").replaceAll("/+$", "");
-                System.out.println("Cleaned remote URL: '" + remoteUrl + "'");
-                
-                String authenticatedUrl = remoteUrl.replace("https://github.com", "https://oauth2:" + token + "@github.com");
-                System.out.println("Authenticated URL: '" + authenticatedUrl + "'");
-                
-                executeGitCommand(projectPath, "git", "remote", "set-url", "origin", authenticatedUrl);
-            }
-            
-            // Push changes
-            String pushResult = executeGitCommand(projectPath, "git", "push", "origin", branch);
+            // Push changes (GitHub/GitLab/Bitbucket auth supported)
+            String pushResult = runWithAuthenticatedOrigin(project, user, projectPath, "git", "push", "origin", branch);
             
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);
@@ -316,28 +592,8 @@ public class ProjectGitService {
         }
 
         try {
-            // Get GitHub token for authenticated pull
-            Optional<com.sca.model.GitHubToken> tokenOpt = gitHubService.getUserToken(user);
-            if (tokenOpt.isPresent()) {
-                String token = tokenOpt.get().getAccessToken();
-                // Update remote URL with token for authentication
-                String remoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url").trim();
-                System.out.println("Pull - Original remote URL: '" + remoteUrl + "'");
-                
-                if (remoteUrl.contains("github.com")) {
-                    // Clean the URL - remove trailing slashes and whitespace
-                    remoteUrl = remoteUrl.replaceAll("\\s+", "").replaceAll("/+$", "");
-                    System.out.println("Pull - Cleaned remote URL: '" + remoteUrl + "'");
-                    
-                    String authenticatedUrl = remoteUrl.replace("https://github.com", "https://oauth2:" + token + "@github.com");
-                    System.out.println("Pull - Authenticated URL: '" + authenticatedUrl + "'");
-                    
-                    executeGitCommand(projectPath, "git", "remote", "set-url", "origin", authenticatedUrl);
-                }
-            }
-            
-            // Pull changes
-            String pullResult = executeGitCommand(projectPath, "git", "pull", "origin", branch);
+            // Pull changes (GitHub/GitLab/Bitbucket auth supported)
+            String pullResult = runWithAuthenticatedOrigin(project, user, projectPath, "git", "pull", "origin", branch);
             
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);
@@ -617,28 +873,8 @@ public class ProjectGitService {
         }
 
         try {
-            // Get GitHub token for authenticated fetch
-            Optional<com.sca.model.GitHubToken> tokenOpt = gitHubService.getUserToken(user);
-            if (tokenOpt.isPresent()) {
-                String token = tokenOpt.get().getAccessToken();
-                // Update remote URL with token for authentication
-                String remoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url").trim();
-                System.out.println("Sync - Original remote URL: '" + remoteUrl + "'");
-                
-                if (remoteUrl.contains("github.com")) {
-                    // Clean the URL - remove trailing slashes and whitespace
-                    remoteUrl = remoteUrl.replaceAll("\\s+", "").replaceAll("/+$", "");
-                    System.out.println("Sync - Cleaned remote URL: '" + remoteUrl + "'");
-                    
-                    String authenticatedUrl = remoteUrl.replace("https://github.com", "https://oauth2:" + token + "@github.com");
-                    System.out.println("Sync - Authenticated URL: '" + authenticatedUrl + "'");
-                    
-                    executeGitCommand(projectPath, "git", "remote", "set-url", "origin", authenticatedUrl);
-                }
-            }
-            
-            // Fetch latest changes
-            String fetchResult = executeGitCommand(projectPath, "git", "fetch", "origin");
+            // Fetch latest changes (GitHub/GitLab/Bitbucket auth supported)
+            String fetchResult = runWithAuthenticatedOrigin(project, user, projectPath, "git", "fetch", "origin");
             
             // Get status after fetch
             Map<String, Object> status = getGitStatus(projectId, user);

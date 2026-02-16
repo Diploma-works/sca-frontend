@@ -3,6 +3,16 @@ import { Client } from '@stomp/stompjs';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Ensure fetch sends cookies by default so cookie-based auth (react-auth-kit) is included.
+// We wrap the global fetch once to add credentials: 'include' when running in browser.
+if (typeof window !== 'undefined' && window.fetch) {
+  const _origFetch = window.fetch.bind(window);
+  window.fetch = (url, options = {}) => {
+    const opts = { credentials: 'include', ...options };
+    return _origFetch(url, opts);
+  };
+}
+
 // Alternative function to get token from react-auth-kit
 const getTokenFromAuthKit = () => {
   try {
@@ -179,25 +189,6 @@ export const projectAPI = {
     return handleResponse(response);
   },
 
-  // Get project by ID
-  getById: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
-      method: 'GET',
-      headers: getAuthHeaders()
-    });
-    return handleResponse(response);
-  },
-
-  // Create new project
-  create: async (name, description, workspacePath) => {
-    const response = await fetch(`${API_BASE_URL}/projects`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ name, description, workspacePath })
-    });
-    return handleResponse(response);
-  },
-
   // Update project
   update: async (id, updates) => {
     const response = await fetch(`${API_BASE_URL}/projects/${id}`, {
@@ -235,7 +226,6 @@ export const projectAPI = {
     });
     return handleResponse(response);
   },
-
   // Create new branch
   createBranch: async (projectId, branchData) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/branches`, {
@@ -255,7 +245,162 @@ export const projectAPI = {
     });
     return handleResponse(response);
   }
+
 };
+
+// GitLab API functions (proxy endpoints expected on backend)
+export const gitLabAPI = {
+  saveToken: async (token) => {
+    const response = await fetch(`${API_BASE_URL}/gitlab/token`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ token })
+    });
+    return handleResponse(response);
+  },
+  getStatus: async () => {
+    const response = await fetch(`${API_BASE_URL}/gitlab/status`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  getRepositories: async () => {
+    const response = await fetch(`${API_BASE_URL}/gitlab/repositories`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  getRepositoryBranches: async (owner, repo) => {
+    const response = await fetch(`${API_BASE_URL}/gitlab/repositories/${owner}/${repo}/branches`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  cloneRepository: async (owner, repo, targetPath, gitUrl, branch = 'main') => {
+    // Использует новый endpoint для клонирования через ProjectController
+    const projectName = repo.replace(/\.git$/, ''); // Удаляем .git если есть
+    const response = await fetch(`${API_BASE_URL}/projects/clone/gitlab`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ 
+        gitUrl: gitUrl,
+        branch: branch,
+        name: projectName
+      })
+    });
+    return handleResponse(response);
+  },
+  createRepository: async (name, description, isPrivate = false) => {
+    const response = await fetch(`${API_BASE_URL}/gitlab/repositories`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ name, description, private: isPrivate })
+    });
+    return handleResponse(response);
+  },
+  removeToken: async () => {
+    const response = await fetch(`${API_BASE_URL}/gitlab/token`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+
+// Bitbucket API functions (proxy endpoints expected on backend)
+export const bitbucketAPI = {
+  // token: the token or app password
+  // username: optional Bitbucket username when using app password (Basic auth)
+  saveToken: async (token, username = null) => {
+    const body = { token };
+    if (username) body.username = username;
+    const response = await fetch(`${API_BASE_URL}/bitbucket/token`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(body)
+    });
+    return handleResponse(response);
+  },
+  getStatus: async () => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/status`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  getRepositories: async () => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/repositories`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  getRepositoryBranches: async (owner, repo) => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/repositories/${owner}/${repo}/branches`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  cloneRepository: async (owner, repo, targetPath) => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/repositories/${owner}/${repo}/clone`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ targetPath })
+    });
+    return handleResponse(response);
+  },
+  createRepository: async (name, description, isPrivate = false) => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/repositories`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ name, description, private: isPrivate })
+    });
+    return handleResponse(response);
+  },
+  removeToken: async () => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/token`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+
+  // --- SSH key management (for git push/pull over SSH) ---
+  getSshKeyStatus: async () => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/ssh-key/status`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  saveSshKey: async (privateKey) => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/ssh-key`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ privateKey })
+    });
+    return handleResponse(response);
+  },
+  removeSshKey: async () => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/ssh-key`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  testSsh: async () => {
+    const response = await fetch(`${API_BASE_URL}/bitbucket/ssh-key/test`, {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  }
+};
+ 
 
 // For backward compatibility with Projects component
 export const projectsAPI = {
@@ -593,148 +738,138 @@ export const gitHubAPI = {
   },
 
   // Git operations for specific project
-  // Get project repository info
+  // NOTE: project-level git operations were moved to projectGitAPI below.
+};
+
+// Project Git API functions (provider-agnostic; operates on already cloned workspace repos)
+export const projectGitAPI = {
   getProjectRepositoryInfo: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/info`, {
       method: 'GET',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Get project git status
   getProjectGitStatus: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/status`, {
       method: 'GET',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Create commit for project
   createProjectCommit: async (projectId, message, files = []) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/commit`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ message, files })
+      body: JSON.stringify({ message, files }),
     });
     return handleResponse(response);
   },
 
-  // Push project changes
   pushProjectChanges: async (projectId, branch = 'main') => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/push`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ branch })
+      body: JSON.stringify({ branch }),
     });
     return handleResponse(response);
   },
 
-  // Pull project changes
   pullProjectChanges: async (projectId, branch = 'main') => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/pull`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ branch })
+      body: JSON.stringify({ branch }),
     });
     return handleResponse(response);
   },
 
-  // Create new branch for project
   createProjectBranch: async (projectId, branchName, fromBranch = 'main') => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/branches`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ name: branchName, from: fromBranch })
+      body: JSON.stringify({ name: branchName, from: fromBranch }),
     });
     return handleResponse(response);
   },
 
-  // Switch project branch
   switchProjectBranch: async (projectId, branchName) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/branches/${branchName}/checkout`, {
       method: 'POST',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Get project branches
   getProjectBranches: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/branches`, {
       method: 'GET',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Sync project with remote (fetch + status)
   syncProject: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/sync`, {
       method: 'POST',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Stash project changes
   stashProjectChanges: async (projectId, message = 'WIP') => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/stash`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ message })
+      body: JSON.stringify({ message }),
     });
     return handleResponse(response);
   },
 
-  // Apply stash (stash pop)
   stashPopProjectChanges: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/stash/pop`, {
       method: 'POST',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Check stash status
   getStashStatus: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/stash/status`, {
       method: 'GET',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
     });
     return handleResponse(response);
   },
 
-  // Reset project changes (git reset --hard)
   resetProjectChanges: async (projectId, hard = false) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/reset`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ hard })
+      body: JSON.stringify({ hard }),
     });
     return handleResponse(response);
   },
 
-  // Merge project branch
   mergeProjectBranch: async (projectId, sourceBranch, targetBranch = 'main') => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/merge`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ source: sourceBranch, target: targetBranch })
+      body: JSON.stringify({ source: sourceBranch, target: targetBranch }),
     });
     return handleResponse(response);
   },
 
-  // Create project tag
   createProjectTag: async (projectId, tagName, message = '') => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/tags`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ name: tagName, message })
+      body: JSON.stringify({ name: tagName, message }),
     });
     return handleResponse(response);
-  }
+  },
 };
 
 // Combined API export
@@ -744,6 +879,7 @@ const api = {
   projectsAPI,
   analysisAPI,
   gitHubAPI,
+  projectGitAPI,
   websocketAPI,
   fileAPI
 };
@@ -756,6 +892,7 @@ export default {
   projects: projectsAPI,
   analysis: analysisAPI,
   github: gitHubAPI,
+  projectGit: projectGitAPI,
   websocket: websocketAPI,
   file: fileAPI,
 };

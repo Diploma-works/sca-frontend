@@ -5,6 +5,8 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import FolderIcon from "@mui/icons-material/Folder";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import GitLabIcon from '@mui/icons-material/Storage';
+import BitbucketIcon from '@mui/icons-material/Cloud';
 import { useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
@@ -64,14 +66,30 @@ const Navbar = ({ mode, switchMode }) => {
                     >
                         Проекты
                     </Button>
-                    <Button
-                        variant={isGitHubPage ? "contained" : "text"}
-                        startIcon={<GitHubIcon />}
-                        onClick={() => navigate('/github')}
-                        sx={{ mr: 1 }}
-                    >
-                        GitHub
-                    </Button>
+                                <Button
+                                    variant={isGitHubPage ? "contained" : "text"}
+                                    startIcon={<GitHubIcon />}
+                                    onClick={() => navigate('/github')}
+                                    sx={{ mr: 1 }}
+                                >
+                                    GitHub
+                                </Button>
+                                <Button
+                                    variant={location.pathname === '/gitlab' ? "contained" : "text"}
+                                    startIcon={<GitLabIcon />}
+                                    onClick={() => navigate('/gitlab')}
+                                    sx={{ mr: 1 }}
+                                >
+                                    GitLab
+                                </Button>
+                                <Button
+                                    variant={location.pathname === '/bitbucket' ? "contained" : "text"}
+                                    startIcon={<BitbucketIcon />}
+                                    onClick={() => navigate('/bitbucket')}
+                                    sx={{ mr: 1 }}
+                                >
+                                    Bitbucket
+                                </Button>
                     <Button
                         variant={isMainPage ? "contained" : "text"}
                         onClick={() => navigate('/')}

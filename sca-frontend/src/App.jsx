@@ -12,6 +12,8 @@ import Main from "./components/Main";
 import Auth from "./components/Auth";
 import Projects from "./components/Projects";
 import GitHubPage from "./pages/GitHubPage";
+import GitLabPage from "./pages/GitLabPage";
+import BitbucketPage from "./pages/BitbucketPage";
 
 import AuthProvider from "react-auth-kit";
 import RequireAuth from "@auth-kit/react-router/RequireAuth"
@@ -52,6 +54,16 @@ const App = () => {
                             <Route path="/github" element={
                                 <RequireAuth fallbackPath="/auth">
                                     <GitHubPage/>
+                                </RequireAuth>
+                            }/>
+                            <Route path="/gitlab" element={
+                                <RequireAuth fallbackPath="/auth">
+                                    <GitLabPage/>
+                                </RequireAuth>
+                            }/>
+                            <Route path="/bitbucket" element={
+                                <RequireAuth fallbackPath="/auth">
+                                    <BitbucketPage/>
                                 </RequireAuth>
                             }/>
                             <Route path="/projects/:id" element={

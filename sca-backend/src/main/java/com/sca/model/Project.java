@@ -31,14 +31,16 @@ public class Project {
     
     @Enumerated(EnumType.STRING)
     private ProjectType type = ProjectType.LOCAL;
-    
-    @Size(max = 200)
+
+    @Size(max = 2000)
     private String gitUrl;
     
     @Size(max = 50)
     private String gitBranch = "main";
     
-    @Size(max = 100)
+    // Workspace paths can be long on Windows; store as TEXT to avoid varchar(255) overflow.
+    @Column(columnDefinition = "TEXT")
+    @Size(max = 2000)
     private String workspacePath;
     
     @Enumerated(EnumType.STRING)

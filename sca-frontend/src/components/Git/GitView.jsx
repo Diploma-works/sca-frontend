@@ -40,7 +40,7 @@ import {
     SwapHoriz as SwitchIcon
 } from '@mui/icons-material';
 import ScrollableContainer from '../ScrollableContainer';
-import { api, gitHubAPI } from '../../utils/api';
+import { api, gitHubAPI, projectGitAPI } from '../../utils/api';
 import './GitView.css';
 
 const GitView = (props) => {
@@ -216,13 +216,17 @@ const GitView = (props) => {
     };
 
     // Git Actions functions
+    // Project-level git operations work on the already cloned workspace repository
+    // and are provider-agnostic. So Git actions for a project shouldn't be blocked
+    // by GitHub account connection status.
     const checkGitHubConnection = async () => {
         try {
             const response = await gitHubAPI.getStatus();
-            setConnected(response.connected);
+            // Keep status for informational purposes, but don't block project actions.
+            setConnected(!!response.connected || !!projectId);
         } catch (err) {
             console.error('Error checking GitHub connection:', err);
-            setConnected(false);
+            setConnected(!!projectId);
         }
     };
 
@@ -230,7 +234,7 @@ const GitView = (props) => {
         if (!projectId) return;
         
         try {
-            const statusData = await gitHubAPI.getProjectGitStatus(projectId);
+            const statusData = await projectGitAPI.getProjectGitStatus(projectId);
             setGitStatus(statusData.files || []);
         } catch (err) {
             console.error('Error loading git status:', err);
@@ -242,7 +246,7 @@ const GitView = (props) => {
         if (!projectId) return;
         
         try {
-            const stashStatus = await gitHubAPI.getStashStatus(projectId);
+            const stashStatus = await projectGitAPI.getStashStatus(projectId);
             setHasStash(stashStatus.hasStash || false);
         } catch (err) {
             console.error('Error loading stash status:', err);
@@ -259,7 +263,7 @@ const GitView = (props) => {
 
         try {
             setLoading(true);
-            await gitHubAPI.createProjectCommit(projectId, commitMessage.trim());
+            await projectGitAPI.createProjectCommit(projectId, commitMessage.trim());
             setSuccess('Коммит успешно создан');
             setCommitMessage('');
             setCommitDialogOpen(false);
@@ -276,7 +280,7 @@ const GitView = (props) => {
     const handlePush = async () => {
         try {
             setLoading(true);
-            await gitHubAPI.pushProjectChanges(projectId, branches.current || 'main');
+            await projectGitAPI.pushProjectChanges(projectId, branches.current || 'main');
             setSuccess('Изменения успешно отправлены в удаленный репозиторий');
             loadGitStatus();
         } catch (err) {
@@ -290,7 +294,7 @@ const GitView = (props) => {
     const handlePull = async () => {
         try {
             setLoading(true);
-            await gitHubAPI.pullProjectChanges(projectId, branches.current || 'main');
+            await projectGitAPI.pullProjectChanges(projectId, branches.current || 'main');
             setSuccess('Изменения успешно загружены из удаленного репозитория');
             fetchData(); // Обновляем данные после pull
         } catch (err) {
@@ -309,7 +313,7 @@ const GitView = (props) => {
 
         try {
             setLoading(true);
-            await gitHubAPI.createProjectBranch(projectId, newBranchName.trim());
+            await projectGitAPI.createProjectBranch(projectId, newBranchName.trim());
             setSuccess(`Ветка "${newBranchName}" успешно создана`);
             setNewBranchName('');
             setBranchDialogOpen(false);
@@ -326,7 +330,7 @@ const GitView = (props) => {
     const handleStash = async () => {
         try {
             setLoading(true);
-            const result = await gitHubAPI.stashProjectChanges(projectId);
+            const result = await projectGitAPI.stashProjectChanges(projectId);
             if (result.success) {
                 setSuccess('Изменения успешно отложены (stashed)');
                 loadGitStatus();
@@ -345,7 +349,7 @@ const GitView = (props) => {
     const handleStashPop = async () => {
         try {
             setLoading(true);
-            const result = await gitHubAPI.stashPopProjectChanges(projectId);
+            const result = await projectGitAPI.stashPopProjectChanges(projectId);
             if (result.success) {
                 setSuccess('Отложенные изменения успешно применены');
                 loadGitStatus();
@@ -369,7 +373,7 @@ const GitView = (props) => {
 
         try {
             setLoading(true);
-            await gitHubAPI.resetProjectChanges(projectId, true); // hard reset
+            await projectGitAPI.resetProjectChanges(projectId, true); // hard reset
             setSuccess('Все изменения сброшены к последнему коммиту');
             loadGitStatus();
             fetchData();
@@ -389,7 +393,7 @@ const GitView = (props) => {
 
         try {
             setLoading(true);
-            await gitHubAPI.mergeProjectBranch(projectId, branchToMerge.trim());
+            await projectGitAPI.mergeProjectBranch(projectId, branchToMerge.trim());
             setSuccess(`Ветка "${branchToMerge}" успешно объединена с текущей веткой`);
             fetchData();
         } catch (err) {
@@ -435,10 +439,15 @@ const GitView = (props) => {
     // Load Git Actions data when component mounts
     useEffect(() => {
         if (projectId) {
+            // Always allow actions when project is present.
+            setConnected(true);
             checkGitHubConnection();
             loadGitStatus();
             loadStashStatus();
+        } else {
+            setConnected(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId]);
 
     const switchBranch = async (branchName) => {
@@ -459,7 +468,7 @@ const GitView = (props) => {
 
         try {
             setLoading(true);
-            await gitHubAPI.switchProjectBranch(projectId, selectedBranch);
+            await projectGitAPI.switchProjectBranch(projectId, selectedBranch);
             setSuccess(`Успешно переключились на ветку "${selectedBranch}"`);
             setSelectedBranch('');
             setSwitchBranchDialogOpen(false);

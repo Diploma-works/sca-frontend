@@ -59,6 +59,9 @@ public class SecurityConfig {
             .requestMatchers("/auth/**").permitAll()
             // разрешить доступ к GitHub endpoints для аутентификации
             .requestMatchers("/api/github/**").permitAll()
+            // allow unauthenticated access to GitLab and Bitbucket integration endpoints (frontend token management)
+            .requestMatchers("/api/gitlab/**").permitAll()
+            .requestMatchers("/api/bitbucket/**").permitAll()
             // разрешить доступ ко всем actuator endpoint'ам
             .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
             // остальное — по JWT/аутентификации

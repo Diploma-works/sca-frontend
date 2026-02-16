@@ -5,13 +5,19 @@ import com.sca.model.ProjectFile;
 import com.sca.model.User;
 import com.sca.model.CodeProblem;
 import com.sca.model.GitHubToken;
+import com.sca.model.GitLabToken;
+import com.sca.model.BitbucketToken;
 import com.sca.repository.ProjectRepository;
+import com.sca.repository.GitLabTokenRepository;
+import com.sca.repository.BitbucketTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,11 +38,28 @@ public class ProjectService {
     @Autowired
     private GitHubService gitHubService;
     
+    @Autowired
+    private GitLabTokenRepository gitLabTokenRepository;
+    
+    @Autowired
+    private BitbucketTokenRepository bitbucketTokenRepository;
+    
     @Value("${filesystem.workspace.base-path:/tmp/sca-workspaces}")
     private String workspaceBasePath;
     
     @Value("${filesystem.workspace.max-size:100MB}")
     private String maxWorkspaceSize;
+
+    /**
+     * Remove credentials from an HTTPS git URL before persisting it.
+     * Examples:
+     *  - https://oauth2:TOKEN@github.com/org/repo.git -> https://github.com/org/repo.git
+     *  - https://x-token-auth:TOKEN@bitbucket.org/ws/repo.git -> https://bitbucket.org/ws/repo.git
+     */
+    private String sanitizeGitUrlForStorage(String gitUrl) {
+        if (gitUrl == null) return null;
+        return gitUrl.replaceFirst("^https://[^/@]+@", "https://");
+    }
 
     /**
      * Получить все проекты пользователя
@@ -231,21 +254,28 @@ public class ProjectService {
         }
     }
     
-    /**
-     * Клонировать Git репозиторий
-     */
-    private void cloneGitRepository(String gitUrl, String branch, String workspacePath) {
+
+    public void cloneGitRepository(String gitUrl, String branch, String workspacePath) {
         try {
+            String normalized = workspacePath == null ? "" : workspacePath;
+            if (normalized.startsWith("/")) normalized = normalized.substring(1);
+            if (normalized.startsWith("\\")) normalized = normalized.substring(1);
+
             ProcessBuilder processBuilder = new ProcessBuilder(
-                "git", "clone", "-b", branch, gitUrl, workspacePath
+                    "git", "clone", "--branch", branch, "--single-branch", gitUrl, normalized
             );
             processBuilder.directory(new File(workspaceBasePath));
+            processBuilder.environment().put("GIT_TERMINAL_PROMPT", "0");
 
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
 
+            String stdout = new String(process.getInputStream().readAllBytes());
+            String stderr = new String(process.getErrorStream().readAllBytes());
+
             if (exitCode != 0) {
-                throw new RuntimeException("Ошибка при клонировании репозитория: " + Integer.toString(exitCode));
+                // Не логируем gitUrl, т.к. там может быть токен; но stderr можно вернуть пользователю.
+                throw new RuntimeException("git clone failed (exit code=" + exitCode + "): " + (stderr.isBlank() ? stdout : stderr));
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Ошибка при клонировании репозитория: " + e.getMessage());
@@ -358,7 +388,7 @@ public class ProjectService {
             project.setWorkspacePath(workspacePath);
             project.setType(Project.ProjectType.GITHUB);
             project.setStatus(Project.ProjectStatus.ACTIVE);
-            project.setGitUrl(gitUrl);
+            project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
             project.setGitBranch(branch);
             
             Project savedProject = projectRepository.save(project);
@@ -370,6 +400,180 @@ public class ProjectService {
             System.err.println("Error in cloneFromGitHub: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Ошибка при клонировании проекта: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Клонировать проект из GitLab репозитория (путь и поведение как у GitHub).
+     */
+    public Project cloneFromGitLab(String gitUrl, String branch, String projectName, User user) {
+        try {
+            System.out.println("=== CLONING FROM GITLAB ===");
+            System.out.println("Git URL (without token): " + sanitizeGitUrlForStorage(gitUrl));
+            System.out.println("Branch: " + branch);
+            System.out.println("Project Name: " + projectName);
+            System.out.println("User: " + user.getUsername());
+            
+            if (projectRepository.existsByNameAndOwner(projectName, user)) {
+                throw new RuntimeException("Проект с таким именем уже существует");
+            }
+
+            // Получаем GitLab токен пользователя напрямую из repository
+            Optional<GitLabToken> tokenOpt = gitLabTokenRepository.findByUser(user);
+            if (tokenOpt.isEmpty()) {
+                throw new RuntimeException("GitLab токен не найден. Пожалуйста, подключите ваш GitLab аккаунт.");
+            }
+            
+            String accessToken = tokenOpt.get().getAccessToken();
+            System.out.println("Found GitLab token for user: " + user.getUsername());
+            
+            // Добавляем токен в URL для аутентификации (если еще не добавлен)
+            String authenticatedUrl = gitUrl;
+            if (gitUrl.startsWith("https://") && !gitUrl.contains("@")) {
+                // Заменяем https://gitlab.com/ на https://oauth2:TOKEN@gitlab.com/
+                authenticatedUrl = gitUrl.replaceFirst("^https://", "https://oauth2:" + accessToken + "@");
+                System.out.println("Using authenticated URL for repository");
+            }
+
+            String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
+            Path projectPath = Paths.get(workspacePath);
+
+            System.out.println("Workspace path: " + workspacePath);
+
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.directory(projectPath.getParent().toFile());
+            processBuilder.environment().put("GIT_TERMINAL_PROMPT", "0");
+
+            List<String> command = new ArrayList<>();
+            command.add("git");
+            command.add("clone");
+            command.add("--branch");
+            command.add(branch);
+            command.add("--single-branch");
+            command.add(authenticatedUrl);
+            command.add(projectPath.getFileName().toString());
+            processBuilder.command(command);
+
+            System.out.println("Executing git clone command");
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+
+            if (exitCode != 0) {
+                String error = new String(process.getErrorStream().readAllBytes());
+                String stdout = new String(process.getInputStream().readAllBytes());
+                System.err.println("Git clone failed with exit code: " + exitCode);
+                System.err.println("Error output: " + error);
+                System.err.println("Standard output: " + stdout);
+                throw new RuntimeException("Ошибка клонирования репозитория GitLab: " + error);
+            }
+
+            System.out.println("Git clone completed successfully");
+
+            Project project = new Project();
+            project.setName(projectName);
+            project.setDescription("Клонированный проект из GitLab: " + sanitizeGitUrlForStorage(gitUrl));
+            project.setOwner(user);
+            project.setWorkspacePath(workspacePath);
+            project.setType(Project.ProjectType.GITLAB);
+            project.setStatus(Project.ProjectStatus.ACTIVE);
+            project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
+            project.setGitBranch(branch);
+
+            Project savedProject = projectRepository.save(project);
+            System.out.println("Project saved to database with ID: " + savedProject.getId());
+            
+            return savedProject;
+        } catch (Exception e) {
+            System.err.println("Error in cloneFromGitLab: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка при клонировании проекта GitLab: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Клонировать проект из Bitbucket репозитория (путь и поведение как у GitHub).
+     */
+    public Project cloneFromBitbucket(String gitUrl, String branch, String projectName, User user) {
+        try {
+            System.out.println("=== CLONING FROM BITBUCKET ===");
+            System.out.println("Git URL (without token): " + sanitizeGitUrlForStorage(gitUrl));
+            System.out.println("Branch: " + branch);
+            System.out.println("Project Name: " + projectName);
+            System.out.println("User: " + user.getUsername());
+            
+            if (projectRepository.existsByNameAndOwner(projectName, user)) {
+                throw new RuntimeException("Проект с таким именем уже существует");
+            }
+
+            // Получаем Bitbucket токен пользователя напрямую из repository
+            Optional<BitbucketToken> tokenOpt = bitbucketTokenRepository.findByUser(user);
+            if (tokenOpt.isEmpty()) {
+                throw new RuntimeException("Bitbucket токен не найден. Пожалуйста, подключите ваш Bitbucket аккаунт.");
+            }
+            
+            String accessToken = tokenOpt.get().getAccessToken();
+            System.out.println("Found Bitbucket token for user: " + user.getUsername());
+            
+            // Добавляем токен в URL для аутентификации (если еще не добавлен)
+            String authenticatedUrl = gitUrl;
+            if (gitUrl.startsWith("https://") && !gitUrl.contains("@")) {
+                // Заменяем https://bitbucket.org/ на https://x-token-auth:TOKEN@bitbucket.org/
+                authenticatedUrl = gitUrl.replaceFirst("^https://", "https://x-token-auth:" + accessToken + "@");
+                System.out.println("Using authenticated URL for repository");
+            }
+
+            String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
+            Path projectPath = Paths.get(workspacePath);
+
+            System.out.println("Workspace path: " + workspacePath);
+
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.directory(projectPath.getParent().toFile());
+            processBuilder.environment().put("GIT_TERMINAL_PROMPT", "0");
+
+            List<String> command = new ArrayList<>();
+            command.add("git");
+            command.add("clone");
+            command.add("--branch");
+            command.add(branch);
+            command.add("--single-branch");
+            command.add(authenticatedUrl);
+            command.add(projectPath.getFileName().toString());
+            processBuilder.command(command);
+
+            System.out.println("Executing git clone command");
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+
+            if (exitCode != 0) {
+                String error = new String(process.getErrorStream().readAllBytes());
+                String stdout = new String(process.getInputStream().readAllBytes());
+                System.err.println("Git clone failed with exit code: " + exitCode);
+                System.err.println("Error output: " + error);
+                System.err.println("Standard output: " + stdout);
+                throw new RuntimeException("Ошибка клонирования репозитория Bitbucket: " + error);
+            }
+
+            System.out.println("Git clone completed successfully");
+
+            Project project = new Project();
+            project.setName(projectName);
+            project.setDescription("Клонированный проект из Bitbucket: " + sanitizeGitUrlForStorage(gitUrl));
+            project.setOwner(user);
+            project.setWorkspacePath(workspacePath);
+            project.setType(Project.ProjectType.BITBUCKET);
+            project.setStatus(Project.ProjectStatus.ACTIVE);
+            project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
+            project.setGitBranch(branch);
+
+            Project savedProject = projectRepository.save(project);
+            System.out.println("Project saved to database with ID: " + savedProject.getId());
+            
+            return savedProject;
+        } catch (Exception e) {
+            System.err.println("Error in cloneFromBitbucket: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка при клонировании проекта Bitbucket: " + e.getMessage());
         }
     }
 

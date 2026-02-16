@@ -314,6 +314,100 @@ public class ProjectController {
     }
 
     /**
+     * Клонировать проект из GitLab репозитория
+     */
+    @PostMapping(value = "/clone/gitlab", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> cloneFromGitLab(@RequestBody Map<String, String> cloneData,
+                                            @AuthenticationPrincipal User user) {
+        try {
+            System.out.println("=== CLONE FROM GITLAB ===");
+            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
+            System.out.println("Request body received: " + cloneData);
+            
+            if (cloneData != null) {
+                cloneData.forEach((key, value) -> System.out.println("  " + key + " = " + value));
+            }
+            
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
+            }
+            
+            String gitUrl = cloneData.get("gitUrl");
+            String branch = cloneData.getOrDefault("branch", "main");
+            String projectName = cloneData.get("name");
+            
+            System.out.println("Extracted values:");
+            System.out.println("  gitUrl: " + gitUrl);
+            System.out.println("  branch: " + branch);
+            System.out.println("  projectName: " + projectName);
+            
+            if (gitUrl == null || gitUrl.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
+            }
+            
+            if (projectName == null || projectName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Project name is required"));
+            }
+            
+            Project clonedProject = projectService.cloneFromGitLab(gitUrl, branch, projectName, user);
+            System.out.println("Successfully cloned project: " + clonedProject.getName());
+            return ResponseEntity.ok(clonedProject);
+            
+        } catch (Exception e) {
+            System.err.println("Error cloning from GitLab: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Клонировать проект из Bitbucket репозитория
+     */
+    @PostMapping(value = "/clone/bitbucket", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> cloneFromBitbucket(@RequestBody Map<String, String> cloneData,
+                                               @AuthenticationPrincipal User user) {
+        try {
+            System.out.println("=== CLONE FROM BITBUCKET ===");
+            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
+            System.out.println("Request body received: " + cloneData);
+            
+            if (cloneData != null) {
+                cloneData.forEach((key, value) -> System.out.println("  " + key + " = " + value));
+            }
+            
+            if (user == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
+            }
+            
+            String gitUrl = cloneData.get("gitUrl");
+            String branch = cloneData.getOrDefault("branch", "main");
+            String projectName = cloneData.get("name");
+            
+            System.out.println("Extracted values:");
+            System.out.println("  gitUrl: " + gitUrl);
+            System.out.println("  branch: " + branch);
+            System.out.println("  projectName: " + projectName);
+            
+            if (gitUrl == null || gitUrl.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
+            }
+            
+            if (projectName == null || projectName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Project name is required"));
+            }
+            
+            Project clonedProject = projectService.cloneFromBitbucket(gitUrl, branch, projectName, user);
+            System.out.println("Successfully cloned project: " + clonedProject.getName());
+            return ResponseEntity.ok(clonedProject);
+            
+        } catch (Exception e) {
+            System.err.println("Error cloning from Bitbucket: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
+        }
+    }
+
+    /**
      * Удалить файл
      */
     @DeleteMapping("/{id}/files/**")
