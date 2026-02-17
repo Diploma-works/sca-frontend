@@ -27,7 +27,19 @@ export const ProjectInfo = ({ open, setOpen }) => {
             </Stack>
             <Divider/>
             <Typography variant="body2" px={1.5} py={1}>Введите ваш запрос на SCAQL в поле ниже:</Typography>
-            <Box p={1.5} pt={0}>
+            <Box sx={{
+                m: 1.5,
+                mt: 0,
+                borderRadius: 1,
+                border: "1px solid",
+                borderColor: "divider",
+                overflow: "hidden",
+                "&:hover": { borderColor: "text.primary" },
+                "&:focus-within": {
+                    borderColor: "primary.main",
+                    boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
+                },
+            }}>
                 <Editor
                     height="400px"
                     theme={theme.palette.mode === 'dark' ? 'sca-dark' : 'sca-light'}
@@ -38,6 +50,7 @@ export const ProjectInfo = ({ open, setOpen }) => {
                         automaticLayout: true,
                         wordBasedSuggestions: "off",
                     }}
+                    onMount={(editor) => editor.focus()}
                 />
             </Box>
             <Divider/>
