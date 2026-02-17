@@ -7,7 +7,7 @@ export const printTree = (tree, code) => {
         const to = node.to;
         const text = code.slice(from, to);
 
-        output.push(`${" ".repeat(indent)}${name} [${from}, ${to}] -> "${text}"`);
+        output.push(`${" ".repeat(indent)}${name} [${from}, ${to}] "${text}"`);
 
         let cursor = node.cursor();
         if (cursor.firstChild()) {
@@ -20,6 +20,6 @@ export const printTree = (tree, code) => {
 
     walk(tree.topNode, 0);
 
-    console.log("=== LEZER TREE ===");
+    console.log("=== SCAQL TREE ===");
     console.log(output.join("\n"));
 }
