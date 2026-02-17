@@ -10,8 +10,8 @@ Problems { "problems" }
 Arch { "arch" }
 
 SelectQuery { Select FieldList From Project }
-FieldList { Asterisk | Field (Comma Field)* }
-Field { GitInfo | Problems | Arch }
+FieldList { Asterisk | field (Comma field)* }
+field { GitInfo | Problems | Arch }
 Project { identifier }
 
 @tokens {

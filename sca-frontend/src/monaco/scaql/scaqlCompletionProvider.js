@@ -1,4 +1,5 @@
 import * as monaco from "monaco-editor";
+import { Arch, Asterisk, Comma, From, GitInfo, Problems, Project, Query, Select } from "./scaqlParser.terms";
 
 const keyword = (text, addLeadingSpace) => ({
     label: text,
@@ -109,6 +110,24 @@ const getCompletionRange = (model, position, before, after) => {
     };
 }
 
+const getUsedFields = (fieldList) => {
+    const used = new Set();
+    if (!fieldList) return used;
+
+    let cursor = fieldList.cursor();
+    if (!cursor.firstChild()) return used;
+
+    do {
+        const node = cursor.node;
+
+        if (node.type.name === "Arch") used.add("arch");
+        if (node.type.name === "GitInfo") used.add("git_info");
+        if (node.type.name === "Problems") used.add("problems");
+    } while (cursor.nextSibling());
+
+    return used;
+}
+
 export const scaqlCompletionProvider = {
     triggerCharacters: [" ", ","],
     provideCompletionItems(model, position) {
@@ -125,8 +144,6 @@ export const scaqlCompletionProvider = {
         // Внутри валидного узла - запрещаем
         if (!nodeBefore.type.isError && pos > nodeBefore.from && pos < nodeBefore.to) return { suggestions: [] };
 
-        console.log("start: ", nodeBefore.type.name, nodeAfter.type.name)
-
         const addLeadingSpace = !/\s/.test(model.getValue()[pos - 1]);
         const range = getCompletionRange(model, position, nodeBefore, nodeAfter);
         const command = { id: "editor.action.triggerSuggest", title: "Re-trigger suggestions" };
@@ -134,44 +151,52 @@ export const scaqlCompletionProvider = {
         const node = findDeepestChildBeforePos(nodeBefore, pos); // ищем валидный узел
         let suggestions = [];
 
-        console.log("found: ", node.type.name)
-
-        switch (node.type.name) {
-            case "Query":
+        switch (node.type.id) {
+            case Query:
                 suggestions.push(keyword("SELECT", false));
                 break;
-            case "Select":
-                if (!["Asterisk", "GitInfo", "Problems", "Arch"].includes(nodeAfter.type.name)) {
+            case Select:
+                if (![Asterisk, GitInfo, Problems, Arch].includes(nodeAfter.type.id)) {
                     suggestions.push(operator("*", addLeadingSpace));
                     suggestions.push(field("git_info", addLeadingSpace));
                     suggestions.push(field("problems", addLeadingSpace));
                     suggestions.push(field("arch", addLeadingSpace));
                 }
                 break;
-            case "Asterisk":
-                if (nodeAfter.type.name !== "From") {
+            case Asterisk:
+                if (nodeAfter.type.id !== From) {
                     suggestions.push(keyword("FROM", addLeadingSpace));
                 }
                 break;
-            case "GitInfo":
-            case "Problems":
-            case "Arch":
-                if (nodeAfter.type.name !== "Comma") {
-                    suggestions.push(symbol(",", false));
+            case GitInfo:
+            case Problems:
+            case Arch:
+                if (nodeAfter.type.id !== Comma) {
+                    const fieldList = node.parent;
+                    const allFields = ["git_info", "problems", "arch"];
+                    const usedFields = getUsedFields(fieldList);
+                    const unusedFields = allFields.filter((f) => !usedFields.has(f));
+
+                    if (unusedFields.length > 0) {
+                        suggestions.push(symbol(",", false));
+                    }
                 }
-                if (nodeAfter.type.name !== "From") {
+                if (nodeAfter.type.id !== From) {
                     suggestions.push(keyword("FROM", addLeadingSpace));
                 }
                 break;
-            case "Comma":
-                if (!["GitInfo", "Problems", "Arch"].includes(nodeAfter.type.name)) {
-                    suggestions.push(field("git_info", addLeadingSpace));
-                    suggestions.push(field("problems", addLeadingSpace));
-                    suggestions.push(field("arch", addLeadingSpace));
+            case Comma:
+                if (![GitInfo, Problems, Arch].includes(nodeAfter.type.id)) {
+                    const fieldList = node.parent;
+                    const allFields = ["git_info", "problems", "arch"];
+                    const usedFields = getUsedFields(fieldList);
+                    const unusedFields = allFields.filter((f) => !usedFields.has(f));
+
+                    unusedFields.forEach((f) => suggestions.push(field(f, addLeadingSpace)));
                 }
                 break;
-            case "From":
-                if (nodeAfter.type.name !== "Project") {
+            case From:
+                if (nodeAfter.type.id !== Project) {
                     suggestions.push(reference("project_1", addLeadingSpace));
                     suggestions.push(reference("project_2", addLeadingSpace));
                 }
@@ -179,7 +204,6 @@ export const scaqlCompletionProvider = {
         }
 
         suggestions = suggestions.map((s) => ({ ...s, range, command }));
-        console.log(suggestions);
 
         return { suggestions, incomplete: true };
     }

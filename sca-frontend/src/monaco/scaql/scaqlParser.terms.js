@@ -5,10 +5,9 @@ export const
   Select = 3,
   FieldList = 4,
   Asterisk = 5,
-  Field = 6,
-  GitInfo = 7,
-  Problems = 8,
-  Arch = 9,
-  Comma = 10,
-  From = 11,
-  Project = 12
+  GitInfo = 6,
+  Problems = 7,
+  Arch = 8,
+  Comma = 9,
+  From = 10,
+  Project = 11
