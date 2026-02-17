@@ -36,6 +36,7 @@ export const ProjectInfo = ({ open, setOpen }) => {
                         fontSize: 14,
                         minimap: { enabled: false },
                         automaticLayout: true,
+                        wordBasedSuggestions: "off",
                     }}
                 />
             </Box>

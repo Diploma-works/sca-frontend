@@ -10,41 +10,45 @@ import { TreeFragment } from "@lezer/common";
 import { parser } from "./parser";
 import { printTree } from "@/monaco/printTree";
 
-function keyword(text) {
+function keyword(text, addLeadingSpace) {
     return {
         label: text,
         kind: monaco.languages.CompletionItemKind.Keyword,
-        insertText: text + " "
+        insertText: addLeadingSpace ? " " + text : text,
     };
 }
 
-function column(text) {
+function field(text, addLeadingSpace) {
     return {
         label: text,
         kind: monaco.languages.CompletionItemKind.Field,
-        insertText: text
+        insertText: addLeadingSpace ? " " + text : text,
     };
 }
 
-function symbol(text) {
+function symbol(text, addLeadingSpace) {
     return {
         label: text,
         kind: monaco.languages.CompletionItemKind.Operator,
-        insertText: text + " "
+        insertText: addLeadingSpace ? " " + text : text,
     };
 }
 
-function variable(text) {
+function variable(text, addLeadingSpace) {
     return {
         label: text,
         kind: monaco.languages.CompletionItemKind.Variable,
-        insertText: text
+        insertText: addLeadingSpace ? " " + text : text,
     };
 }
 
 function findDeepestChildBeforePos(node, pos) {
-    let current = node;
+    // Если нам пришел errorNode - поднимаемся до первого корректного родителя и ищем детей в нем
+    while (node && node.type.isError) {
+        node = node.parent;
+    }
 
+    let current = node;
     while (current) {
         let cursor = current.cursor();
         if (!cursor.firstChild()) return current; // детей нет, возвращаем сам узел
@@ -69,6 +73,53 @@ function findDeepestChildBeforePos(node, pos) {
     return null;
 }
 
+function getCompletionRange(model, position, before, after) {
+    // Если слева error - заменяем его (важнее, чем справа)
+    if (before.type.isError) {
+        return {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: model.getPositionAt(before.from).column,
+            endColumn: model.getPositionAt(before.to).column,
+        };
+    }
+
+    // Если справа error - заменяем его
+    if (after.type.isError) {
+        return {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: model.getPositionAt(after.from).column,
+            endColumn: model.getPositionAt(after.to).column,
+        };
+    }
+
+    // Иначе вставляем в позицию курсора
+    return {
+        startLineNumber: position.lineNumber,
+        endLineNumber: position.lineNumber,
+        startColumn: position.column,
+        endColumn: position.column,
+    };
+}
+
+function skipWhitespaceLeft(model, pos) {
+    while (pos > 0) {
+        const ch = model.getValue()[pos - 1];
+        if (!/\s/.test(ch)) break;
+        pos--;
+    }
+    return pos;
+}
+
+function skipWhitespaceRight(model, pos) {
+    const text = model.getValue();
+    while (pos < text.length) {
+        if (!/\s/.test(text[pos])) break;
+        pos++;
+    }
+    return pos;
+}
 
 self.MonacoEnvironment = {
     getWorker(_, label) {
@@ -152,43 +203,72 @@ loader.init().then((monaco) => {
             if (!tree) return { suggestions: [] };
 
             const pos = model.getOffsetAt(position);
-            let node = tree.resolveInner(pos, -1);
-            if (!node) return { suggestions: [keyword("SELECT")] };
+            const nodeBefore = tree.resolveInner(skipWhitespaceLeft(model, pos), -1);
+            const nodeAfter = tree.resolveInner(skipWhitespaceRight(model, pos), 1);
 
-            node = findDeepestChildBeforePos(node, pos);
-            const suggestions = [];
+            // В начале текста, если справа валидный узел - запрещаем
+            if (pos === 0 && nodeAfter.type.name === "Select") return { suggestions: [] };
+
+            // Внутри валидного узла - запрещаем
+            if (!nodeBefore.type.isError && pos > nodeBefore.from && pos < nodeBefore.to) return { suggestions: [] };
+
+            console.log("start: ", nodeBefore.type.name, nodeAfter.type.name)
+
+            const addLeadingSpace = !/\s/.test(model.getValue()[pos - 1]);
+            const range = getCompletionRange(model, position, nodeBefore, nodeAfter);
+            const command = { id: "editor.action.triggerSuggest", title: "Re-trigger suggestions" };
+
+            const node = findDeepestChildBeforePos(nodeBefore, pos); // ищем валидный узел
+            let suggestions = [];
+
+            console.log("found: ", node.type.name)
 
             switch (node.type.name) {
                 case "Query":
-                    suggestions.push(keyword("SELECT"));
+                    suggestions.push(keyword("SELECT", false));
                     break;
                 case "Select":
-                    suggestions.push(keyword("*"));
-                    suggestions.push(column("git_info"));
-                    suggestions.push(column("problems"));
-                    suggestions.push(column("arch"));
+                    if (!["Asterisk", "GitInfo", "Problems", "Arch"].includes(nodeAfter.type.name)) {
+                        suggestions.push(keyword("*", addLeadingSpace));
+                        suggestions.push(field("git_info", addLeadingSpace));
+                        suggestions.push(field("problems", addLeadingSpace));
+                        suggestions.push(field("arch", addLeadingSpace));
+                    }
                     break;
                 case "Asterisk":
-                    suggestions.push(keyword("FROM"));
+                    if (nodeAfter.type.name !== "From") {
+                        suggestions.push(keyword("FROM", addLeadingSpace));
+                    }
                     break;
                 case "GitInfo":
                 case "Problems":
                 case "Arch":
-                    suggestions.push(symbol(","));
-                    suggestions.push(keyword("FROM"));
+                    if (nodeAfter.type.name !== "Comma") {
+                        suggestions.push(symbol(",", false));
+                    }
+                    if (nodeAfter.type.name !== "From") {
+                        suggestions.push(keyword("FROM", addLeadingSpace));
+                    }
                     break;
                 case "Comma":
-                    suggestions.push(column("git_info"));
-                    suggestions.push(column("problems"));
-                    suggestions.push(column("arch"));
+                    if (!["GitInfo", "Problems", "Arch"].includes(nodeAfter.type.name)) {
+                        suggestions.push(field("git_info", addLeadingSpace));
+                        suggestions.push(field("problems", addLeadingSpace));
+                        suggestions.push(field("arch", addLeadingSpace));
+                    }
                     break;
                 case "From":
-                    suggestions.push(variable("project_1"));
-                    suggestions.push(variable("project_2"));
+                    if (nodeAfter.type.name !== "Project") {
+                        suggestions.push(variable("project_1", addLeadingSpace));
+                        suggestions.push(variable("project_2", addLeadingSpace));
+                    }
                     break;
             }
 
-            return { suggestions };
+            suggestions = suggestions.map((s) => ({ ...s, range, command }));
+            console.log(suggestions);
+
+            return { suggestions, incomplete: true };
         }
     });
 });
