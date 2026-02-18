@@ -19,35 +19,26 @@ const Editor = ({ projectId }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [saveError, setSaveError] = useState(null);
     const fileType = useMemo(() => getFileType(activeTab?.label), [activeTab]);
-    const actualProjectId = projectId || 6; // TODO: заменить на актуальный id
+    const actualProjectId = projectId || 6;
 
     useEffect(() => {
         async function fetchContent() {
             if (activeTab?.label) {
-                console.log('activeTab:', activeTab);
-                console.log('activeTab.path:', activeTab.path);
-                
                 let filePath = "";
                 
                 try {
                     if(activeTab.path && activeTab.path.length > 0) {
-                        // Собираем полный путь из всех элементов path
                         const pathParts = activeTab.path.map(p => p.id);
                         filePath = pathParts.join("/") + "/" + activeTab.label;
                     } else {
                         filePath = activeTab.label;
                     }
                     
-                    console.log('Final filePath:', filePath);
-                    console.log('Using projectId:', actualProjectId);
                     const content = await fileAPI.getFileContent(actualProjectId, filePath);
-                    console.log('Received content:', content);
-                    
                     setFileContent(content);
                     setEditedContent(content);
                 } catch (e) {
                     console.error('Error fetching file content:', e);
-                    console.log('Failed for filePath:', filePath);
                     setFileContent("");
                     setEditedContent("");
                 }

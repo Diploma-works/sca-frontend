@@ -308,7 +308,6 @@ const ProjectStructure = memo((props) => {
                 });
             }
             setItems(addIdsAndLabels(structure));
-            console.log(addIdsAndLabels(structure));
         } catch (e) {
             setItems([]);
             showNotification('Ошибка загрузки структуры проекта', 'error');
@@ -319,12 +318,10 @@ const ProjectStructure = memo((props) => {
         refreshStructure();
     }, [projectId]);
 
-    // Функция для показа уведомлений
     const showNotification = (message, severity = 'info') => {
         setNotification({ open: true, message, severity });
     };
 
-    // Обработчики контекстного меню
     const handleDeleteFile = async (filePath) => {
         try {
             await fileAPI.deleteFile(projectId, filePath);
@@ -367,7 +364,6 @@ const ProjectStructure = memo((props) => {
         });
     };
 
-    // Функция создания файла (главная кнопка)
     const handleCreateFile = async () => {
         if (!newFileName.trim()) return;
         setCreatingFile(true);
@@ -385,7 +381,6 @@ const ProjectStructure = memo((props) => {
         }
     };
 
-    // Функция быстрого создания из контекстного меню
     const handleQuickCreate = async () => {
         if (!quickCreateDialog.name.trim()) return;
         
@@ -409,34 +404,29 @@ const ProjectStructure = memo((props) => {
         }
     };
 
-    // TODO: добавить полноценные функции
     const additionalActions = [
         {
             title: "Развернуть все",
             icon: <UnfoldMoreRoundedIcon/>,
             props: {
-                onClick: () => console.log(treeViewApiRef.current)
+                onClick: () => treeViewApiRef.current?.expandAll?.()
             }
         },
         {
             title: "Свернуть все",
             icon: <UnfoldLessRoundedIcon/>,
             props: {
-                onClick: () => console.log(treeViewApiRef.current)
+                onClick: () => treeViewApiRef.current?.collapseAll?.()
             }
         }
     ];
 
-    // TODO: обернуть в useCallback?
     const handleExpandedItemsChange = (e, itemIds) => setExpandedItems(itemIds);
     const handleSelectedItemsChange = (e, itemIds) => setSelectedItems(itemIds);
 
-    // TODO: добавить вызов этой функции при нажатии в PathBreadcrumbs
     const handleItemExpansionToggle = async (event, itemId) => {
-        // Можно реализовать подгрузку дочерних элементов, если API поддерживает
     };
 
-    // Объект с обработчиками для контекстного меню
     const contextHandlers = {
         onDeleteFile: handleDeleteFile,
         onRenameFile: handleRenameFile,

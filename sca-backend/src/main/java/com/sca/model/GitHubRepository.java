@@ -30,7 +30,6 @@ public class GitHubRepository {
         this.cloneUrl = cloneUrl;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

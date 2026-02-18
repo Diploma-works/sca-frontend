@@ -31,22 +31,15 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity<List<Project>> getUserProjects(@AuthenticationPrincipal User user) {
         try {
-            // Отладочная информация
-            System.out.println("=== GET USER PROJECTS ===");
-            System.out.println("User from @AuthenticationPrincipal: " + (user != null ? user.getUsername() : "NULL"));
-            System.out.println("User object: " + user);
-            
             if (user == null) {
                 System.err.println("User is null in getUserProjects");
                 return ResponseEntity.status(401).build();
             }
             
             List<Project> projects = projectService.getProjectsByUser(user);
-            System.out.println("Found " + projects.size() + " projects for user " + user.getUsername());
             return ResponseEntity.ok(projects);
         } catch (Exception e) {
             System.err.println("Exception in getUserProjects: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -73,10 +66,6 @@ public class ProjectController {
     public ResponseEntity<?> createProject(@Valid @RequestBody Project project, 
                                          @AuthenticationPrincipal User user) {
         try {
-            // Отладочная информация
-            System.out.println("Creating project: " + project.getName());
-            System.out.println("User from @AuthenticationPrincipal: " + (user != null ? user.getUsername() : "NULL"));
-            
             if (user == null) {
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "Пользователь не аутентифицирован");
@@ -88,13 +77,11 @@ public class ProjectController {
             return ResponseEntity.ok(createdProject);
         } catch (RuntimeException e) {
             System.err.println("RuntimeException in createProject: " + e.getMessage());
-            e.printStackTrace();
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         } catch (Exception e) {
             System.err.println("Exception in createProject: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -176,13 +163,10 @@ public class ProjectController {
             Object structure = projectService.getProjectStructure(id, user);
             return ResponseEntity.ok(structure);
         } catch (RuntimeException e) {
-            // Подробный вывод ошибки в консоль
             System.err.println("Ошибка при получении структуры проекта: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.err.println("Неизвестная ошибка: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
@@ -194,7 +178,6 @@ public class ProjectController {
         try {
             Project project = projectService.getProjectById(projectId, user);
 
-            // Получаем полный path после /files/
             String pathWithinHandler = (String) request.getAttribute(
                     HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE
             );
@@ -226,17 +209,11 @@ public class ProjectController {
                                            @AuthenticationPrincipal User user,
                                            HttpServletRequest request) {
         try {
-            System.out.println("=== SAVE FILE CONTENT ===");
-            System.out.println("Project ID: " + projectId);
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
             }
             
-            // Получаем полный path после /files/
             String requestUri = request.getRequestURI();
-            System.out.println("Request URI: " + requestUri);
             
             String projectsPattern = "/api/projects/" + projectId + "/files/";
             int filesIndex = requestUri.indexOf(projectsPattern);
@@ -245,21 +222,17 @@ public class ProjectController {
             }
             
             String relativePath = requestUri.substring(filesIndex + projectsPattern.length());
-            System.out.println("Relative path: " + relativePath);
             
             String content = body.get("content");
             if (content == null) {
                 content = "";
             }
             
-            System.out.println("Content length: " + content.length());
-            
             projectService.updateFile(projectId, relativePath, content, user);
             return ResponseEntity.ok(Map.of("message", "File saved successfully", "filePath", relativePath));
             
         } catch (Exception e) {
             System.err.println("Error saving file: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
     }
@@ -271,16 +244,6 @@ public class ProjectController {
     public ResponseEntity<?> cloneFromGitHub(@RequestBody Map<String, String> cloneData,
                                            @AuthenticationPrincipal User user) {
         try {
-            System.out.println("=== CLONE FROM GITHUB ===");
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            System.out.println("Request body received: " + cloneData);
-            System.out.println("Request body class: " + (cloneData != null ? cloneData.getClass().getName() : "NULL"));
-            System.out.println("Request body size: " + (cloneData != null ? cloneData.size() : 0));
-            
-            if (cloneData != null) {
-                cloneData.forEach((key, value) -> System.out.println("  " + key + " = " + value));
-            }
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
             }
@@ -288,11 +251,6 @@ public class ProjectController {
             String gitUrl = cloneData.get("gitUrl");
             String branch = cloneData.getOrDefault("branch", "main");
             String projectName = cloneData.get("name");
-            
-            System.out.println("Extracted values:");
-            System.out.println("  gitUrl: " + gitUrl);
-            System.out.println("  branch: " + branch);
-            System.out.println("  projectName: " + projectName);
             
             if (gitUrl == null || gitUrl.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
@@ -303,12 +261,10 @@ public class ProjectController {
             }
             
             Project clonedProject = projectService.cloneFromGitHub(gitUrl, branch, projectName, user);
-            System.out.println("Successfully cloned project: " + clonedProject.getName());
             return ResponseEntity.ok(clonedProject);
             
         } catch (Exception e) {
             System.err.println("Error cloning from GitHub: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
         }
     }
@@ -320,14 +276,6 @@ public class ProjectController {
     public ResponseEntity<?> cloneFromGitLab(@RequestBody Map<String, String> cloneData,
                                             @AuthenticationPrincipal User user) {
         try {
-            System.out.println("=== CLONE FROM GITLAB ===");
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            System.out.println("Request body received: " + cloneData);
-            
-            if (cloneData != null) {
-                cloneData.forEach((key, value) -> System.out.println("  " + key + " = " + value));
-            }
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
             }
@@ -335,11 +283,6 @@ public class ProjectController {
             String gitUrl = cloneData.get("gitUrl");
             String branch = cloneData.getOrDefault("branch", "main");
             String projectName = cloneData.get("name");
-            
-            System.out.println("Extracted values:");
-            System.out.println("  gitUrl: " + gitUrl);
-            System.out.println("  branch: " + branch);
-            System.out.println("  projectName: " + projectName);
             
             if (gitUrl == null || gitUrl.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
@@ -350,12 +293,10 @@ public class ProjectController {
             }
             
             Project clonedProject = projectService.cloneFromGitLab(gitUrl, branch, projectName, user);
-            System.out.println("Successfully cloned project: " + clonedProject.getName());
             return ResponseEntity.ok(clonedProject);
             
         } catch (Exception e) {
             System.err.println("Error cloning from GitLab: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
         }
     }
@@ -367,14 +308,6 @@ public class ProjectController {
     public ResponseEntity<?> cloneFromBitbucket(@RequestBody Map<String, String> cloneData,
                                                @AuthenticationPrincipal User user) {
         try {
-            System.out.println("=== CLONE FROM BITBUCKET ===");
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            System.out.println("Request body received: " + cloneData);
-            
-            if (cloneData != null) {
-                cloneData.forEach((key, value) -> System.out.println("  " + key + " = " + value));
-            }
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
             }
@@ -382,11 +315,6 @@ public class ProjectController {
             String gitUrl = cloneData.get("gitUrl");
             String branch = cloneData.getOrDefault("branch", "main");
             String projectName = cloneData.get("name");
-            
-            System.out.println("Extracted values:");
-            System.out.println("  gitUrl: " + gitUrl);
-            System.out.println("  branch: " + branch);
-            System.out.println("  projectName: " + projectName);
             
             if (gitUrl == null || gitUrl.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
@@ -397,12 +325,10 @@ public class ProjectController {
             }
             
             Project clonedProject = projectService.cloneFromBitbucket(gitUrl, branch, projectName, user);
-            System.out.println("Successfully cloned project: " + clonedProject.getName());
             return ResponseEntity.ok(clonedProject);
             
         } catch (Exception e) {
             System.err.println("Error cloning from Bitbucket: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
         }
     }
@@ -415,20 +341,13 @@ public class ProjectController {
                                       @AuthenticationPrincipal User user,
                                       HttpServletRequest request) {
         try {
-            System.out.println("=== DELETE FILE ===");
-            System.out.println("Project ID: " + id);
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Пользователь не аутентифицирован"));
             }
             
-            // Извлечение пути файла из URL
             String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
             String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
             String filePath = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
-            
-            System.out.println("File path to delete: " + filePath);
             
             boolean result = projectService.deleteFile(id, filePath, user);
             if (result) {
@@ -442,7 +361,6 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.err.println("Exception in deleteFile: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Внутренняя ошибка сервера"));
         }
     }
@@ -456,24 +374,15 @@ public class ProjectController {
                                       @AuthenticationPrincipal User user,
                                       HttpServletRequest request) {
         try {
-            System.out.println("=== RENAME FILE ===");
-            System.out.println("Project ID: " + id);
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            System.out.println("Rename data: " + renameData);
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Пользователь не аутентифицирован"));
             }
             
-            // Извлечение пути файла из URL
             String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
             String bestMatchingPattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
             String filePath = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern, path);
             
             String newName = renameData.get("newName");
-            
-            System.out.println("File path to rename: " + filePath);
-            System.out.println("New name: " + newName);
             
             if (newName == null || newName.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Новое имя файла обязательно"));
@@ -491,7 +400,6 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.err.println("Exception in renameFile: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Внутренняя ошибка сервера"));
         }
     }
@@ -504,11 +412,6 @@ public class ProjectController {
                                         @RequestBody Map<String, String> folderData,
                                         @AuthenticationPrincipal User user) {
         try {
-            System.out.println("=== CREATE FOLDER ===");
-            System.out.println("Project ID: " + id);
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            System.out.println("Folder data: " + folderData);
-            
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Пользователь не аутентифицирован"));
             }
@@ -531,7 +434,6 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             System.err.println("Exception in createFolder: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Внутренняя ошибка сервера"));
         }
     }

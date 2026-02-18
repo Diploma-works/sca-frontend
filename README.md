@@ -18,42 +18,6 @@
 - Расположен в папке `sca-backend/`
 - Spring Boot 3.2, PostgreSQL, Redis, Docker
 
-### Структура репозитория
-
-```
-sca-frontend/          — клиентская часть (React)
-  src/
-    components/
-      Git/             — общие Git-компоненты (GitActions, GitView, gitProviderAdapters)
-      GitHub/          — интеграция с GitHub
-      GitLab/          — интеграция с GitLab
-      Bitbucket/       — интеграция с Bitbucket
-      Editor/          — редактор кода
-      LeftSidebar/     — боковая панель навигации
-      Problems/        — панель проблем анализа
-      Projects/        — управление проектами
-      ProjectStructure/— структура файлов проекта
-      Statistics/      — статистика и метрики
-    pages/             — страницы (GitHubPage, GitLabPage, BitbucketPage)
-    utils/api.js       — API-клиент (gitHubAPI, gitLabAPI, bitbucketAPI, projectGitAPI)
-    hooks/             — пользовательские хуки
-    themes/            — темы оформления (dark, light)
-
-sca-backend/           — серверная часть (Spring Boot)
-  src/main/java/com/sca/
-    controller/        — REST-контроллеры
-    service/           — бизнес-логика
-    model/             — JPA-сущности
-    config/            — конфигурация (Security, JWT, WebSocket)
-    repository/        — Spring Data JPA репозитории
-  src/test/            — unit- и интеграционные тесты
-
-user-data/             — пользовательские рабочие пространства
-docker-compose.yml     — конфигурация Docker Compose
-```
-
----
-
 ## Предварительные требования
 
 - Node.js 18+
@@ -102,16 +66,7 @@ docker-compose up -d
 docker-compose up backend -d --build
 ```
 
-### 5. Доступ к приложению
 
-| Компонент     | URL                           |
-|---------------|-------------------------------|
-| Frontend      | http://localhost:3000          |
-| Backend API   | http://localhost:8080/api      |
-| SonarQube     | http://localhost:9000          |
-| Nginx Proxy   | http://localhost:80            |
-
----
 
 ## Основные возможности
 
@@ -133,7 +88,6 @@ docker-compose up backend -d --build
 | Возможность                     | GitHub | GitLab | Bitbucket |
 |---------------------------------|--------|--------|-----------|
 | Аутентификация по токену        | да     | да     | да        |
-| Basic auth (App Password)       | —      | —      | да        |
 | Список репозиториев             | да     | да     | да        |
 | Просмотр веток                  | да     | да     | да        |
 | Клонирование репозитория        | да     | да     | да        |
@@ -141,7 +95,6 @@ docker-compose up backend -d --build
 | Создание и переключение веток   | да     | да     | да        |
 | Stash / Stash Pop               | да     | да     | да        |
 | Reset                           | да     | да     | да        |
-| Управление SSH-ключами          | —      | —      | да        |
 
 Git-операции на уровне проекта (commit, push, pull, branch) унифицированы через паттерн Adapter (`gitProviderAdapters.js`) и единый backend-сервис `ProjectGitService`.
 
@@ -162,54 +115,6 @@ Git-операции на уровне проекта (commit, push, pull, branc
 - Ограничения ресурсов (память, CPU)
 - Автоматическая очистка контейнеров
 - Безопасность контейнеров
-
----
-
-## Конфигурация
-
-### Frontend (`sca-frontend/.env`)
-
-```env
-REACT_APP_API_URL=http://localhost:8080/api
-REACT_APP_WS_URL=ws://localhost:8080/ws
-REACT_APP_ENV=development
-```
-
-### Backend (`sca-backend/src/main/resources/application.yml`)
-
-```yaml
-server:
-  port: 8080
-  servlet:
-    context-path: /api
-
-spring:
-  datasource:
-    url: jdbc:postgresql://postgres:5432/sca_ide
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-  data:
-    redis:
-      host: ${SPRING_REDIS_HOST}
-      port: 6379
-      password: ${REDIS_PASSWORD}
-  security:
-    jwt:
-      secret: ${JWT_SECRET}
-      expiration: 86400000
-
-docker:
-  host: tcp://localhost:2375
-  containers:
-    memory-limit: 512m
-    cpu-limit: 0.5
-    timeout: 300
-```
-
----
 
 ## Docker-развёртывание
 
@@ -336,23 +241,6 @@ docker-compose up postgres redis sonarqube nginx -d
 - Docker статистика
 
 ---
-
-## Тестирование
-
-### Frontend-тесты
-
-```bash
-cd sca-frontend
-npm test
-npm run test:coverage
-```
-
-Тесты расположены в `src/components/Git/__tests__/`:
-- `GitView.test.js` — основные тесты компонента GitView (рендеринг, действия, ветки, статусы)
-- `GitView.integration.test.js` — интеграционные тесты (commit, push, pull, branch, stash, reset)
-- `GitView.utils.test.js` — тесты утилитарных функций
-
-Используются: Jest, React Testing Library.
 
 ### Backend-тесты
 

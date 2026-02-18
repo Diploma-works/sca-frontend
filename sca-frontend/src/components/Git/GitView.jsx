@@ -65,14 +65,10 @@ const GitView = (props) => {
 
     const { projectId } = props;
 
-    console.log('GitView - Received projectId:', projectId); // Отладочная информация
-
     useEffect(() => {
-        console.log('GitView - useEffect triggered with projectId:', projectId); // Отладочная информация
         if (projectId) {
             fetchData();
         } else {
-            console.log('GitView - No projectId provided, not fetching data'); // Отладочная информация
             setLoading(false);
             setError('No project selected');
         }
@@ -82,15 +78,12 @@ const GitView = (props) => {
         if (!projectId) return;
         
         try {
-            // Force fetch remote branches
-            console.log('Fetching remote branches for project:', projectId);
             setLoading(true);
             const branchesResponse = await api.projectAPI.getBranches(projectId);
             setBranches(prev => ({
                 ...prev,
                 remote: branchesResponse?.remote || []
             }));
-            console.log('Remote branches updated:', branchesResponse?.remote);
         } catch (err) {
             console.error('Error fetching remote branches:', err);
             setError('Failed to fetch remote branches: ' + err.message);
@@ -101,33 +94,19 @@ const GitView = (props) => {
 
     const fetchData = async () => {
         try {
-            console.log('GitView - fetchData started for projectId:', projectId); // Отладочная информация
             setLoading(true);
             setError(null);
             
-            console.log('GitView - Making API calls...'); // Отладочная информация
             const [branchesResponse, graphResponse] = await Promise.all([
                 api.projectAPI.getBranches(projectId),
                 api.projectAPI.getBranchGraph(projectId, limit)
             ]);
             
-            console.log('GitView - API calls completed'); // Отладочная информация
-            console.log('Branches response:', branchesResponse); // Отладочная информация
-            console.log('Graph response:', graphResponse); // Отладочная информация
-            
-            // Детальное логирование веток
-            console.log('Local branches count:', branchesResponse?.local?.length || 0);
-            console.log('Remote branches count:', branchesResponse?.remote?.length || 0);
-            console.log('Local branches:', branchesResponse?.local);
-            console.log('Remote branches:', branchesResponse?.remote);
-            
-            // Извлекаем ветки из данных коммитов для более полного списка
             const extractBranchesFromCommits = (commits) => {
                 if (!commits || !Array.isArray(commits)) return [];
                 
                 const branchNames = new Set();
                 
-                // Ищем merge коммиты для определения веток
                 const mergeCommitIndex = commits.findIndex(c => 
                     c.message && typeof c.message === 'string' && 
                     c.message.toLowerCase().includes('merge')
@@ -135,8 +114,6 @@ const GitView = (props) => {
                 
                 if (mergeCommitIndex !== -1) {
                     const mergeCommit = commits[mergeCommitIndex];
-                    
-                    // Извлекаем название ветки из сообщения merge
                     const message = mergeCommit.message.toLowerCase();
                     const branchPatterns = [
                         /merge pull request #\d+ from \w+\/(\w+)/,
@@ -166,11 +143,8 @@ const GitView = (props) => {
                 }));
             };
             
-            // Получаем дополнительные ветки из истории коммитов
             const branchesFromCommits = extractBranchesFromCommits(graphResponse?.commits || graphResponse || []);
-            console.log('Branches extracted from commits:', branchesFromCommits);
             
-            // Объединяем physical remote ветки с ветками из истории коммитов
             const existingRemoteBranches = Array.isArray(branchesResponse?.remote) ? branchesResponse.remote : [];
             const existingBranchNames = new Set(existingRemoteBranches.map(b => b.name || b));
             
@@ -178,15 +152,12 @@ const GitView = (props) => {
                 !existingBranchNames.has(branch.name)
             );
             
-            // Убеждаемся, что структура данных корректна
             const normalizedBranches = {
                 local: Array.isArray(branchesResponse?.local) ? branchesResponse.local : [],
                 remote: [...existingRemoteBranches, ...additionalRemoteBranches],
                 current: branchesResponse?.current || ''
             };
             
-            console.log('Final remote branches (physical + from commits):', normalizedBranches.remote);
-            console.log('Normalized branches:', normalizedBranches);
             setBranches(normalizedBranches);
             const normalizedGraph = {
                 commits: graphResponse?.commits || graphResponse || [],
@@ -194,35 +165,22 @@ const GitView = (props) => {
             };
             setGraphData(normalizedGraph);
             setError(null);
-            console.log('GitView - Data fetched successfully'); // Отладочная информация
         } catch (err) {
-            console.error('GitView - Error fetching git data:', err); // Отладочная информация
-            console.error('GitView - Error details:', {
-                message: err.message,
-                status: err.status,
-                response: err.response
-            }); // Отладочная информация
-            
-            // Проверяем, является ли это ошибкой "Project not found"
+            console.error('Error fetching git data:', err);
             if (err.message && err.message.includes('Project not found')) {
                 setError('Project not found. Please select a valid project from the Projects tab.');
             } else {
                 setError('Failed to fetch git data: ' + (err.message || 'Unknown error'));
             }
         } finally {
-            console.log('GitView - fetchData completed, setting loading to false'); // Отладочная информация
             setLoading(false);
         }
     };
 
     // Git Actions functions
-    // Project-level git operations work on the already cloned workspace repository
-    // and are provider-agnostic. So Git actions for a project shouldn't be blocked
-    // by GitHub account connection status.
     const checkGitHubConnection = async () => {
         try {
             const response = await gitHubAPI.getStatus();
-            // Keep status for informational purposes, but don't block project actions.
             setConnected(!!response.connected || !!projectId);
         } catch (err) {
             console.error('Error checking GitHub connection:', err);
@@ -250,7 +208,6 @@ const GitView = (props) => {
             setHasStash(stashStatus.hasStash || false);
         } catch (err) {
             console.error('Error loading stash status:', err);
-            // Не показываем ошибку пользователю, просто предполагаем что stash нет
             setHasStash(false);
         }
     };
@@ -268,7 +225,7 @@ const GitView = (props) => {
             setCommitMessage('');
             setCommitDialogOpen(false);
             loadGitStatus();
-            fetchData(); // Обновляем граф
+            fetchData();
         } catch (err) {
             console.error('Error creating commit:', err);
             setError('Ошибка при создании коммита: ' + (err.message || 'Неизвестная ошибка'));
@@ -296,7 +253,7 @@ const GitView = (props) => {
             setLoading(true);
             await projectGitAPI.pullProjectChanges(projectId, branches.current || 'main');
             setSuccess('Изменения успешно загружены из удаленного репозитория');
-            fetchData(); // Обновляем данные после pull
+            fetchData();
         } catch (err) {
             console.error('Error pulling changes:', err);
             setError('Ошибка при загрузке изменений: ' + (err.message || 'Неизвестная ошибка'));
@@ -317,7 +274,7 @@ const GitView = (props) => {
             setSuccess(`Ветка "${newBranchName}" успешно создана`);
             setNewBranchName('');
             setBranchDialogOpen(false);
-            fetchData(); // Обновляем список веток
+            fetchData();
         } catch (err) {
             console.error('Error creating branch:', err);
             setError('Ошибка при создании ветки: ' + (err.message || 'Неизвестная ошибка'));
@@ -436,10 +393,8 @@ const GitView = (props) => {
         }
     };
 
-    // Load Git Actions data when component mounts
     useEffect(() => {
         if (projectId) {
-            // Always allow actions when project is present.
             setConnected(true);
             checkGitHubConnection();
             loadGitStatus();
@@ -472,8 +427,8 @@ const GitView = (props) => {
             setSuccess(`Успешно переключились на ветку "${selectedBranch}"`);
             setSelectedBranch('');
             setSwitchBranchDialogOpen(false);
-            fetchData(); // Обновляем данные
-            loadGitStatus(); // Обновляем статус
+            fetchData();
+            loadGitStatus();
         } catch (err) {
             console.error('Error switching branch:', err);
             setError('Ошибка при переключении ветки: ' + (err.message || 'Неизвестная ошибка'));
@@ -487,32 +442,16 @@ const GitView = (props) => {
             return { commits: [], totalBranches: 1 };
         }
         
-        console.log('Parsing commits:', commits);
-        console.log('Branches data:', branchesData);
-        
-        // Анализируем Git граф символы для правильного определения структуры веток
-        const allBranches = new Set(['main']); // Всегда есть main ветка
+        const allBranches = new Set(['main']);
         const branchMap = new Map();
         branchMap.set('main', 0);
         let nextTrack = 1;
-        
-        // Анализируем Git граф из commit.graph для определения активных веток
-        commits.forEach((commit, index) => {
-            if (commit.graph) {
-                console.log(`Commit ${index}: ${commit.shortHash} - Graph: "${commit.graph}"`);
-            }
-        });
-        
-        // Определяем ветки из refs информации и устанавливаем фиксированные треки
-        branchMap.set('main', 0); // main всегда трек 0
         
         commits.forEach((commit, index) => {
             if (commit.refs && commit.refs.trim()) {
                 const refs = commit.refs.split(',').map(ref => ref.trim());
                 refs.forEach(ref => {
-                    // Извлекаем имена веток из refs
                     if (ref.includes('->')) {
-                        // HEAD -> branch_name или origin/branch -> branch
                         const parts = ref.split('->').map(p => p.trim());
                         if (parts.length > 1) {
                             const branchName = parts[1];
@@ -524,7 +463,6 @@ const GitView = (props) => {
                             }
                         }
                     } else if (!ref.includes('tag:') && !ref.includes('origin/HEAD')) {
-                        // Простое имя ветки
                         const branchName = ref.replace('origin/', '').trim();
                         if (branchName && branchName !== 'HEAD' && branchName.length > 0) {
                             allBranches.add(branchName);
@@ -537,13 +475,9 @@ const GitView = (props) => {
             }
         });
         
-        // Ищем merge коммиты для определения дополнительных веток
         commits.forEach((commit, index) => {
             if (commit.message && typeof commit.message === 'string' && 
                 commit.message.toLowerCase().includes('merge')) {
-                console.log('Found merge commit:', commit);
-                
-                // Извлекаем название ветки из сообщения merge
                 const message = commit.message.toLowerCase();
                 const branchPatterns = [
                     /merge pull request #\d+ from \w+\/(\w+)/,
@@ -564,56 +498,34 @@ const GitView = (props) => {
                 if (mergedBranchName && !branchMap.has(mergedBranchName)) {
                     allBranches.add(mergedBranchName);
                     branchMap.set(mergedBranchName, nextTrack++);
-                    console.log(`Detected merged branch from message: ${mergedBranchName}`);
                 }
             }
         });
         
-        console.log('All detected branches:', Array.from(allBranches));
-        console.log('Branch to track mapping:', Array.from(branchMap.entries()));
-        
-        // Анализируем коммиты и назначаем им правильные треки на основе граф символов
         const parsedCommits = commits.map((commit, index) => {
-            let branchTrack = 0; // По умолчанию main
+            let branchTrack = 0;
             let branchName = 'main';
             
-            // Анализируем graph символы для определения трека
             if (commit.graph) {
                 const graph = commit.graph;
-                
-                // Улучшенная логика определения трека по граф символам
-                // Считаем количество символов до * включая пробелы и |
-                // Примеры:
-                // "* " -> track 0 (main)
-                // "| * " -> track 1 (feature branch) 
-                // "| | * " -> track 2 (another branch)
-                // "*   " merge commit в main -> track 0
-                // "|\  " -> track 0 (после merge)
-                
                 let trackPosition = 0;
                 const asteriskIndex = graph.indexOf('*');
                 
                 if (asteriskIndex !== -1) {
-                    // Подсчитываем количество | символов перед *
                     const beforeAsterisk = graph.substring(0, asteriskIndex);
                     trackPosition = (beforeAsterisk.match(/\|/g) || []).length;
                     
-                    // Особый случай для merge коммитов
                     if (graph.includes('*   ') || graph.includes('*  ')) {
-                        // Merge коммит всегда в основной ветке (track 0)
                         trackPosition = 0;
                     }
                 }
                 
                 branchTrack = trackPosition;
-                console.log(`Graph "${graph}" -> track ${trackPosition} (asterisk at ${asteriskIndex})`);
             }
             
-            // Определяем имя ветки приоритетно по refs, затем по граф позиции
             if (commit.refs && commit.refs.trim()) {
                 const refs = commit.refs.split(',').map(ref => ref.trim());
                 
-                // Ищем текущую ветку (HEAD -> branch) - это самый точный индикатор
                 const headRef = refs.find(ref => ref.includes('HEAD ->'));
                 if (headRef) {
                     const match = headRef.match(/HEAD\s*->\s*([^\s,]+)/);
@@ -622,7 +534,6 @@ const GitView = (props) => {
                         branchTrack = branchMap.get(branchName) || 0;
                     }
                 } else {
-                    // Ищем любую не-tag ветку в refs
                     const branchRefs = refs.filter(ref => 
                         !ref.includes('tag:') && 
                         !ref.includes('origin/HEAD') && 
@@ -630,7 +541,6 @@ const GitView = (props) => {
                     );
                     
                     if (branchRefs.length > 0) {
-                        // Приоритет: main > остальные ветки
                         let selectedRef = branchRefs.find(ref => ref.includes('main')) || branchRefs[0];
                         let cleanBranchName = selectedRef.replace('origin/', '').trim();
                         
@@ -641,12 +551,9 @@ const GitView = (props) => {
                     }
                 }
             } else {
-                // Если нет refs, пытаемся определить по граф позиции и merge commit'ам
                 if (branchTrack > 0) {
-                    // Ищем merge commit чтобы определить имя ветки
                     let foundBranchName = null;
                     
-                    // Проверяем ближайшие merge commit'ы
                     for (let i = Math.max(0, index - 3); i <= Math.min(commits.length - 1, index + 3); i++) {
                         const nearCommit = commits[i];
                         if (nearCommit.message && nearCommit.message.toLowerCase().includes('merge')) {
@@ -675,19 +582,15 @@ const GitView = (props) => {
                             branchMap.set(branchName, branchTrack);
                         }
                     } else {
-                        // Fallback: создаем generic имя ветки
                         branchName = `feature-track-${branchTrack}`;
                         allBranches.add(branchName);
                         branchMap.set(branchName, branchTrack);
                     }
                 } else {
-                    // track 0 без refs = main
                     branchName = 'main';
                     branchTrack = 0;
                 }
             }
-            
-            console.log(`Commit ${index}: ${commit.shortHash} -> track ${branchTrack} (${branchName})`);
             
             return {
                 ...commit,
@@ -701,21 +604,6 @@ const GitView = (props) => {
             };
         });
             
-            console.log('Final branch mapping:', Array.from(branchMap.entries()));
-            console.log('Total branches detected:', allBranches.size);
-            console.log('All branches:', Array.from(allBranches));
-            console.log('Parsed commits with correct tracks:', parsedCommits.map(c => ({
-                id: c.id, 
-                branchTrack: c.branchTrack, 
-                branchName: c.branchName, 
-                message: c.message?.substring(0, 50)
-            })));
-            
-            // Проверяем, что у нас есть коммиты с разными branchTrack
-            const uniqueTracks = [...new Set(parsedCommits.map(c => c.branchTrack))];
-            console.log('Unique branch tracks:', uniqueTracks);
-            console.log('Should render', uniqueTracks.length, 'visual tracks');
-            
         return { 
             commits: parsedCommits, 
             totalBranches: allBranches.size
@@ -724,19 +612,18 @@ const GitView = (props) => {
 
     const getBranchColor = (track) => {
         const colors = [
-            '#3b82f6', // blue
-            '#10b981', // emerald  
-            '#f59e0b', // amber
-            '#ef4444', // red
-            '#8b5cf6', // violet
-            '#06b6d4', // cyan
-            '#84cc16'  // lime
+            '#3b82f6',
+            '#10b981',
+            '#f59e0b',
+            '#ef4444',
+            '#8b5cf6',
+            '#06b6d4',
+            '#84cc16'
         ];
         return colors[track % colors.length];
     };
 
     const renderBranchItem = (branch, isLocal = true) => {
-        // Извлекаем имя ветки из объекта или используем как строку
         const branchName = typeof branch === 'object' ? (branch.name || branch.current || String(branch)) : String(branch);
         const branchKey = typeof branch === 'object' ? (branch.name || branch.current || JSON.stringify(branch)) : String(branch);
         
@@ -791,9 +678,8 @@ const GitView = (props) => {
         );
     };
 
-    // Константы для синхронизации высоты элементов
-    const COMMIT_ITEM_HEIGHT = 72; // Высота одного элемента коммита (включая отступы)
-    const COMMIT_ITEM_PADDING = 8; // Отступы между элементами
+    const COMMIT_ITEM_HEIGHT = 72;
+    const COMMIT_ITEM_PADDING = 8;
     
     const renderCommitGraph = (commits) => {
         if (!commits.length) return null;

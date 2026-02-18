@@ -58,57 +58,41 @@ public class JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
             final String username = extractUsername(token);
-            System.out.println("JWT Service - Checking token validity for username: " + username);
-            System.out.println("JWT Service - Expected username: " + userDetails.getUsername());
-            System.out.println("JWT Service - Token expired: " + isTokenExpired(token));
-            
-            boolean isValid = (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-            System.out.println("JWT Service - Token is valid: " + isValid);
-            return isValid;
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
         } catch (Exception e) {
-            System.err.println("JWT Service - Error validating token: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("JWT Service error validating token: " + e.getMessage());
             return false;
         }
     }
 
     private boolean isTokenExpired(String token) {
         try {
-            boolean expired = extractExpiration(token).before(new Date());
-            System.out.println("JWT Service - Token expiration check: " + expired);
-            return expired;
+            return extractExpiration(token).before(new Date());
         } catch (Exception e) {
-            System.err.println("JWT Service - Error checking token expiration: " + e.getMessage());
+            System.err.println("JWT Service error checking token expiration: " + e.getMessage());
             return true;
         }
     }
 
     private Date extractExpiration(String token) {
         try {
-            Date expiration = extractClaim(token, Claims::getExpiration);
-            System.out.println("JWT Service - Token expiration: " + expiration);
-            return expiration;
+            return extractClaim(token, Claims::getExpiration);
         } catch (Exception e) {
-            System.err.println("JWT Service - Error extracting expiration: " + e.getMessage());
+            System.err.println("JWT Service error extracting expiration: " + e.getMessage());
             throw e;
         }
     }
 
     private Claims extractAllClaims(String token) {
         try {
-            System.out.println("JWT Service - Extracting claims from token");
-            System.out.println("JWT Service - Secret key length: " + (secretKey != null ? secretKey.length() : "NULL"));
-            Claims claims = Jwts
+            return Jwts
                     .parser()
                     .setSigningKey(getSignInKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            System.out.println("JWT Service - Claims extracted successfully");
-            return claims;
         } catch (Exception e) {
-            System.err.println("JWT Service - Error extracting claims: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("JWT Service error extracting claims: " + e.getMessage());
             throw e;
         }
     }

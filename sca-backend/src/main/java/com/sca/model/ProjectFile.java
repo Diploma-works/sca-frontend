@@ -56,7 +56,6 @@ public class ProjectFile {
         updatedAt = LocalDateTime.now();
     }
     
-    // Constructors
     public ProjectFile() {}
     
     public ProjectFile(String name, String path, Project project) {
@@ -65,7 +64,6 @@ public class ProjectFile {
         this.project = project;
     }
     
-    // Getters and Setters
     public Long getId() {
         return id;
     }

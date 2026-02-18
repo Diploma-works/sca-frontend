@@ -13,34 +13,14 @@ if (typeof window !== 'undefined' && window.fetch) {
   };
 }
 
-// Alternative function to get token from react-auth-kit
-const getTokenFromAuthKit = () => {
-  try {
-    // Try to get token from react-auth-kit store
-    const authStore = JSON.parse(localStorage.getItem('react-auth-kit-store'));
-    if (authStore && authStore.auth && authStore.auth.token) {
-      console.log('Token from react-auth-kit store:', authStore.auth.token);
-      return authStore.auth.token;
-    }
-  } catch (error) {
-    console.error('Error getting token from react-auth-kit store:', error);
-  }
-  return null;
-};
-
-// Utility function to get auth headers
 const getAuthHeaders = () => {
-  // Получаем токен из react-auth-kit
   const getAuthToken = () => {
     try {
-      // First try react-auth-kit store from localStorage
       const authStore = JSON.parse(localStorage.getItem('react-auth-kit-store') || '{}');
       if (authStore && authStore.auth && authStore.auth.token) {
-        console.log('Using token from react-auth-kit localStorage store');
         return authStore.auth.token;
       }
 
-      // Then try react-auth-kit cookie
       const getCookie = (name) => {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -49,35 +29,19 @@ const getAuthHeaders = () => {
       };
       
       const authCookie = getCookie('_auth');
-      console.log('=== DEBUG TOKEN ===');
-      console.log('All cookies:', document.cookie);
-      console.log('_auth cookie:', authCookie);
       
       if (authCookie) {
-        // Декодируем URL-encoded cookie
         const decodedCookie = decodeURIComponent(authCookie);
-        console.log('Decoded cookie:', decodedCookie);
-        
         try {
-          // Парсим JSON из cookie
           const cookieData = JSON.parse(decodedCookie);
-          console.log('Parsed cookie data:', cookieData);
-          
-          // Извлекаем токен из структуры react-auth-kit
-          const token = cookieData.auth?.token || cookieData.token;
-          console.log('Extracted token from cookie:', token);
-          return token;
+          return cookieData.auth?.token || cookieData.token;
         } catch (parseError) {
-          console.error('Error parsing cookie:', parseError);
-          // Если не удается распарсить, используем как есть
+          console.error('Error parsing auth cookie:', parseError);
           return decodedCookie;
         }
       }
       
-      // Fallback к localStorage
-      const localToken = localStorage.getItem('token');
-      console.log('Fallback localStorage token:', localToken);
-      return localToken;
+      return localStorage.getItem('token');
     } catch (error) {
       console.error('Error getting auth token:', error);
       return null;
@@ -85,7 +49,6 @@ const getAuthHeaders = () => {
   };
   
   const token = getAuthToken();
-  console.log('Final token for headers:', token);
   
   return {
     'Content-Type': 'application/json',
@@ -280,8 +243,7 @@ export const gitLabAPI = {
     return handleResponse(response);
   },
   cloneRepository: async (owner, repo, targetPath, gitUrl, branch = 'main') => {
-    // Использует новый endpoint для клонирования через ProjectController
-    const projectName = repo.replace(/\.git$/, ''); // Удаляем .git если есть
+    const projectName = repo.replace(/\.git$/, '');
     const response = await fetch(`${API_BASE_URL}/projects/clone/gitlab`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -312,8 +274,6 @@ export const gitLabAPI = {
 
 // Bitbucket API functions (proxy endpoints expected on backend)
 export const bitbucketAPI = {
-  // token: the token or app password
-  // username: optional Bitbucket username when using app password (Basic auth)
   saveToken: async (token, username = null) => {
     const body = { token };
     if (username) body.username = username;
@@ -434,16 +394,12 @@ export const websocketAPI = {
       connectHeaders: {
         'Authorization': `Bearer ${getAuthHeaders().Authorization?.split(' ')[1] || ''}`
       },
-      debug: function (str) {
-        console.log('STOMP Debug:', str);
-      },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
     });
 
     websocketAPI.client.onConnect = function (frame) {
-      console.log('Connected: ' + frame);
       websocketAPI.connected = true;
     };
 
@@ -511,15 +467,9 @@ export const fileAPI = {
     return handleResponse(response);
   },
 
-  // Get file content
   getFileContent: async (projectId, filePath) => {
-    // Кодируем каждый сегмент пути отдельно для корректной обработки
     const encodedFilePath = filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-    console.log('Original filePath:', filePath);
-    console.log('Encoded filePath:', encodedFilePath);
-    
     const url = `${API_BASE_URL}/projects/${projectId}/files/${encodedFilePath}`;
-    console.log('Full request URL:', url);
     
     try {
       const response = await fetch(url, {
@@ -527,19 +477,12 @@ export const fileAPI = {
         headers: getAuthHeaders()
       });
       
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
       
       const data = await response.json();
-      console.log('API response data:', data);
-      console.log('Content length:', data.content ? data.content.length : 'No content');
-      
       return data.content || '';
     } catch (error) {
       console.error('Error in getFileContent:', error);
@@ -547,10 +490,7 @@ export const fileAPI = {
     }
   },
 
-  // Update file content via REST API
   updateFileContent: async (projectId, filePath, content) => {
-    console.log('Saving file:', projectId, filePath, 'content length:', content.length);
-    
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/files/${filePath}`, {
       method: 'PUT',
       headers: {
@@ -595,12 +535,8 @@ export const fileAPI = {
     return handleResponse(response);
   },
 
-  // Delete file
   deleteFile: async (projectId, filePath) => {
-    // Кодируем каждый сегмент пути отдельно для корректной обработки
     const encodedFilePath = filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-    console.log('Deleting file:', filePath, 'encoded:', encodedFilePath);
-    
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/files/${encodedFilePath}`, {
       method: 'DELETE',
       headers: getAuthHeaders()
@@ -608,12 +544,8 @@ export const fileAPI = {
     return handleResponse(response);
   },
 
-  // Rename file
   renameFile: async (projectId, oldPath, newName) => {
-    // Кодируем каждый сегмент пути отдельно для корректной обработки
     const encodedFilePath = oldPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-    console.log('Renaming file:', oldPath, 'to', newName);
-    
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/files/rename/${encodedFilePath}`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -622,10 +554,7 @@ export const fileAPI = {
     return handleResponse(response);
   },
 
-  // Create folder
   createFolder: async (projectId, folderPath) => {
-    console.log('Creating folder:', folderPath);
-    
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/folders`, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -736,12 +665,8 @@ export const gitHubAPI = {
     });
     return handleResponse(response);
   },
-
-  // Git operations for specific project
-  // NOTE: project-level git operations were moved to projectGitAPI below.
 };
 
-// Project Git API functions (provider-agnostic; operates on already cloned workspace repos)
 export const projectGitAPI = {
   getProjectRepositoryInfo: async (projectId) => {
     const response = await fetch(`${API_BASE_URL}/projects/${projectId}/git/info`, {

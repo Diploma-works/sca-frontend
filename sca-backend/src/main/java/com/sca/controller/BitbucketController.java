@@ -105,7 +105,6 @@ public class BitbucketController {
         }
     }
 
-    // --- SSH key management for Bitbucket git operations (push/pull over SSH) ---
     @GetMapping("/ssh-key/status")
     public ResponseEntity<?> getSshKeyStatus(@AuthenticationPrincipal User user) {
         try {

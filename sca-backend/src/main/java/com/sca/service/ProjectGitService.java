@@ -76,7 +76,6 @@ public class ProjectGitService {
             Path keyPath = getBitbucketPrivateKeyPath(user);
             Files.writeString(keyPath, privateKeyPem.replace("\r\n", "\n").trim() + "\n", StandardCharsets.UTF_8);
 
-            // Best-effort permissions: on Linux containers set 600; on Windows these calls may fail.
             try {
                 Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
                 Files.setPosixFilePermissions(keyPath, perms);
@@ -113,7 +112,6 @@ public class ProjectGitService {
                 throw new RuntimeException("Bitbucket SSH key is not configured");
             }
 
-            // ssh -T returns non-zero for "success" messages sometimes; we will treat output as result.
             String out = executeCommandWithEnv(null,
                     Map.of("GIT_SSH_COMMAND", buildGitSshCommand(keyPath)),
                     "ssh", "-T", "git@bitbucket.org");
@@ -123,7 +121,7 @@ public class ProjectGitService {
             resTest.put("output", out);
             return resTest;
         } catch (Exception e) {
-            // Return as error details so the UI can show it.
+
             Map<String, Object> res = new HashMap<>();
             res.put("success", false);
             res.put("error", e.getMessage());
@@ -132,16 +130,10 @@ public class ProjectGitService {
     }
 
     private String buildGitSshCommand(Path privateKeyPath) {
-        // accept-new avoids interactive prompt on first connect (requires OpenSSH >= 7.6)
-        // IdentitiesOnly forces using the provided key.
         return "ssh -i \"" + privateKeyPath.toString() + "\" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new";
     }
 
     private String toBitbucketSshRemote(String currentRemote) {
-        // Converts:
-        //  - https://bitbucket.org/workspace/repo.git
-        //  - git@bitbucket.org:workspace/repo.git
-        // into git@bitbucket.org:workspace/repo.git
         if (currentRemote == null) return null;
         String cleaned = currentRemote.trim().replaceAll("\\s+", "").replaceAll("/+$", "");
         if (cleaned.startsWith("git@bitbucket.org:")) return cleaned;
@@ -205,7 +197,6 @@ public class ProjectGitService {
         }
 
         int exitCode = process.waitFor();
-        // ssh -T may return non-zero on success message; for git commands we still want to fail on non-zero.
         if (exitCode != 0) {
             throw new RuntimeException("Command failed: " + errorOutput);
         }
@@ -214,8 +205,7 @@ public class ProjectGitService {
 
     private static String encodeUserInfoComponent(String value) {
         if (value == null) return "";
-        // Percent-encode reserved characters for the userinfo subcomponent (RFC 3986).
-        // Note: URLEncoder is for x-www-form-urlencoded and turns spaces into '+', which is not correct here.
+        
         StringBuilder sb = new StringBuilder(value.length());
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
@@ -260,7 +250,6 @@ public class ProjectGitService {
             );
             return rebuilt.toString();
         } catch (java.net.URISyntaxException e) {
-            // If rebuilding fails for any reason, don't break git operations; just return the original.
             return remoteUrl;
         }
     }
@@ -291,7 +280,6 @@ public class ProjectGitService {
                     if (username == null || username.isBlank()) {
                         throw new RuntimeException("Bitbucket username не сохранён. Для push/pull по HTTPS Bitbucket требует Basic auth (username + app password). Пожалуйста, сохраните токен вместе с username.");
                     }
-                    // Bitbucket Cloud git over HTTPS uses Basic auth: https://<username>:<app_password>@bitbucket.org/<workspace>/<repo>.git
                     return withUserInfo(cleaned, username, bt.getAccessToken());
                 }
             }
@@ -302,7 +290,6 @@ public class ProjectGitService {
     }
 
     private String runWithAuthenticatedOrigin(Project project, User user, String projectPath, String... gitCommand) throws Exception {
-        // For Bitbucket, HTTPS bearer tokens don't work for git push/pull. Use SSH-based auth.
         if (project.getType() == Project.ProjectType.BITBUCKET) {
             return runWithBitbucketSsh(user, projectPath, gitCommand);
         }
@@ -325,19 +312,11 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> getRepositoryInfo(Long projectId, User user) {
-        System.out.println("ProjectGitService.getRepositoryInfo called with projectId: " + projectId + ", user: " + user.getUsername());
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        System.out.println("Found project: " + project.getName());
-        
         String projectPath = workspaceBasePath + "/user-" + user.getId() + "/" + project.getName();
-        System.out.println("Project path: " + projectPath);
-        
         File projectDir = new File(projectPath);
-        System.out.println("Project directory exists: " + projectDir.exists());
-        System.out.println("Git directory exists: " + new File(projectDir, ".git").exists());
 
         if (!projectDir.exists() || !new File(projectDir, ".git").exists()) {
             throw new RuntimeException("Project is not a Git repository");
@@ -346,15 +325,12 @@ public class ProjectGitService {
         try {
             Map<String, Object> repoInfo = new HashMap<>();
             
-            // Get remote URL
             String remoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url");
             repoInfo.put("url", remoteUrl.trim());
             
-            // Get current branch
             String currentBranch = executeGitCommand(projectPath, "git", "branch", "--show-current");
             repoInfo.put("currentBranch", currentBranch.trim());
             
-            // Get last commit info
             String lastCommitInfo = executeGitCommand(projectPath, "git", "log", "-1", "--pretty=format:%H|%s|%an|%ad", "--date=iso");
             if (!lastCommitInfo.trim().isEmpty()) {
                 String[] parts = lastCommitInfo.split("\\|");
@@ -366,7 +342,6 @@ public class ProjectGitService {
                 repoInfo.put("lastCommit", lastCommit);
             }
             
-            // Get repository name from URL
             String repoName = project.getName();
             if (remoteUrl.contains("/")) {
                 String[] urlParts = remoteUrl.split("/");
@@ -382,8 +357,6 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> hasStash(Long projectId, User user) {
-        System.out.println("ProjectGitService.hasStash called with projectId: " + projectId);
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -395,7 +368,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Check if there are any stashes
             String stashList = executeGitCommand(projectPath, "git", "stash", "list");
             boolean hasStash = !stashList.trim().isEmpty();
             
@@ -411,16 +383,11 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> createTag(Long projectId, String name, String message, User user) {
-        System.out.println("ProjectGitService.createTag called with projectId: " + projectId + ", name: " + name + ", message: " + message);
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
         String projectPath = workspaceBasePath + "/user-" + user.getId() + "/" + project.getName();
-        
         File projectDir = new File(projectPath);
-        System.out.println("Project directory exists: " + projectDir.exists());
-        System.out.println("Git directory exists: " + new File(projectDir, ".git").exists());
 
         if (!projectDir.exists() || !new File(projectDir, ".git").exists()) {
             throw new RuntimeException("Project is not a Git repository");
@@ -429,15 +396,12 @@ public class ProjectGitService {
         try {
             Map<String, Object> repoInfo = new HashMap<>();
             
-            // Get remote URL
             String remoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url");
             repoInfo.put("url", remoteUrl.trim());
             
-            // Get current branch
             String currentBranch = executeGitCommand(projectPath, "git", "branch", "--show-current");
             repoInfo.put("currentBranch", currentBranch.trim());
             
-            // Get last commit info
             String lastCommitInfo = executeGitCommand(projectPath, "git", "log", "-1", "--pretty=format:%H|%s|%an|%ad", "--date=iso");
             if (!lastCommitInfo.trim().isEmpty()) {
                 String[] parts = lastCommitInfo.split("\\|");
@@ -449,7 +413,6 @@ public class ProjectGitService {
                 repoInfo.put("lastCommit", lastCommit);
             }
             
-            // Get repository name from URL
             String repoName = project.getName();
             if (remoteUrl.contains("/")) {
                 String[] urlParts = remoteUrl.split("/");
@@ -465,26 +428,17 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> getGitStatus(Long projectId, User user) {
-        System.out.println("ProjectGitService.getGitStatus called with projectId: " + projectId + ", user: " + user.getUsername());
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        System.out.println("Found project: " + project.getName());
-        
         String projectPath = workspaceBasePath + "/user-" + user.getId() + "/" + project.getName();
-        System.out.println("Project path: " + projectPath);
-        
         File projectDir = new File(projectPath);
-        System.out.println("Project directory exists: " + projectDir.exists());
-        System.out.println("Git directory exists: " + new File(projectDir, ".git").exists());
 
         if (!projectDir.exists() || !new File(projectDir, ".git").exists()) {
             throw new RuntimeException("Project is not a Git repository");
         }
 
         try {
-            // Get git status in porcelain format
             String statusOutput = executeGitCommand(projectPath, "git", "status", "--porcelain");
             
             List<Map<String, Object>> files = new ArrayList<>();
@@ -526,10 +480,8 @@ public class ProjectGitService {
         }
 
         try {
-            // Configure Git user if not already configured
             configureGitUser(projectPath, user);
             
-            // Add files (if specific files provided, add them, otherwise add all)
             if (files.isEmpty()) {
                 executeGitCommand(projectPath, "git", "add", ".");
             } else {
@@ -538,7 +490,6 @@ public class ProjectGitService {
                 }
             }
             
-            // Create commit
             String commitResult = executeGitCommand(projectPath, "git", "commit", "-m", message);
             
             Map<String, Object> result = new HashMap<>();
@@ -565,7 +516,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Push changes (GitHub/GitLab/Bitbucket auth supported)
             String pushResult = runWithAuthenticatedOrigin(project, user, projectPath, "git", "push", "origin", branch);
             
             Map<String, Object> result = new HashMap<>();
@@ -592,7 +542,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Pull changes (GitHub/GitLab/Bitbucket auth supported)
             String pullResult = runWithAuthenticatedOrigin(project, user, projectPath, "git", "pull", "origin", branch);
             
             Map<String, Object> result = new HashMap<>();
@@ -619,7 +568,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Get local branches with detailed info
             String localBranches = executeGitCommand(projectPath, "git", "branch", "-v");
             List<Map<String, Object>> localBranchList = new ArrayList<>();
             String currentBranch = "";
@@ -641,7 +589,6 @@ public class ProjectGitService {
                             localBranchList.add(branchInfo);
                         }
                     } else if (!branch.isEmpty()) {
-                        // Other branches
                         String[] parts = branch.split("\\s+", 3);
                         if (parts.length >= 2) {
                             Map<String, Object> branchInfo = new HashMap<>();
@@ -655,10 +602,8 @@ public class ProjectGitService {
                 }
             }
             
-            // Get remote branches
             List<Map<String, Object>> remoteBranchList = new ArrayList<>();
             try {
-                // First, try to get local tracking branches
                 String remoteBranches = executeGitCommand(projectPath, "git", "branch", "-r", "-v");
                 if (!remoteBranches.trim().isEmpty()) {
                     String[] lines = remoteBranches.split("\n");
@@ -677,7 +622,6 @@ public class ProjectGitService {
                     }
                 }
                 
-                // Also fetch all remote branches directly from origin
                 try {
                     String allRemoteBranches = executeGitCommand(projectPath, "git", "ls-remote", "--heads", "origin");
                     if (!allRemoteBranches.trim().isEmpty()) {
@@ -694,7 +638,6 @@ public class ProjectGitService {
                                 if (ref.startsWith("refs/heads/")) {
                                     String branchName = "origin/" + ref.substring("refs/heads/".length());
                                     
-                                    // Only add if not already present
                                     if (!existingBranches.contains(branchName)) {
                                         Map<String, Object> branchInfo = new HashMap<>();
                                         branchInfo.put("name", branchName);
@@ -737,7 +680,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Get commit graph with branches
             List<String> gitLogCmd = new ArrayList<>();
             gitLogCmd.add("git");
             gitLogCmd.add("log");
@@ -750,7 +692,7 @@ public class ProjectGitService {
             if (limit != null && limit > 0) {
                 gitLogCmd.add("-" + limit);
             } else {
-                gitLogCmd.add("-50"); // Default limit
+                gitLogCmd.add("-50");
             }
             
             String gitLog = executeGitCommand(projectPath, gitLogCmd.toArray(new String[0]));
@@ -760,7 +702,6 @@ public class ProjectGitService {
                 String[] lines = gitLog.split("\n");
                 for (String line : lines) {
                     if (line.contains("|")) {
-                        // Find the commit data part (after graph symbols)
                         String commitData = "";
                         int pipeIndex = -1;
                         for (int i = 0; i < line.length(); i++) {
@@ -783,7 +724,6 @@ public class ProjectGitService {
                                 commit.put("message", parts[5]);
                                 commit.put("refs", parts.length > 6 ? parts[6] : "");
                                 
-                                // Extract graph part
                                 String graphPart = line.substring(0, line.indexOf(commitData));
                                 commit.put("graph", graphPart);
                                 
@@ -817,7 +757,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Create and checkout new branch
             String createResult = executeGitCommand(projectPath, "git", "checkout", "-b", name, from);
             
             Map<String, Object> result = new HashMap<>();
@@ -845,7 +784,6 @@ public class ProjectGitService {
         }
 
         try {
-            // Switch to branch
             String checkoutResult = executeGitCommand(projectPath, "git", "checkout", branchName);
             
             Map<String, Object> result = new HashMap<>();
@@ -873,10 +811,8 @@ public class ProjectGitService {
         }
 
         try {
-            // Fetch latest changes (GitHub/GitLab/Bitbucket auth supported)
             String fetchResult = runWithAuthenticatedOrigin(project, user, projectPath, "git", "fetch", "origin");
             
-            // Get status after fetch
             Map<String, Object> status = getGitStatus(projectId, user);
             
             Map<String, Object> result = new HashMap<>();
@@ -894,48 +830,33 @@ public class ProjectGitService {
 
     private void configureGitUser(String projectPath, User user) throws Exception {
         try {
-            // Check if user.name is already configured
             String currentUserName = null;
-            try {
-                currentUserName = executeGitCommand(projectPath, "git", "config", "user.name").trim();
-            } catch (Exception e) {
-                // User name not configured
-            }
-            
-            // Check if user.email is already configured
+            currentUserName = executeGitCommand(projectPath, "git", "config", "user.name").trim();
+
             String currentUserEmail = null;
             try {
                 currentUserEmail = executeGitCommand(projectPath, "git", "config", "user.email").trim();
             } catch (Exception e) {
-                // User email not configured
             }
             
-            // Configure user.name if not set or empty
             if (currentUserName == null || currentUserName.isEmpty()) {
                 String userName = user.getUsername() != null ? user.getUsername() : "SCA User";
                 executeGitCommand(projectPath, "git", "config", "user.name", userName);
-                System.out.println("Configured Git user.name: " + userName);
             }
             
-            // Configure user.email if not set or empty
             if (currentUserEmail == null || currentUserEmail.isEmpty()) {
                 String userEmail = user.getEmail() != null ? user.getEmail() : user.getUsername() + "@sca.local";
                 executeGitCommand(projectPath, "git", "config", "user.email", userEmail);
-                System.out.println("Configured Git user.email: " + userEmail);
             }
             
         } catch (Exception e) {
             System.err.println("Error configuring Git user: " + e.getMessage());
-            // Don't throw exception here, just log - we'll set defaults below
             
-            // Set default values as fallback
             String userName = user.getUsername() != null ? user.getUsername() : "SCA User";
             String userEmail = user.getEmail() != null ? user.getEmail() : user.getUsername() + "@sca.local";
             
             executeGitCommand(projectPath, "git", "config", "user.name", userName);
             executeGitCommand(projectPath, "git", "config", "user.email", userEmail);
-            
-            System.out.println("Set fallback Git configuration - name: " + userName + ", email: " + userEmail);
         }
     }
 
@@ -968,8 +889,6 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> stashChanges(Long projectId, String message, User user) {
-        System.out.println("ProjectGitService.stashChanges called with projectId: " + projectId + ", message: " + message);
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -983,7 +902,6 @@ public class ProjectGitService {
         try {
             configureGitUser(projectPath, user);
             
-            // Check if there are changes to stash (including untracked files)
             String status = executeGitCommand(projectPath, "git", "status", "--porcelain");
             if (status.trim().isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
@@ -993,7 +911,6 @@ public class ProjectGitService {
                 return response;
             }
             
-            // Stash changes including untracked files
             String result;
             if (message != null && !message.trim().isEmpty()) {
                 result = executeGitCommand(projectPath, "git", "stash", "push", "-a", "-m", message);
@@ -1014,8 +931,6 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> stashPop(Long projectId, User user) {
-        System.out.println("ProjectGitService.stashPop called with projectId: " + projectId);
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -1029,7 +944,6 @@ public class ProjectGitService {
         try {
             configureGitUser(projectPath, user);
             
-            // Check if there are any stashes
             String stashList = executeGitCommand(projectPath, "git", "stash", "list");
             if (stashList.trim().isEmpty()) {
                 Map<String, Object> response = new HashMap<>();
@@ -1039,7 +953,6 @@ public class ProjectGitService {
                 return response;
             }
             
-            // Apply stash
             String result = executeGitCommand(projectPath, "git", "stash", "pop");
             
             Map<String, Object> response = new HashMap<>();
@@ -1055,8 +968,6 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> resetChanges(Long projectId, boolean hard, User user) {
-        System.out.println("ProjectGitService.resetChanges called with projectId: " + projectId + ", hard: " + hard);
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -1070,12 +981,10 @@ public class ProjectGitService {
         try {
             configureGitUser(projectPath, user);
             
-            // Reset changes
             String result;
             if (hard) {
-                // Hard reset with cleanup of untracked files
                 executeGitCommand(projectPath, "git", "reset", "--hard", "HEAD");
-                result = executeGitCommand(projectPath, "git", "clean", "-fd"); // Remove untracked files and directories
+                result = executeGitCommand(projectPath, "git", "clean", "-fd");
             } else {
                 result = executeGitCommand(projectPath, "git", "reset", "HEAD");
             }
@@ -1093,8 +1002,6 @@ public class ProjectGitService {
     }
 
     public Map<String, Object> mergeBranch(Long projectId, String sourceBranch, String targetBranch, User user) {
-        System.out.println("ProjectGitService.mergeBranch called with projectId: " + projectId + ", source: " + sourceBranch + ", target: " + targetBranch);
-        
         Project project = projectRepository.findByIdAndOwner(projectId, user)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -1108,10 +1015,8 @@ public class ProjectGitService {
         try {
             configureGitUser(projectPath, user);
             
-            // Switch to target branch first
             executeGitCommand(projectPath, "git", "checkout", targetBranch);
             
-            // Merge source branch
             String result = executeGitCommand(projectPath, "git", "merge", sourceBranch);
             
             Map<String, Object> response = new HashMap<>();

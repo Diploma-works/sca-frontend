@@ -50,12 +50,6 @@ public class ProjectService {
     @Value("${filesystem.workspace.max-size:100MB}")
     private String maxWorkspaceSize;
 
-    /**
-     * Remove credentials from an HTTPS git URL before persisting it.
-     * Examples:
-     *  - https://oauth2:TOKEN@github.com/org/repo.git -> https://github.com/org/repo.git
-     *  - https://x-token-auth:TOKEN@bitbucket.org/ws/repo.git -> https://bitbucket.org/ws/repo.git
-     */
     private String sanitizeGitUrlForStorage(String gitUrl) {
         if (gitUrl == null) return null;
         return gitUrl.replaceFirst("^https://[^/@]+@", "https://");
@@ -85,21 +79,17 @@ public class ProjectService {
      * Создать новый проект
      */
     public Project createProject(Project project) {
-        // Проверяем, что проект с таким именем не существует
         if (projectRepository.existsByNameAndOwner(project.getName(), project.getOwner())) {
             throw new RuntimeException("Проект с таким именем уже существует");
         }
-        
-        // Создаем рабочую директорию
+
         String workspacePath = createWorkspaceDirectory(project.getOwner().getId(), project.getName());
         project.setWorkspacePath(workspacePath);
         project.setType(Project.ProjectType.LOCAL);
         project.setStatus(Project.ProjectStatus.ACTIVE);
         
-        // Сохраняем проект в БД
         Project savedProject = projectRepository.save(project);
         
-        // Создаем базовую структуру проекта
         createBasicProjectStructure(savedProject);
         
         return savedProject;
@@ -138,10 +128,8 @@ public class ProjectService {
         if (project.isPresent()) {
             Project foundProject = project.get();
             
-            // Удаляем рабочую директорию
             deleteWorkspaceDirectory(foundProject.getWorkspacePath());
             
-            // Удаляем из БД
             projectRepository.delete(foundProject);
         } else {
             throw new RuntimeException("Проект не найден");
@@ -225,7 +213,6 @@ public class ProjectService {
                         try {
                             Files.delete(p);
                         } catch (IOException e) {
-                            // Логируем ошибку, но продолжаем удаление
                             System.err.println("Ошибка при удалении файла: " + p);
                         }
                     });
@@ -274,7 +261,6 @@ public class ProjectService {
             String stderr = new String(process.getErrorStream().readAllBytes());
 
             if (exitCode != 0) {
-                // Не логируем gitUrl, т.к. там может быть токен; но stderr можно вернуть пользователю.
                 throw new RuntimeException("git clone failed (exit code=" + exitCode + "): " + (stderr.isBlank() ? stdout : stderr));
             }
         } catch (IOException | InterruptedException e) {
@@ -315,41 +301,25 @@ public class ProjectService {
      */
     public Project cloneFromGitHub(String gitUrl, String branch, String projectName, User user) {
         try {
-            System.out.println("=== CLONING FROM GITHUB ===");
-            System.out.println("Git URL: " + gitUrl);
-            System.out.println("Branch: " + branch);
-            System.out.println("Project Name: " + projectName);
-            System.out.println("User: " + user.getUsername());
-            
-            // Проверяем, что проект с таким именем не существует
             if (projectRepository.existsByNameAndOwner(projectName, user)) {
                 throw new RuntimeException("Проект с таким именем уже существует");
             }
             
-            // Получаем GitHub токен пользователя
             Optional<GitHubToken> tokenOpt = gitHubService.getUserToken(user);
             if (tokenOpt.isEmpty()) {
                 throw new RuntimeException("GitHub токен не найден. Пожалуйста, подключите ваш GitHub аккаунт.");
             }
             
             String accessToken = tokenOpt.get().getAccessToken();
-            System.out.println("Found GitHub token for user: " + user.getUsername());
             
-            // Создаем рабочую директорию
             String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
             Path projectPath = Paths.get(workspacePath);
             
-            System.out.println("Workspace path: " + workspacePath);
-            
-            // Модифицируем URL для использования токена
             String authenticatedUrl = gitUrl;
             if (gitUrl.startsWith("https://github.com/")) {
-                // Заменяем https://github.com/ на https://oauth2:TOKEN@github.com/
                 authenticatedUrl = gitUrl.replace("https://github.com/", "https://oauth2:" + accessToken + "@github.com/");
-                System.out.println("Using authenticated URL for private repository");
             }
             
-            // Выполняем git clone
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(projectPath.getParent().toFile());
             
@@ -364,23 +334,16 @@ public class ProjectService {
             
             processBuilder.command(command);
             
-            System.out.println("Executing git clone command");
-            // Не логируем полную команду чтобы не показать токен в логах
-            
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             
             if (exitCode != 0) {
-                // Читаем ошибку
                 String error = new String(process.getErrorStream().readAllBytes());
                 System.err.println("Git clone failed with exit code: " + exitCode);
                 System.err.println("Error output: " + error);
                 throw new RuntimeException("Ошибка клонирования репозитория: " + error);
             }
             
-            System.out.println("Git clone completed successfully");
-            
-            // Создаем проект в БД
             Project project = new Project();
             project.setName(projectName);
             project.setDescription("Клонированный проект из " + gitUrl);
@@ -391,14 +354,10 @@ public class ProjectService {
             project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
             project.setGitBranch(branch);
             
-            Project savedProject = projectRepository.save(project);
-            System.out.println("Project saved to database with ID: " + savedProject.getId());
-            
-            return savedProject;
+            return projectRepository.save(project);
             
         } catch (Exception e) {
             System.err.println("Error in cloneFromGitHub: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Ошибка при клонировании проекта: " + e.getMessage());
         }
     }
@@ -408,37 +367,24 @@ public class ProjectService {
      */
     public Project cloneFromGitLab(String gitUrl, String branch, String projectName, User user) {
         try {
-            System.out.println("=== CLONING FROM GITLAB ===");
-            System.out.println("Git URL (without token): " + sanitizeGitUrlForStorage(gitUrl));
-            System.out.println("Branch: " + branch);
-            System.out.println("Project Name: " + projectName);
-            System.out.println("User: " + user.getUsername());
-            
             if (projectRepository.existsByNameAndOwner(projectName, user)) {
                 throw new RuntimeException("Проект с таким именем уже существует");
             }
 
-            // Получаем GitLab токен пользователя напрямую из repository
             Optional<GitLabToken> tokenOpt = gitLabTokenRepository.findByUser(user);
             if (tokenOpt.isEmpty()) {
                 throw new RuntimeException("GitLab токен не найден. Пожалуйста, подключите ваш GitLab аккаунт.");
             }
             
             String accessToken = tokenOpt.get().getAccessToken();
-            System.out.println("Found GitLab token for user: " + user.getUsername());
             
-            // Добавляем токен в URL для аутентификации (если еще не добавлен)
             String authenticatedUrl = gitUrl;
             if (gitUrl.startsWith("https://") && !gitUrl.contains("@")) {
-                // Заменяем https://gitlab.com/ на https://oauth2:TOKEN@gitlab.com/
                 authenticatedUrl = gitUrl.replaceFirst("^https://", "https://oauth2:" + accessToken + "@");
-                System.out.println("Using authenticated URL for repository");
             }
 
             String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
             Path projectPath = Paths.get(workspacePath);
-
-            System.out.println("Workspace path: " + workspacePath);
 
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(projectPath.getParent().toFile());
@@ -454,20 +400,15 @@ public class ProjectService {
             command.add(projectPath.getFileName().toString());
             processBuilder.command(command);
 
-            System.out.println("Executing git clone command");
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
 
             if (exitCode != 0) {
                 String error = new String(process.getErrorStream().readAllBytes());
-                String stdout = new String(process.getInputStream().readAllBytes());
                 System.err.println("Git clone failed with exit code: " + exitCode);
                 System.err.println("Error output: " + error);
-                System.err.println("Standard output: " + stdout);
                 throw new RuntimeException("Ошибка клонирования репозитория GitLab: " + error);
             }
-
-            System.out.println("Git clone completed successfully");
 
             Project project = new Project();
             project.setName(projectName);
@@ -479,13 +420,9 @@ public class ProjectService {
             project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
             project.setGitBranch(branch);
 
-            Project savedProject = projectRepository.save(project);
-            System.out.println("Project saved to database with ID: " + savedProject.getId());
-            
-            return savedProject;
+            return projectRepository.save(project);
         } catch (Exception e) {
             System.err.println("Error in cloneFromGitLab: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Ошибка при клонировании проекта GitLab: " + e.getMessage());
         }
     }
@@ -495,37 +432,24 @@ public class ProjectService {
      */
     public Project cloneFromBitbucket(String gitUrl, String branch, String projectName, User user) {
         try {
-            System.out.println("=== CLONING FROM BITBUCKET ===");
-            System.out.println("Git URL (without token): " + sanitizeGitUrlForStorage(gitUrl));
-            System.out.println("Branch: " + branch);
-            System.out.println("Project Name: " + projectName);
-            System.out.println("User: " + user.getUsername());
-            
             if (projectRepository.existsByNameAndOwner(projectName, user)) {
                 throw new RuntimeException("Проект с таким именем уже существует");
             }
 
-            // Получаем Bitbucket токен пользователя напрямую из repository
             Optional<BitbucketToken> tokenOpt = bitbucketTokenRepository.findByUser(user);
             if (tokenOpt.isEmpty()) {
                 throw new RuntimeException("Bitbucket токен не найден. Пожалуйста, подключите ваш Bitbucket аккаунт.");
             }
             
             String accessToken = tokenOpt.get().getAccessToken();
-            System.out.println("Found Bitbucket token for user: " + user.getUsername());
             
-            // Добавляем токен в URL для аутентификации (если еще не добавлен)
             String authenticatedUrl = gitUrl;
             if (gitUrl.startsWith("https://") && !gitUrl.contains("@")) {
-                // Заменяем https://bitbucket.org/ на https://x-token-auth:TOKEN@bitbucket.org/
                 authenticatedUrl = gitUrl.replaceFirst("^https://", "https://x-token-auth:" + accessToken + "@");
-                System.out.println("Using authenticated URL for repository");
             }
 
             String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
             Path projectPath = Paths.get(workspacePath);
-
-            System.out.println("Workspace path: " + workspacePath);
 
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.directory(projectPath.getParent().toFile());
@@ -541,20 +465,15 @@ public class ProjectService {
             command.add(projectPath.getFileName().toString());
             processBuilder.command(command);
 
-            System.out.println("Executing git clone command");
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
 
             if (exitCode != 0) {
                 String error = new String(process.getErrorStream().readAllBytes());
-                String stdout = new String(process.getInputStream().readAllBytes());
                 System.err.println("Git clone failed with exit code: " + exitCode);
                 System.err.println("Error output: " + error);
-                System.err.println("Standard output: " + stdout);
                 throw new RuntimeException("Ошибка клонирования репозитория Bitbucket: " + error);
             }
-
-            System.out.println("Git clone completed successfully");
 
             Project project = new Project();
             project.setName(projectName);
@@ -566,13 +485,9 @@ public class ProjectService {
             project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
             project.setGitBranch(branch);
 
-            Project savedProject = projectRepository.save(project);
-            System.out.println("Project saved to database with ID: " + savedProject.getId());
-            
-            return savedProject;
+            return projectRepository.save(project);
         } catch (Exception e) {
             System.err.println("Error in cloneFromBitbucket: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Ошибка при клонировании проекта Bitbucket: " + e.getMessage());
         }
     }
@@ -582,14 +497,10 @@ public class ProjectService {
      */
     public boolean deleteFile(Long projectId, String filePath, User user) {
         try {
-            System.out.println("ProjectService.deleteFile called with projectId: " + projectId + ", filePath: " + filePath);
-            
             Project project = getProjectById(projectId, user);
             String fullPath = project.getWorkspacePath() + "/" + filePath;
             
             File file = new File(fullPath);
-            System.out.println("Full file path: " + fullPath);
-            System.out.println("File exists: " + file.exists());
             
             if (!file.exists()) {
                 throw new RuntimeException("Файл не найден: " + filePath);
@@ -597,14 +508,11 @@ public class ProjectService {
             
             boolean deleted;
             if (file.isDirectory()) {
-                // Удаляем папку рекурсивно
                 deleted = deleteDirectory(file);
             } else {
-                // Удаляем файл
                 deleted = file.delete();
             }
             
-            System.out.println("File deletion result: " + deleted);
             return deleted;
             
         } catch (Exception e) {
@@ -618,33 +526,23 @@ public class ProjectService {
      */
     public boolean renameFile(Long projectId, String filePath, String newName, User user) {
         try {
-            System.out.println("ProjectService.renameFile called with projectId: " + projectId + ", filePath: " + filePath + ", newName: " + newName);
-            
             Project project = getProjectById(projectId, user);
             String fullPath = project.getWorkspacePath() + "/" + filePath;
             
             File oldFile = new File(fullPath);
-            System.out.println("Old file path: " + fullPath);
-            System.out.println("File exists: " + oldFile.exists());
             
             if (!oldFile.exists()) {
                 throw new RuntimeException("Файл не найден: " + filePath);
             }
             
-            // Создаем новый путь
             String parentDir = oldFile.getParent();
             File newFile = new File(parentDir, newName);
-            String newFilePath = newFile.getAbsolutePath();
-            
-            System.out.println("New file path: " + newFilePath);
             
             if (newFile.exists()) {
                 throw new RuntimeException("Файл с именем '" + newName + "' уже существует");
             }
             
-            boolean renamed = oldFile.renameTo(newFile);
-            System.out.println("File rename result: " + renamed);
-            return renamed;
+            return oldFile.renameTo(newFile);
             
         } catch (Exception e) {
             System.err.println("Error renaming file: " + e.getMessage());
@@ -657,22 +555,16 @@ public class ProjectService {
      */
     public boolean createFolder(Long projectId, String folderPath, User user) {
         try {
-            System.out.println("ProjectService.createFolder called with projectId: " + projectId + ", folderPath: " + folderPath);
-            
             Project project = getProjectById(projectId, user);
             String fullPath = project.getWorkspacePath() + "/" + folderPath;
             
             File folder = new File(fullPath);
-            System.out.println("Full folder path: " + fullPath);
-            System.out.println("Folder exists: " + folder.exists());
             
             if (folder.exists()) {
                 throw new RuntimeException("Папка уже существует: " + folderPath);
             }
             
-            boolean created = folder.mkdirs();
-            System.out.println("Folder creation result: " + created);
-            return created;
+            return folder.mkdirs();
             
         } catch (Exception e) {
             System.err.println("Error creating folder: " + e.getMessage());

@@ -24,14 +24,12 @@ public class GitHubService {
      */
     public GitHubToken saveUserToken(User user, String accessToken) {
         try {
-            // Проверяем токен
             GitHub github = new GitHubBuilder().withOAuthToken(accessToken).build();
             GHUser githubUser = github.getMyself();
             
-            // Удаляем старый токен если есть
+
             gitHubTokenRepository.deleteByUser(user);
             
-            // Сохраняем новый токен
             GitHubToken token = new GitHubToken(user, accessToken, githubUser.getLogin());
             return gitHubTokenRepository.save(token);
         } catch (IOException e) {
@@ -121,8 +119,6 @@ public class GitHubService {
             GitHub github = getGitHubClient(user);
             GHRepository repo = github.getRepository(owner + "/" + repoName);
             
-            // Здесь можно добавить логику клонирования с помощью JGit или системных команд
-            // Пока возвращаем URL для клонирования
             return repo.getHttpTransportUrl();
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при клонировании репозитория", e);
@@ -163,7 +159,7 @@ public class GitHubService {
     public boolean isTokenValid(User user) {
         try {
             GitHub github = getGitHubClient(user);
-            github.getMyself(); // Попытка обращения к API
+            github.getMyself();
             return true;
         } catch (Exception e) {
             return false;

@@ -7,7 +7,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// --- SecurityConfig for actuator health endpoint ---
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,9 +24,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-    System.out.println("Registering WebSocket endpoint: " + webSocketProperties.getEndpoint());
-    registry.addEndpoint(webSocketProperties.getEndpoint())
-        .setAllowedOrigins(webSocketProperties.getAllowedOrigins().toArray(new String[0]));
+        registry.addEndpoint(webSocketProperties.getEndpoint())
+            .setAllowedOrigins(webSocketProperties.getAllowedOrigins().toArray(new String[0]));
     }
 
     @Override

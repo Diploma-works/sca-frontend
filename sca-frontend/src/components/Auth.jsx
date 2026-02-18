@@ -46,24 +46,18 @@ const Auth = () => {
                     return;
                 }
                 
-                console.log('Регистрация:', form);
                 const res = await authAPI.register(form.username, form.password, form.email, form.fullName);
-                console.log('Register response:', res);
                 signIn({
                     auth: { token: res.token, type: 'Bearer' },
                     userState: res.user
                 });
                 navigate("/");
             } else {
-                console.log('Логин:', { username: form.username, password: form.password });
                 const res = await authAPI.login(form.username, form.password);
-                console.log('Login response:', res);
-                console.log('Token from response:', res.token);
                 signIn({
                     auth: { token: res.token, type: 'Bearer' },
                     userState: res.user
                 });
-                console.log('Token saved to react-auth-kit');
                 navigate("/");
             }
         } catch (e) {

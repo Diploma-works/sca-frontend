@@ -32,13 +32,12 @@ public class Project {
     @Enumerated(EnumType.STRING)
     private ProjectType type = ProjectType.LOCAL;
 
-    @Size(max = 2000)
+    @Size(max = 200)
     private String gitUrl;
     
     @Size(max = 50)
     private String gitBranch = "main";
     
-    // Workspace paths can be long on Windows; store as TEXT to avoid varchar(255) overflow.
     @Column(columnDefinition = "TEXT")
     @Size(max = 2000)
     private String workspacePath;
@@ -72,7 +71,6 @@ public class Project {
         updatedAt = LocalDateTime.now();
     }
     
-    // Constructors
     public Project() {}
     
     public Project(String name, User owner) {
@@ -80,7 +78,6 @@ public class Project {
         this.owner = owner;
     }
     
-    // Getters and Setters
     public Long getId() {
         return id;
     }

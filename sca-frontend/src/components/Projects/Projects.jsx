@@ -65,30 +65,6 @@ const Projects = () => {
 
   const handleCreateProject = async () => {
     try {
-      // Отладочная информация
-      console.log('Создание проекта:', createForm);
-      
-      // Проверяем токен
-      const getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-      };
-      
-      const token = getCookie('_auth') || getCookie('auth') || getCookie('token');
-      console.log('Токен из cookies:', token);
-      console.log('localStorage token:', localStorage.getItem('token'));
-      
-      const testResponse = await fetch('http://localhost:8080/api/projects', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      console.log('Тест API ответ:', testResponse.status, testResponse.statusText);
-      
       const newProject = await projectsAPI.createProject(createForm);
       setProjects([...projects, newProject]);
       setCreateDialogOpen(false);

@@ -53,18 +53,19 @@ public class SecurityConfig {
                         })
                 )
         .authorizeHttpRequests(authz -> authz
-            // разрешить доступ к WebSocket endpoint
+            // разрешить доступ к WebSocket эндпоинтам
             .requestMatchers("/ws/**", "/ws").permitAll()
-            // разрешить доступ к auth endpoints
+            // разрешить доступ к auth эндпоинтам
             .requestMatchers("/auth/**").permitAll()
-            // разрешить доступ к GitHub endpoints для аутентификации
+            // разрешить доступ к GitHub эндпоинтам для аутентификации
             .requestMatchers("/api/github/**").permitAll()
-            // allow unauthenticated access to GitLab and Bitbucket integration endpoints (frontend token management)
+            // разрешить доступ к GitLab эндпоинтам для аутентификации
             .requestMatchers("/api/gitlab/**").permitAll()
+            // разрешить доступ к Bitbucket эндпоинтам для аутентификации
             .requestMatchers("/api/bitbucket/**").permitAll()
-            // разрешить доступ ко всем actuator endpoint'ам
+            // разрешить доступ ко всем actuator эндпоинтам
             .requestMatchers(EndpointRequest.toAnyEndpoint()).permitAll()
-            // остальное — по JWT/аутентификации
+            // остальное — по JWT и аутентификации
             .anyRequest().authenticated()
         )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

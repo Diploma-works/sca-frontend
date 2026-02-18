@@ -87,7 +87,6 @@ public class CodeAnalysisService {
             dockerService.stopAndRemoveContainer(containerId);
             
         } catch (Exception e) {
-            // Логируем ошибку, но продолжаем анализ
             System.err.println("SonarQube analysis failed: " + e.getMessage());
         }
         
@@ -223,8 +222,6 @@ public class CodeAnalysisService {
     private List<CodeProblem> parseSonarQubeResults(String output, Project project) {
         List<CodeProblem> problems = new ArrayList<>();
         
-        // Простой парсинг XML результатов
-        // В реальном проекте нужно использовать XML парсер
         String[] lines = output.split("\n");
         for (String line : lines) {
             if (line.contains("issue")) {

@@ -33,7 +33,6 @@ public class GitHubToken {
         this.githubUsername = githubUsername;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }

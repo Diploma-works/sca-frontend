@@ -54,7 +54,6 @@ public class User implements UserDetails {
         createdAt = LocalDateTime.now();
     }
     
-    // Constructors
     public User() {}
     
     public User(String username, String email, String password) {
@@ -63,7 +62,6 @@ public class User implements UserDetails {
         this.password = password;
     }
     
-    // UserDetails implementation
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -89,7 +87,6 @@ public class User implements UserDetails {
         return enabled;
     }
     
-    // Getters and Setters
     public Long getId() {
         return id;
     }

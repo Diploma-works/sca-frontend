@@ -13,7 +13,6 @@ public class GitHubBranch {
         this.sha = sha;
     }
 
-    // Getters and Setters
     public String getName() {
         return name;
     }

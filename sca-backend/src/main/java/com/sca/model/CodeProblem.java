@@ -66,7 +66,6 @@ public class CodeProblem {
         createdAt = LocalDateTime.now();
     }
     
-    // Constructors
     public CodeProblem() {}
     
     public CodeProblem(String description, Project project) {
@@ -74,7 +73,6 @@ public class CodeProblem {
         this.project = project;
     }
     
-    // Getters and Setters
     public Long getId() {
         return id;
     }

@@ -44,7 +44,6 @@ public class GitLabService {
             Map body = resp.getBody();
             String username = body != null ? (String) body.get("username") : null;
 
-            // remove old token
             gitLabTokenRepository.deleteByUser(user);
 
             GitLabToken token = new GitLabToken(user, accessToken, username != null ? username : "");
@@ -131,16 +130,11 @@ public class GitLabService {
                 throw new RuntimeException("Не удалось получить URL репозитория");
             }
 
-            // Use ProjectService to perform server-side clone into workspaceBasePath/targetPath
-            // Normalize targetPath to avoid absolute path usage
             String normalizedTarget = (targetPath == null) ? "" : targetPath;
             if (normalizedTarget.startsWith("/")) normalizedTarget = normalizedTarget.substring(1);
 
             logger.info("GitLab clone request for {}/{} (default branch: {}), targetPath: {}", owner, repo, defaultBranch, normalizedTarget);
 
-            // For private repositories GitLab requires token-based auth for HTTPS clone.
-            // Recommended basic-auth form: https://oauth2:<token>@gitlab.com/group/project.git
-            // (Works for PAT and OAuth tokens.)
             String authenticatedCloneUrl = cloneUrl;
             if (cloneUrl.startsWith("https://")) {
                 String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
@@ -148,10 +142,9 @@ public class GitLabService {
             }
 
             try {
-                // Make clone path consistent with GitHub: user workspace dir + project name
                 String projectName = normalizedTarget;
                 if (projectName == null || projectName.isBlank()) projectName = repo;
-                // If targetPath is a nested path, use the last segment as project name
+
                 if (projectName.contains("/")) {
                     projectName = projectName.substring(projectName.lastIndexOf('/') + 1);
                 }
@@ -164,25 +157,16 @@ public class GitLabService {
 
             return cloneUrl;
         } catch (Exception e) {
-            // Try to avoid leaking tokens in the error message returned to the client.
             try {
                 String msg = e.getMessage();
                 if (msg == null) msg = "";
-                // If we have a token variable in scope, redact it. (safe-guard: token may be null)
-                try {
-                    // token variable exists above in method scope; redact occurrences
-                    java.lang.reflect.Field tokenField = null;
-                    // best-effort: if 'token' local exists, it's captured above — but we cannot reliably access local vars via reflection
-                } catch (Throwable ignored) {
-                }
-                // Generic redaction: remove oauth2:...@ and x-token-auth:...@ patterns
+
                 msg = msg.replaceAll("oauth2:[^@\\s]+@", "oauth2:[REDACTED]@");
                 msg = msg.replaceAll("x-token-auth:[^@\\s]+@", "x-token-auth:[REDACTED]@");
                 msg = msg.replaceAll("https?://[^@\\s]+@", "https://[REDACTED]@");
 
                 throw new RuntimeException("Ошибка при клонировании репозитория GitLab: " + msg);
             } catch (RuntimeException rex) {
-                // If redaction failed for some reason, fall back to generic message with cause
                 throw new RuntimeException("Ошибка при клонировании репозитория GitLab", e);
             }
         }

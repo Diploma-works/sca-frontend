@@ -21,10 +21,6 @@ public class ProjectGitController {
     public ResponseEntity<?> getRepositoryInfo(@PathVariable Long projectId, 
                                                @AuthenticationPrincipal User user) {
         try {
-            System.out.println("=== GET PROJECT REPOSITORY INFO ===");
-            System.out.println("Project ID: " + projectId);
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            
             if (user == null) {
                 System.err.println("User is null in controller!");
                 return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
@@ -34,7 +30,6 @@ public class ProjectGitController {
             return ResponseEntity.ok(repoInfo);
         } catch (Exception e) {
             System.err.println("Exception in getRepositoryInfo controller: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -43,10 +38,6 @@ public class ProjectGitController {
     public ResponseEntity<?> getGitStatus(@PathVariable Long projectId, 
                                           @AuthenticationPrincipal User user) {
         try {
-            System.out.println("=== GET PROJECT GIT STATUS ===");
-            System.out.println("Project ID: " + projectId);
-            System.out.println("User: " + (user != null ? user.getUsername() : "NULL"));
-            
             if (user == null) {
                 System.err.println("User is null in controller!");
                 return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
@@ -56,7 +47,6 @@ public class ProjectGitController {
             return ResponseEntity.ok(gitStatus);
         } catch (Exception e) {
             System.err.println("Exception in getGitStatus controller: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -65,11 +55,6 @@ public class ProjectGitController {
     public ResponseEntity<?> createCommit(@PathVariable Long projectId,
                                           @RequestBody Map<String, Object> commitData,
                                           @AuthenticationPrincipal User user) {
-        System.out.println("=== CREATE PROJECT COMMIT ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Commit data: " + commitData);
-        
         try {
             String message = (String) commitData.get("message");
             @SuppressWarnings("unchecked")
@@ -87,11 +72,6 @@ public class ProjectGitController {
     public ResponseEntity<?> pushChanges(@PathVariable Long projectId,
                                          @RequestBody Map<String, String> pushData,
                                          @AuthenticationPrincipal User user) {
-        System.out.println("=== PUSH PROJECT CHANGES ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Push data: " + pushData);
-        
         try {
             String branch = pushData.getOrDefault("branch", "main");
             Map<String, Object> result = projectGitService.pushChanges(projectId, branch, user);
@@ -106,11 +86,6 @@ public class ProjectGitController {
     public ResponseEntity<?> pullChanges(@PathVariable Long projectId,
                                          @RequestBody Map<String, String> pullData,
                                          @AuthenticationPrincipal User user) {
-        System.out.println("=== PULL PROJECT CHANGES ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Pull data: " + pullData);
-        
         try {
             String branch = pullData.getOrDefault("branch", "main");
             Map<String, Object> result = projectGitService.pullChanges(projectId, branch, user);
@@ -124,10 +99,6 @@ public class ProjectGitController {
     @GetMapping("/branches")
     public ResponseEntity<?> getBranches(@PathVariable Long projectId,
                                          @AuthenticationPrincipal User user) {
-        System.out.println("=== GET PROJECT BRANCHES ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        
         try {
             Map<String, Object> branches = projectGitService.getBranches(projectId, user);
             return ResponseEntity.ok(branches);
@@ -141,11 +112,6 @@ public class ProjectGitController {
     public ResponseEntity<?> getBranchGraph(@PathVariable Long projectId,
                                            @RequestParam(value = "limit", defaultValue = "50") Integer limit,
                                            @AuthenticationPrincipal User user) {
-        System.out.println("=== GET PROJECT BRANCH GRAPH ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("Limit: " + limit);
-        System.out.println("User: " + user.getUsername());
-        
         try {
             Map<String, Object> graph = projectGitService.getBranchGraph(projectId, user, limit);
             return ResponseEntity.ok(graph);
@@ -159,11 +125,6 @@ public class ProjectGitController {
     public ResponseEntity<?> createBranch(@PathVariable Long projectId,
                                           @RequestBody Map<String, String> branchData,
                                           @AuthenticationPrincipal User user) {
-        System.out.println("=== CREATE PROJECT BRANCH ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Branch data: " + branchData);
-        
         try {
             String name = branchData.get("name");
             String from = branchData.getOrDefault("from", "main");
@@ -180,11 +141,6 @@ public class ProjectGitController {
     public ResponseEntity<?> switchBranch(@PathVariable Long projectId,
                                           @PathVariable String branchName,
                                           @AuthenticationPrincipal User user) {
-        System.out.println("=== SWITCH PROJECT BRANCH ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("Branch: " + branchName);
-        System.out.println("User: " + user.getUsername());
-        
         try {
             Map<String, Object> result = projectGitService.switchBranch(projectId, branchName, user);
             return ResponseEntity.ok(result);
@@ -197,10 +153,6 @@ public class ProjectGitController {
     @PostMapping("/sync")
     public ResponseEntity<?> syncProject(@PathVariable Long projectId,
                                          @AuthenticationPrincipal User user) {
-        System.out.println("=== SYNC PROJECT ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        
         try {
             Map<String, Object> result = projectGitService.syncProject(projectId, user);
             return ResponseEntity.ok(result);
@@ -214,11 +166,6 @@ public class ProjectGitController {
     public ResponseEntity<?> stashChanges(@PathVariable Long projectId,
                                           @RequestBody Map<String, String> stashData,
                                           @AuthenticationPrincipal User user) {
-        System.out.println("=== STASH PROJECT CHANGES ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Stash data: " + stashData);
-        
         try {
             String message = stashData.getOrDefault("message", "WIP");
             Map<String, Object> result = projectGitService.stashChanges(projectId, message, user);
@@ -232,10 +179,6 @@ public class ProjectGitController {
     @PostMapping("/stash/pop")
     public ResponseEntity<?> stashPop(@PathVariable Long projectId,
                                       @AuthenticationPrincipal User user) {
-        System.out.println("=== STASH POP PROJECT ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        
         try {
             Map<String, Object> result = projectGitService.stashPop(projectId, user);
             return ResponseEntity.ok(result);
@@ -249,11 +192,6 @@ public class ProjectGitController {
     public ResponseEntity<?> resetChanges(@PathVariable Long projectId,
                                           @RequestBody Map<String, Boolean> resetData,
                                           @AuthenticationPrincipal User user) {
-        System.out.println("=== RESET PROJECT CHANGES ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Reset data: " + resetData);
-        
         try {
             boolean hard = resetData.getOrDefault("hard", false);
             Map<String, Object> result = projectGitService.resetChanges(projectId, hard, user);
@@ -268,11 +206,6 @@ public class ProjectGitController {
     public ResponseEntity<?> mergeBranch(@PathVariable Long projectId,
                                          @RequestBody Map<String, String> mergeData,
                                          @AuthenticationPrincipal User user) {
-        System.out.println("=== MERGE PROJECT BRANCH ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Merge data: " + mergeData);
-        
         try {
             String source = mergeData.get("source");
             String target = mergeData.getOrDefault("target", "main");
@@ -287,10 +220,6 @@ public class ProjectGitController {
     @GetMapping("/stash/status")
     public ResponseEntity<?> getStashStatus(@PathVariable Long projectId,
                                             @AuthenticationPrincipal User user) {
-        System.out.println("=== GET STASH STATUS ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        
         try {
             Map<String, Object> result = projectGitService.hasStash(projectId, user);
             return ResponseEntity.ok(result);
@@ -304,11 +233,6 @@ public class ProjectGitController {
     public ResponseEntity<?> createTag(@PathVariable Long projectId,
                                        @RequestBody Map<String, String> tagData,
                                        @AuthenticationPrincipal User user) {
-        System.out.println("=== CREATE PROJECT TAG ===");
-        System.out.println("Project ID: " + projectId);
-        System.out.println("User: " + user.getUsername());
-        System.out.println("Tag data: " + tagData);
-        
         try {
             String name = tagData.get("name");
             String message = tagData.getOrDefault("message", "");
