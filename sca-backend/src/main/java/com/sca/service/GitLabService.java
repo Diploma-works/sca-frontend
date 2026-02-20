@@ -6,6 +6,7 @@ import com.sca.repository.GitLabTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
@@ -172,6 +173,7 @@ public class GitLabService {
         }
     }
 
+    @Transactional
     public void removeUserToken(User user) {
         gitLabTokenRepository.deleteByUser(user);
     }
