@@ -5,19 +5,39 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import FolderIcon from "@mui/icons-material/Folder";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
-import { useState } from "react";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import { useEffect, useRef, useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ProjectInfo } from "@/components/ProjectInfo";
 
-const Navbar = ({ mode, switchMode, setProjectInfoOpen }) => {
+const Navbar = ({ mode, switchMode }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const signOut = useSignOut();
     const authUser = useAuthUser();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+    const searchInputRef = useRef(null);
+
+    const handleKeyDown = (e) => {
+        if (e.ctrlKey && e.code === "KeyF") {
+            e.preventDefault();
+            e.stopPropagation();
+            setProjectInfoOpen(true);
+        }
+    }
+
+    useEffect(() => {
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, []);
 
     const handleProjectInfoClick = () => setProjectInfoOpen(true);
     const handleAccountClick = (event) => {
@@ -79,8 +99,8 @@ const Navbar = ({ mode, switchMode, setProjectInfoOpen }) => {
                 </Button>
                 <Box sx={{ flex: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <IconButton size="small" onClick={handleProjectInfoClick}>
-                        <QueryStatsRoundedIcon sx={{ color: 'text.secondary' }}/>
+                    <IconButton size="small" onClick={handleProjectInfoClick} ref={searchInputRef}>
+                        <SearchRoundedIcon sx={{ color: 'text.secondary' }}/>
                     </IconButton>
                     <IconButton size="small" onClick={switchMode}>
                         {mode === "light" ? (
@@ -106,6 +126,7 @@ const Navbar = ({ mode, switchMode, setProjectInfoOpen }) => {
                         )}
                         <MenuItem onClick={handleLogout}>Выйти</MenuItem>
                     </Menu>
+                    <ProjectInfo open={projectInfoOpen} setOpen={setProjectInfoOpen} anchorRef={searchInputRef}/>
                 </Stack>
             </Toolbar>
         </AppBar>

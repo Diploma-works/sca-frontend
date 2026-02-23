@@ -17,7 +17,6 @@ import AuthProvider from "react-auth-kit";
 import RequireAuth from "@auth-kit/react-router/RequireAuth"
 
 import createStore from "react-auth-kit/createStore";
-import { ProjectInfo } from "./components/ProjectInfo";
 
 const store = createStore({
     authName: '_auth',
@@ -33,8 +32,6 @@ const App = () => {
     const theme = mode === "light" ? lightTheme : darkTheme;
     const switchMode = () => setMode(prevState => prevState === "light" ? "dark" : "light");
 
-    const [projectInfoOpen, setProjectInfoOpen] = useState(false);
-
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline enableColorScheme/>
@@ -43,7 +40,7 @@ const App = () => {
             }}>
                 <AuthProvider store={store}>
                     <BrowserRouter>
-                        <Navbar mode={mode} switchMode={switchMode} setProjectInfoOpen={setProjectInfoOpen}/>
+                        <Navbar mode={mode} switchMode={switchMode}/>
                         <Routes>
                             <Route path="/auth" element={<Auth/>}/>
                             <Route path="/projects" element={
@@ -68,7 +65,6 @@ const App = () => {
                             }/>
                         </Routes>
                     </BrowserRouter>
-                    <ProjectInfo open={projectInfoOpen} setOpen={setProjectInfoOpen}/>
                 </AuthProvider>
             </Stack>
         </ThemeProvider>

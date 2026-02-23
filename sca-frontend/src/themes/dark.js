@@ -87,6 +87,23 @@ const darkTheme = createTheme(globalStyles, {
                     paddingBottom: globalStyles.spacing(4 / 8),
                 }
             }
+        },
+        MuiPopover: {
+            defaultProps: {
+                slotProps: {
+                    paper: {
+                        elevation: 0,
+                    }
+                }
+            },
+            styleOverrides: {
+                paper: {
+                    border: '1px solid',
+                    borderColor: globalStyles.palette.divider,
+                    boxShadow: `0 0 10px 2px ${globalStyles.palette.background.default}`,
+                    backgroundColor: grey[900],
+                },
+            }
         }
     },
 });
