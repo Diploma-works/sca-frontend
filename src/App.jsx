@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 
 import "overlayscrollbars/overlayscrollbars.css";
 
-import { CssBaseline, Stack, ThemeProvider } from "@mui/material";
+import {CssBaseline, Stack, ThemeProvider} from "@mui/material";
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
 
-import { darkTheme, lightTheme } from "./themes";
+import {darkTheme, lightTheme} from "./themes";
 import AppLayout from "./pages/AppLayout";
 import Main from "./pages/Main";
 import Auth from "./components/Auth";
@@ -17,48 +17,53 @@ import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
 
 const store = createStore({
-    authName: '_auth',
-    authType: 'cookie',
-    cookieDomain: window.location.hostname,
-    cookieSecure: window.location.protocol === 'https:',
+  authName: '_auth',
+  authType: 'cookie',
+  cookieDomain: window.location.hostname,
+  cookieSecure: window.location.protocol === 'https:',
 });
 
 const App = () => {
-    const [mode, setMode] = useState("dark");
+  const [mode, setMode] = useState("dark");
 
-    const theme = mode === "light" ? lightTheme : darkTheme;
-    const switchMode = () => setMode(prevState => prevState === "light" ? "dark" : "light");
+  const theme = mode === "light" ? lightTheme : darkTheme;
+  const switchMode = () => setMode(prevState => prevState === "light" ? "dark" : "light");
 
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', mode);
-    }, [mode]);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', mode);
+  }, [mode]);
 
-    const router = createBrowserRouter([
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <AppLayout mode={mode} switchMode={switchMode}/>,
+
+      children: [
         {
-            path: "/",
-            element: <AppLayout mode={mode} switchMode={switchMode} />,
-            children: [
-                { path: "/sca-frontend", element: <Main /> },
-            ],
+          index: true,
+          element: <Navigate to="/sca-frontend" replace/>
         },
-        {
-            path: "/sca-frontend/auth",
-            element: <Auth />,
-        },
-    ]);
+        {path: "/sca-frontend", element: <Main/>},
+      ],
+    },
+    {
+      path: "/sca-frontend/auth",
+      element: <Auth/>,
+    },
+  ]);
 
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline enableColorScheme />
-            <Stack sx={{
-                height: '100dvh',
-            }}>
-                <AuthProvider store={store}>
-                    <RouterProvider router={router} />
-                </AuthProvider>
-            </Stack>
-        </ThemeProvider>
-    );
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline enableColorScheme/>
+      <Stack sx={{
+        height: '100dvh',
+      }}>
+        <AuthProvider store={store}>
+          <RouterProvider router={router}/>
+        </AuthProvider>
+      </Stack>
+    </ThemeProvider>
+  );
 }
 
 export default App;
