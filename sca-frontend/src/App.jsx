@@ -2,9 +2,9 @@ import { useState } from "react";
 
 import "overlayscrollbars/overlayscrollbars.css";
 
-import { CssBaseline, Divider, Stack, ThemeProvider } from "@mui/material";
+import { CssBaseline, Stack, ThemeProvider } from "@mui/material";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { darkTheme, lightTheme } from "./themes";
 import Navbar from "./components/Navbar";
@@ -41,7 +41,6 @@ const App = () => {
                 <AuthProvider store={store}>
                     <BrowserRouter>
                         <Navbar mode={mode} switchMode={switchMode}/>
-                        <Divider/>
                         <Routes>
                             <Route path="/auth" element={<Auth/>}/>
                             <Route path="/projects" element={

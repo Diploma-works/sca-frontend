@@ -1,0 +1,22 @@
+@top Query { SelectQuery }
+
+Select { "SELECT" | "select" }
+From { "FROM" | "from" }
+Comma { "," }
+Asterisk { "*" }
+
+GitInfo { "git_info" }
+Problems { "problems" }
+Arch { "arch" }
+
+SelectQuery { Select FieldList From Project }
+FieldList { Asterisk | field (Comma field)* }
+field { GitInfo | Problems | Arch }
+Project { identifier }
+
+@tokens {
+  space { @whitespace+ }
+  identifier { $[a-zA-Z0-9_-]+ }
+}
+
+@skip { space }

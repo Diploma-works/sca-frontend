@@ -137,11 +137,6 @@ const Main = () => {
             component: <Git projectId={projectId} />
         },
         {
-            title: "Статистика",
-            icon: <QueryStatsRoundedIcon/>,
-            component: <Statistics/>
-        },
-        {
             title: "Проблемы",
             icon: <ErrorOutlineRoundedIcon/>,
             component: <Problems/>

@@ -1,6 +1,7 @@
 .vscode/*
-user-data/*
-
 sca-backend/target/*
 sca-backend/.idea/*
 sca-backend/.env
+
+/.idea/
+/user-data/
