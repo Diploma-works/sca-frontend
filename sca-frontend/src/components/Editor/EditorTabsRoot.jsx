@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-
+import { Tabs } from "@mui/material";
 import {
     closestCenter,
     DndContext,
@@ -11,13 +11,10 @@ import {
 } from "@dnd-kit/core";
 import { horizontalListSortingStrategy, SortableContext, sortableKeyboardCoordinates, } from "@dnd-kit/sortable";
 
-import { Tabs, useTheme } from "@mui/material";
-
 import { useTabsContext } from "./TabsContext";
 import { EditorTabOverlay, SortableEditorTab } from "./EditorTab";
 
 const EditorTabsRoot = () => {
-    const theme = useTheme();
     const [draggedTab, setDraggedTab] = useState(null);
     const { tabs, moveTab, removeTab, activeTab, setActiveTab } = useTabsContext();
 
@@ -68,36 +65,36 @@ const EditorTabsRoot = () => {
                     allowScrollButtonsMobile
                     value={activeTab?.id}
                     onChange={handleChange}
-                    sx={{
+                    sx={(theme) => ({
                         position: 'relative',
-                        p: 4 / 8,
+                        p: 0.5,
                         pb: 0,
-                        minHeight: 0,
-                        boxShadow: `inset 0 -1px ${theme.palette.divider}`,
+                        minHeight: 'fit-content',
+                        boxShadow: `inset 0 -1px ${theme.vars.palette.divider}`,
                         '& .MuiTabs-scroller': {
-                            borderTopLeftRadius: theme.shape.borderRadius,
-                            borderTopRightRadius: theme.shape.borderRadius,
+                            borderTopLeftRadius: 1,
+                            borderTopRightRadius: 1,
                         },
                         '& .MuiTabs-indicator': {
                             display: 'none',
                         },
                         '& .MuiTabs-flexContainer': {
-                            gap: 4 / 8,
+                            gap: 0.5,
                         },
                         '& .MuiTabScrollButton-root': {
                             color: 'text.secondary',
                             position: 'absolute',
-                            p: 4 / 8,
+                            p: 0.5,
                             zIndex: 2,
                             opacity: 1,
                             width: 'auto',
                             borderRadius: 1,
                             backdropFilter: 'blur(5px)',
                             ':first-of-type': {
-                                left: theme.spacing(4 / 8),
+                                left: theme.spacing(0.5),
                             },
                             ':last-of-type': {
-                                right: theme.spacing(4 / 8),
+                                right: theme.spacing(0.5),
                             },
                             '&.Mui-disabled': {
                                 visibility: 'hidden',
@@ -107,9 +104,9 @@ const EditorTabsRoot = () => {
                                     bgcolor: 'action.hover',
                                 },
                             },
-                            boxShadow: `0 0 10px 2px ${theme.palette.background.paper}`,
+                            boxShadow: `0 0 10px 2px ${theme.vars.palette.background.paper}`,
                         },
-                    }}
+                    })}
                 >
                     {tabs.map(({ id, label }) => (
                         <SortableEditorTab key={id} value={id} label={label} removeTab={removeTab}/>

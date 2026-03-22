@@ -1,22 +1,16 @@
-import { useState } from "react";
-
-import "overlayscrollbars/overlayscrollbars.css";
-
 import { CssBaseline, Stack, ThemeProvider } from "@mui/material";
-
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import { darkTheme, lightTheme } from "./themes";
+import AuthProvider from "react-auth-kit";
+import createStore from "react-auth-kit/createStore";
+import RequireAuth from "@auth-kit/react-router/RequireAuth"
+
 import Navbar from "./components/Navbar";
 import Main from "./components/Main";
 import Auth from "./components/Auth";
 import Projects from "./components/Projects";
 import GitHubPage from "./pages/GitHubPage";
-
-import AuthProvider from "react-auth-kit";
-import RequireAuth from "@auth-kit/react-router/RequireAuth"
-
-import createStore from "react-auth-kit/createStore";
+import { theme } from "./theme";
 
 const store = createStore({
     authName: '_auth',
@@ -27,20 +21,15 @@ const store = createStore({
 });
 
 const App = () => {
-    const [mode, setMode] = useState("dark");
-
-    const theme = mode === "light" ? lightTheme : darkTheme;
-    const switchMode = () => setMode(prevState => prevState === "light" ? "dark" : "light");
-
     return (
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={theme} noSsr>
             <CssBaseline enableColorScheme/>
             <Stack sx={{
                 height: '100dvh',
             }}>
                 <AuthProvider store={store}>
                     <BrowserRouter>
-                        <Navbar mode={mode} switchMode={switchMode}/>
+                        <Navbar/>
                         <Routes>
                             <Route path="/auth" element={<Auth/>}/>
                             <Route path="/projects" element={

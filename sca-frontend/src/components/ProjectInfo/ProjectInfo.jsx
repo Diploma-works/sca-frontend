@@ -1,10 +1,10 @@
 import { useRef } from "react";
-import { Box, Divider, Fade, Popover, Typography, useTheme } from "@mui/material";
+import { Box, Divider, Fade, Popover, Typography, useColorScheme } from "@mui/material";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { Editor } from "@monaco-editor/react";
 
 export const ProjectInfo = ({ anchorRef, open, setOpen }) => {
-    const theme = useTheme();
+    const { mode } = useColorScheme();
     const editorRef = useRef(null);
 
     const handleClose = () => setOpen(false);
@@ -49,24 +49,23 @@ export const ProjectInfo = ({ anchorRef, open, setOpen }) => {
                 },
             }}
         >
-            <Box sx={{
-                borderRadius: 1,
-                border: "1px solid",
-                borderColor: "divider",
-                overflow: "hidden",
-                "&:hover": { borderColor: "text.primary" },
-                "&:focus-within": {
-                    borderColor: "primary.main",
-                    boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
-                },
+            <Box sx={(theme) => ({
                 m: 1,
                 px: 1,
                 py: 0.5,
                 height: 32,
                 position: "relative",
-            }}>
+                overflow: "hidden",
+                border: `1px solid ${theme.vars.palette.divider}`,
+                borderRadius: 1,
+                "&:hover": { borderColor: "text.primary" },
+                "&:focus-within": {
+                    borderColor: "primary.main",
+                    boxShadow: `0 0 0 1px ${theme.vars.palette.primary.main}`,
+                },
+            })}>
                 <Editor
-                    theme={theme.palette.mode === 'dark' ? 'sca-dark' : 'sca-light'}
+                    theme={mode === 'dark' ? 'sca-dark' : 'sca-light'}
                     language="SCAQL"
                     options={{
                         fontSize: 16,

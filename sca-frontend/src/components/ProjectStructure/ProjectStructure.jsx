@@ -251,7 +251,7 @@ const ProjectStructureItem = ({ itemId, label, path, children, contextHandlers }
                 '.MuiTreeItem-groupTransition': {
                     ml: 2,
                     pl: 0,
-                    borderLeft: `1px solid ${theme.palette.divider}`,
+                    borderLeft: `1px solid ${theme.vars.palette.divider}`,
                 },
             }}
         >

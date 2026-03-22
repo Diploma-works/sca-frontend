@@ -1,16 +1,16 @@
 import { memo, useCallback } from "react";
+import { Box, IconButton, SvgIcon, Tab } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { DragOverlay } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { Box, IconButton, SvgIcon, Tab, useTheme } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-
-import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
+import { fileTypeIcons, getFileType } from "@/utils/fileTypes";
 
 const commonTabSx = {
-    p: 4 / 8,
+    p: 0.5,
+    pl: 0.75,
     minHeight: 0,
     borderRadius: 1,
     flexDirection: 'row',
@@ -27,9 +27,9 @@ const EditorTabLabel = memo(({ label, handleClose }) => {
         <>
             <SvgIcon sx={{ width: 18, height: 18, mr: 1 }}>{fileTypeIcon}</SvgIcon>
             <span>{label}</span>
-            <Box sx={{ ml: 4 / 8, width: 20, height: 20 }}>
+            <Box sx={{ ml: 0.5, width: 20, height: 20 }}>
                 {handleClose && (
-                    <IconButton component="div" onClick={handleClose} sx={{ p: 2 / 8 }}>
+                    <IconButton component="div" onClick={handleClose} sx={{ p: 0.25 }}>
                         <CloseIcon sx={{ fontSize: 16 }}/>
                     </IconButton>
                 )}
@@ -39,8 +39,6 @@ const EditorTabLabel = memo(({ label, handleClose }) => {
 });
 
 const EditorTab = memo(({ value, label, removeTab, ...rest }) => {
-    const theme = useTheme();
-
     const handleClose = useCallback((e) => {
         e.stopPropagation(); // ОЧЕНЬ важная строка, если не вызвать эту функцию - контекст сломается!!!
         removeTab(value);
@@ -51,7 +49,7 @@ const EditorTab = memo(({ value, label, removeTab, ...rest }) => {
             {...rest}
             value={value}
             label={<EditorTabLabel label={label} handleClose={handleClose}/>}
-            sx={{
+            sx={(theme) => ({
                 ...commonTabSx,
                 overflow: 'visible',
                 '.MuiIconButton-root': {
@@ -77,22 +75,23 @@ const EditorTab = memo(({ value, label, removeTab, ...rest }) => {
                     },
                     '::before': {
                         position: 'absolute',
-                        bottom: `calc(-${theme.spacing(4 / 8)} - 1px)`,
-                        width: `calc(100% - 2*${theme.spacing(4 / 8)})`,
+                        left: '50%',
+                        bottom: `calc(0px - ${theme.spacing(0.5)} - 1px)`,
+                        width: `calc(100% - ${theme.spacing(1)})`,
                         height: 2,
+                        transform: 'translateX(-50%)',
                         content: '""',
                         pointerEvents: 'none',
                         bgcolor: 'primary.main',
                         transition: 'width 0.2s',
                     },
                 },
-            }}
+            })}
         />
     );
 });
 
 const SortableEditorTab = (props) => {
-    const theme = useTheme();
     const {
         isDragging,
         attributes,
@@ -107,11 +106,11 @@ const SortableEditorTab = (props) => {
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            sx={{
+            sx={(theme) => ({
                 transition,
                 borderRadius: 1,
                 transform: CSS.Transform.toString(transform),
-                mb: `calc(${theme.spacing(4 / 8)} + 1px)`,
+                mb: `calc(${theme.spacing(0.5)} + 1px)`,
                 ...(isDragging ? {
                     zIndex: 0,
                     bgcolor: 'action.focus',
@@ -121,7 +120,7 @@ const SortableEditorTab = (props) => {
                 } : {
                     zIndex: 1,
                 }),
-            }}
+            })}
         >
             <EditorTab {...props}/>
         </Box>
@@ -129,19 +128,17 @@ const SortableEditorTab = (props) => {
 }
 
 const EditorTabOverlay = ({ draggedTab }) => {
-    const theme = useTheme();
-
     return (
         <DragOverlay>
             {draggedTab && (
                 <Tab
                     label={<EditorTabLabel label={draggedTab.label}/>}
-                    sx={{
+                    sx={(theme) => ({
                         ...commonTabSx,
                         opacity: 1,
                         cursor: 'grab',
-                        boxShadow: `0 0 10px 2px ${theme.palette.background.default}`,
-                    }}
+                        boxShadow: `0 0 10px 2px ${theme.vars.palette.background.default}`,
+                    })}
                 />
             )}
         </DragOverlay>

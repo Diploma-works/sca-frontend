@@ -1,5 +1,5 @@
-import { memo, useMemo, useState, useEffect } from "react";
-import { alpha, Box, Button, Divider, Link, Menu, MenuItem, SvgIcon, Tooltip, useTheme } from "@mui/material";
+import { memo, useEffect, useState } from "react";
+import { alpha, Box, Button, Menu, MenuItem, SvgIcon, Tooltip, useColorScheme, useTheme } from "@mui/material";
 import { yellow } from "@mui/material/colors";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
@@ -9,6 +9,7 @@ import MonacoEditor from "@monaco-editor/react";
 
 const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {
     const theme = useTheme();
+    const { mode } = useColorScheme();
     const [leaveSpaceForScrollbar, setLeaveSpaceForScrollbar] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [editorInstance, setEditorInstance] = useState(null);
@@ -130,7 +131,7 @@ const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {
             <MonacoEditor
                 height="100%"
                 language={language}
-                theme={theme.palette.mode === 'dark' ? 'vs-dark' : 'custom-light'}
+                theme={mode === 'dark' ? 'vs-dark' : 'custom-light'}
                 value={typeof children === 'string' ? children : children?.content || ''}
                 onChange={onCodeChange}
                 onMount={handleEditorDidMount}

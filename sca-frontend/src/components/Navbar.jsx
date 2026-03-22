@@ -1,4 +1,16 @@
-import { AppBar, Box, Button, Divider, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from "@mui/material";
+import {
+    AppBar,
+    Box,
+    Button,
+    Divider,
+    IconButton,
+    Menu,
+    MenuItem,
+    Stack,
+    Toolbar,
+    Typography,
+    useColorScheme
+} from "@mui/material";
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -12,13 +24,14 @@ import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ProjectInfo } from "@/components/ProjectInfo";
 
-const Navbar = ({ mode, switchMode }) => {
+const Navbar = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const signOut = useSignOut();
     const authUser = useAuthUser();
     const navigate = useNavigate();
     const location = useLocation();
+    const { mode, setMode } = useColorScheme();
 
     const [projectInfoOpen, setProjectInfoOpen] = useState(false);
     const searchInputRef = useRef(null);
@@ -51,6 +64,7 @@ const Navbar = ({ mode, switchMode }) => {
         handleClose();
         navigate("/auth");
     };
+    const handleThemeChange = () => setMode(mode === "light" ? "dark" : "light");
 
     const isProjectsPage = location.pathname === '/projects';
     const isMainPage = location.pathname === '/' || location.pathname === '/editor';
@@ -102,7 +116,7 @@ const Navbar = ({ mode, switchMode }) => {
                     <IconButton size="small" onClick={handleProjectInfoClick} ref={searchInputRef}>
                         <SearchRoundedIcon sx={{ color: 'text.secondary' }}/>
                     </IconButton>
-                    <IconButton size="small" onClick={switchMode}>
+                    <IconButton size="small" onClick={handleThemeChange}>
                         {mode === "light" ? (
                             <DarkModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
                         ) : (

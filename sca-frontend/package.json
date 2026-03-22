@@ -16,6 +16,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@fontsource-variable/montserrat": "^5.2.8",
     "@lezer/common": "^1.5.1",
     "@lezer/lr": "^1.4.8",
     "@monaco-editor/react": "^4.7.0",

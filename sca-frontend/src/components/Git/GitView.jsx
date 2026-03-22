@@ -1,50 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { 
-    Box, 
-    Stack, 
-    Typography, 
-    useTheme, 
+import React, { useEffect, useState } from 'react';
+import {
     Accordion,
-    AccordionSummary,
     AccordionDetails,
-    Chip,
-    Divider,
-    Button,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemIcon,
+    AccordionSummary,
     Alert,
+    Box,
+    Button,
+    Chip,
     CircularProgress,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField
+    DialogContent,
+    DialogTitle,
+    Divider,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Stack,
+    TextField,
+    Typography,
+    useColorScheme
 } from '@mui/material';
 import KeyboardArrowRightRoundedIcon from '@mui/icons-material/KeyboardArrowRightRounded';
 import {
-    Commit as CommitIcon,
-    Upload as PushIcon,
-    Download as PullIcon,
-    CallSplit as BranchIcon,
-    Sync as SyncIcon,
     Add as AddIcon,
-    CheckCircle as CheckCircleIcon,
+    CallSplit as BranchIcon,
     Cancel as CancelIcon,
-    Info as InfoIcon,
-    Restore as RestoreIcon,
+    CheckCircle as CheckCircleIcon,
+    Commit as CommitIcon,
     DeleteForever as ResetIcon,
-    Merge as MergeIcon,
+    Download as PullIcon,
     History as HistoryIcon,
-    SwapHoriz as SwitchIcon
+    Info as InfoIcon,
+    Merge as MergeIcon,
+    Restore as RestoreIcon,
+    SwapHoriz as SwitchIcon,
+    Sync as SyncIcon,
+    Upload as PushIcon
 } from '@mui/icons-material';
 import ScrollableContainer from '../ScrollableContainer';
-import { api, gitHubAPI } from '../../utils/api';
+import { api, gitHubAPI } from '@/utils/api';
 import './GitView.css';
 
 const GitView = (props) => {
-    const theme = useTheme();
+    const { mode } = useColorScheme();
     const [branches, setBranches] = useState({ local: [], remote: [], current: '' });
     const [graphData, setGraphData] = useState({ commits: [], total: 0 });
     const [loading, setLoading] = useState(true);
@@ -80,7 +80,7 @@ const GitView = (props) => {
 
     const fetchRemoteBranches = async () => {
         if (!projectId) return;
-        
+
         try {
             // Force fetch remote branches
             console.log('Fetching remote branches for project:', projectId);
@@ -104,38 +104,38 @@ const GitView = (props) => {
             console.log('GitView - fetchData started for projectId:', projectId); // Отладочная информация
             setLoading(true);
             setError(null);
-            
+
             console.log('GitView - Making API calls...'); // Отладочная информация
             const [branchesResponse, graphResponse] = await Promise.all([
                 api.projectAPI.getBranches(projectId),
                 api.projectAPI.getBranchGraph(projectId, limit)
             ]);
-            
+
             console.log('GitView - API calls completed'); // Отладочная информация
             console.log('Branches response:', branchesResponse); // Отладочная информация
             console.log('Graph response:', graphResponse); // Отладочная информация
-            
+
             // Детальное логирование веток
             console.log('Local branches count:', branchesResponse?.local?.length || 0);
             console.log('Remote branches count:', branchesResponse?.remote?.length || 0);
             console.log('Local branches:', branchesResponse?.local);
             console.log('Remote branches:', branchesResponse?.remote);
-            
+
             // Извлекаем ветки из данных коммитов для более полного списка
             const extractBranchesFromCommits = (commits) => {
                 if (!commits || !Array.isArray(commits)) return [];
-                
+
                 const branchNames = new Set();
-                
+
                 // Ищем merge коммиты для определения веток
-                const mergeCommitIndex = commits.findIndex(c => 
-                    c.message && typeof c.message === 'string' && 
+                const mergeCommitIndex = commits.findIndex(c =>
+                    c.message && typeof c.message === 'string' &&
                     c.message.toLowerCase().includes('merge')
                 );
-                
+
                 if (mergeCommitIndex !== -1) {
                     const mergeCommit = commits[mergeCommitIndex];
-                    
+
                     // Извлекаем название ветки из сообщения merge
                     const message = mergeCommit.message.toLowerCase();
                     const branchPatterns = [
@@ -144,7 +144,7 @@ const GitView = (props) => {
                         /merge.*from\s+([^\s/]+)$/,
                         /merge\s+([^\s]+)\s+into/
                     ];
-                    
+
                     let mergedBranchName = null;
                     for (const pattern of branchPatterns) {
                         const match = message.match(pattern);
@@ -153,38 +153,38 @@ const GitView = (props) => {
                             break;
                         }
                     }
-                    
+
                     if (mergedBranchName && mergedBranchName !== 'main') {
                         branchNames.add(`origin/${mergedBranchName}`);
                     }
                 }
-                
+
                 return Array.from(branchNames).map(branchName => ({
                     name: branchName,
                     commit: 'detected',
                     message: 'Branch detected from commit history'
                 }));
             };
-            
+
             // Получаем дополнительные ветки из истории коммитов
             const branchesFromCommits = extractBranchesFromCommits(graphResponse?.commits || graphResponse || []);
             console.log('Branches extracted from commits:', branchesFromCommits);
-            
+
             // Объединяем physical remote ветки с ветками из истории коммитов
             const existingRemoteBranches = Array.isArray(branchesResponse?.remote) ? branchesResponse.remote : [];
             const existingBranchNames = new Set(existingRemoteBranches.map(b => b.name || b));
-            
-            const additionalRemoteBranches = branchesFromCommits.filter(branch => 
+
+            const additionalRemoteBranches = branchesFromCommits.filter(branch =>
                 !existingBranchNames.has(branch.name)
             );
-            
+
             // Убеждаемся, что структура данных корректна
             const normalizedBranches = {
                 local: Array.isArray(branchesResponse?.local) ? branchesResponse.local : [],
                 remote: [...existingRemoteBranches, ...additionalRemoteBranches],
                 current: branchesResponse?.current || ''
             };
-            
+
             console.log('Final remote branches (physical + from commits):', normalizedBranches.remote);
             console.log('Normalized branches:', normalizedBranches);
             setBranches(normalizedBranches);
@@ -202,7 +202,7 @@ const GitView = (props) => {
                 status: err.status,
                 response: err.response
             }); // Отладочная информация
-            
+
             // Проверяем, является ли это ошибкой "Project not found"
             if (err.message && err.message.includes('Project not found')) {
                 setError('Project not found. Please select a valid project from the Projects tab.');
@@ -228,7 +228,7 @@ const GitView = (props) => {
 
     const loadGitStatus = async () => {
         if (!projectId) return;
-        
+
         try {
             const statusData = await gitHubAPI.getProjectGitStatus(projectId);
             setGitStatus(statusData.files || []);
@@ -240,7 +240,7 @@ const GitView = (props) => {
 
     const loadStashStatus = async () => {
         if (!projectId) return;
-        
+
         try {
             const stashStatus = await gitHubAPI.getStashStatus(projectId);
             setHasStash(stashStatus.hasStash || false);
@@ -404,15 +404,15 @@ const GitView = (props) => {
         switch (status) {
             case 'added':
             case 'A':
-                return <AddIcon color="success" />;
+                return <AddIcon color="success"/>;
             case 'modified':
             case 'M':
-                return <InfoIcon color="info" />;
+                return <InfoIcon color="info"/>;
             case 'deleted':
             case 'D':
-                return <CancelIcon color="error" />;
+                return <CancelIcon color="error"/>;
             default:
-                return <CheckCircleIcon />;
+                return <CheckCircleIcon/>;
         }
     };
 
@@ -477,26 +477,26 @@ const GitView = (props) => {
         if (!commits || !Array.isArray(commits) || commits.length === 0) {
             return { commits: [], totalBranches: 1 };
         }
-        
+
         console.log('Parsing commits:', commits);
         console.log('Branches data:', branchesData);
-        
+
         // Анализируем Git граф символы для правильного определения структуры веток
         const allBranches = new Set(['main']); // Всегда есть main ветка
         const branchMap = new Map();
         branchMap.set('main', 0);
         let nextTrack = 1;
-        
+
         // Анализируем Git граф из commit.graph для определения активных веток
         commits.forEach((commit, index) => {
             if (commit.graph) {
                 console.log(`Commit ${index}: ${commit.shortHash} - Graph: "${commit.graph}"`);
             }
         });
-        
+
         // Определяем ветки из refs информации и устанавливаем фиксированные треки
         branchMap.set('main', 0); // main всегда трек 0
-        
+
         commits.forEach((commit, index) => {
             if (commit.refs && commit.refs.trim()) {
                 const refs = commit.refs.split(',').map(ref => ref.trim());
@@ -527,13 +527,13 @@ const GitView = (props) => {
                 });
             }
         });
-        
+
         // Ищем merge коммиты для определения дополнительных веток
         commits.forEach((commit, index) => {
-            if (commit.message && typeof commit.message === 'string' && 
+            if (commit.message && typeof commit.message === 'string' &&
                 commit.message.toLowerCase().includes('merge')) {
                 console.log('Found merge commit:', commit);
-                
+
                 // Извлекаем название ветки из сообщения merge
                 const message = commit.message.toLowerCase();
                 const branchPatterns = [
@@ -542,7 +542,7 @@ const GitView = (props) => {
                     /merge.*from\s+([^\s/]+)$/,
                     /merge\s+([^\s]+)\s+into/
                 ];
-                
+
                 let mergedBranchName = null;
                 for (const pattern of branchPatterns) {
                     const match = message.match(pattern);
@@ -551,7 +551,7 @@ const GitView = (props) => {
                         break;
                     }
                 }
-                
+
                 if (mergedBranchName && !branchMap.has(mergedBranchName)) {
                     allBranches.add(mergedBranchName);
                     branchMap.set(mergedBranchName, nextTrack++);
@@ -559,19 +559,19 @@ const GitView = (props) => {
                 }
             }
         });
-        
+
         console.log('All detected branches:', Array.from(allBranches));
         console.log('Branch to track mapping:', Array.from(branchMap.entries()));
-        
+
         // Анализируем коммиты и назначаем им правильные треки на основе граф символов
         const parsedCommits = commits.map((commit, index) => {
             let branchTrack = 0; // По умолчанию main
             let branchName = 'main';
-            
+
             // Анализируем graph символы для определения трека
             if (commit.graph) {
                 const graph = commit.graph;
-                
+
                 // Улучшенная логика определения трека по граф символам
                 // Считаем количество символов до * включая пробелы и |
                 // Примеры:
@@ -580,30 +580,30 @@ const GitView = (props) => {
                 // "| | * " -> track 2 (another branch)
                 // "*   " merge commit в main -> track 0
                 // "|\  " -> track 0 (после merge)
-                
+
                 let trackPosition = 0;
                 const asteriskIndex = graph.indexOf('*');
-                
+
                 if (asteriskIndex !== -1) {
                     // Подсчитываем количество | символов перед *
                     const beforeAsterisk = graph.substring(0, asteriskIndex);
                     trackPosition = (beforeAsterisk.match(/\|/g) || []).length;
-                    
+
                     // Особый случай для merge коммитов
                     if (graph.includes('*   ') || graph.includes('*  ')) {
                         // Merge коммит всегда в основной ветке (track 0)
                         trackPosition = 0;
                     }
                 }
-                
+
                 branchTrack = trackPosition;
                 console.log(`Graph "${graph}" -> track ${trackPosition} (asterisk at ${asteriskIndex})`);
             }
-            
+
             // Определяем имя ветки приоритетно по refs, затем по граф позиции
             if (commit.refs && commit.refs.trim()) {
                 const refs = commit.refs.split(',').map(ref => ref.trim());
-                
+
                 // Ищем текущую ветку (HEAD -> branch) - это самый точный индикатор
                 const headRef = refs.find(ref => ref.includes('HEAD ->'));
                 if (headRef) {
@@ -614,17 +614,17 @@ const GitView = (props) => {
                     }
                 } else {
                     // Ищем любую не-tag ветку в refs
-                    const branchRefs = refs.filter(ref => 
-                        !ref.includes('tag:') && 
-                        !ref.includes('origin/HEAD') && 
+                    const branchRefs = refs.filter(ref =>
+                        !ref.includes('tag:') &&
+                        !ref.includes('origin/HEAD') &&
                         ref.trim().length > 0
                     );
-                    
+
                     if (branchRefs.length > 0) {
                         // Приоритет: main > остальные ветки
                         let selectedRef = branchRefs.find(ref => ref.includes('main')) || branchRefs[0];
                         let cleanBranchName = selectedRef.replace('origin/', '').trim();
-                        
+
                         if (cleanBranchName) {
                             branchName = cleanBranchName;
                             branchTrack = branchMap.get(branchName) || 0;
@@ -636,7 +636,7 @@ const GitView = (props) => {
                 if (branchTrack > 0) {
                     // Ищем merge commit чтобы определить имя ветки
                     let foundBranchName = null;
-                    
+
                     // Проверяем ближайшие merge commit'ы
                     for (let i = Math.max(0, index - 3); i <= Math.min(commits.length - 1, index + 3); i++) {
                         const nearCommit = commits[i];
@@ -647,7 +647,7 @@ const GitView = (props) => {
                                 /merge.*branch\s+'([^']+)'/,
                                 /merge.*from\s+([^\s/]+)$/
                             ];
-                            
+
                             for (const pattern of branchPatterns) {
                                 const match = mergeMessage.match(pattern);
                                 if (match && match[1]) {
@@ -658,7 +658,7 @@ const GitView = (props) => {
                             if (foundBranchName) break;
                         }
                     }
-                    
+
                     if (foundBranchName) {
                         branchName = foundBranchName;
                         allBranches.add(branchName);
@@ -677,9 +677,9 @@ const GitView = (props) => {
                     branchTrack = 0;
                 }
             }
-            
+
             console.log(`Commit ${index}: ${commit.shortHash} -> track ${branchTrack} (${branchName})`);
-            
+
             return {
                 ...commit,
                 id: commit.shortHash || commit.hash?.substring(0, 7) || `commit-${index}`,
@@ -691,24 +691,24 @@ const GitView = (props) => {
                 message: commit.message || 'No message'
             };
         });
-            
-            console.log('Final branch mapping:', Array.from(branchMap.entries()));
-            console.log('Total branches detected:', allBranches.size);
-            console.log('All branches:', Array.from(allBranches));
-            console.log('Parsed commits with correct tracks:', parsedCommits.map(c => ({
-                id: c.id, 
-                branchTrack: c.branchTrack, 
-                branchName: c.branchName, 
-                message: c.message?.substring(0, 50)
-            })));
-            
-            // Проверяем, что у нас есть коммиты с разными branchTrack
-            const uniqueTracks = [...new Set(parsedCommits.map(c => c.branchTrack))];
-            console.log('Unique branch tracks:', uniqueTracks);
-            console.log('Should render', uniqueTracks.length, 'visual tracks');
-            
-        return { 
-            commits: parsedCommits, 
+
+        console.log('Final branch mapping:', Array.from(branchMap.entries()));
+        console.log('Total branches detected:', allBranches.size);
+        console.log('All branches:', Array.from(allBranches));
+        console.log('Parsed commits with correct tracks:', parsedCommits.map(c => ({
+            id: c.id,
+            branchTrack: c.branchTrack,
+            branchName: c.branchName,
+            message: c.message?.substring(0, 50)
+        })));
+
+        // Проверяем, что у нас есть коммиты с разными branchTrack
+        const uniqueTracks = [...new Set(parsedCommits.map(c => c.branchTrack))];
+        console.log('Unique branch tracks:', uniqueTracks);
+        console.log('Should render', uniqueTracks.length, 'visual tracks');
+
+        return {
+            commits: parsedCommits,
             totalBranches: allBranches.size
         };
     };
@@ -730,46 +730,46 @@ const GitView = (props) => {
         // Извлекаем имя ветки из объекта или используем как строку
         const branchName = typeof branch === 'object' ? (branch.name || branch.current || String(branch)) : String(branch);
         const branchKey = typeof branch === 'object' ? (branch.name || branch.current || JSON.stringify(branch)) : String(branch);
-        
+
         return (
             <Box
                 key={branchKey}
-                sx={{
+                sx={(theme) => ({
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1,
                     p: 1,
                     borderRadius: 1,
-                    backgroundColor: branchName === branches.current ? 
-                        theme.palette.primary.main + '20' : 'transparent',
-                }}
+                    backgroundColor: branchName === branches.current ?
+                        theme.palette.primary.main + '20' : 'transparent', // TODO: what's 20???
+                })}
             >
                 <Box
-                    sx={{
+                    sx={(theme) => ({
                         width: 8,
                         height: 8,
                         borderRadius: '50%',
-                        backgroundColor: branchName === branches.current ? 
-                            theme.palette.primary.main : theme.palette.text.secondary,
+                        backgroundColor: branchName === branches.current ?
+                            theme.vars.palette.primary.main : theme.vars.palette.text.secondary,
                         mr: 1
-                    }}
+                    })}
                 />
-                <Typography 
-                    variant="body2" 
-                    sx={{ 
+                <Typography
+                    variant="body2"
+                    sx={(theme) => ({
                         fontFamily: 'monospace',
                         fontWeight: branchName === branches.current ? 600 : 400,
-                        color: branchName === branches.current ? 
-                            theme.palette.primary.main : theme.palette.text.primary
-                    }}
+                        color: branchName === branches.current ?
+                            theme.vars.palette.primary.main : theme.vars.palette.text.primary
+                    })}
                 >
                     {branchName}
                 </Typography>
                 {branchName === branches.current && (
-                    <Chip 
-                        label="current" 
-                        size="small" 
-                        color="primary" 
+                    <Chip
+                        label="current"
+                        size="small"
+                        color="primary"
                         sx={{ ml: 'auto', height: 20, fontSize: '0.7rem' }}
                     />
                 )}
@@ -785,7 +785,7 @@ const GitView = (props) => {
     // Константы для синхронизации высоты элементов
     const COMMIT_ITEM_HEIGHT = 72; // Высота одного элемента коммита (включая отступы)
     const COMMIT_ITEM_PADDING = 8; // Отступы между элементами
-    
+
     const renderCommitGraph = (commits) => {
         if (!commits.length) return null;
 
@@ -795,22 +795,22 @@ const GitView = (props) => {
         const GRAPH_WIDTH = Math.max(80, LEFT_MARGIN + totalBranches * TRACK_WIDTH + 15);
 
         return (
-            <Box 
-                sx={{ 
+            <Box
+                sx={(theme) => ({
                     width: GRAPH_WIDTH,
                     minHeight: commits.length * (COMMIT_ITEM_HEIGHT + COMMIT_ITEM_PADDING),
                     position: 'relative',
-                    borderRight: `1px solid ${theme.palette.divider}`,
-                    backgroundColor: theme.palette.background.default,
-                }}
+                    borderRight: `1px solid ${theme.vars.palette.divider}`,
+                    backgroundColor: 'background.default',
+                })}
             >
-                <svg 
+                <svg
                     width={GRAPH_WIDTH}
                     height={commits.length * (COMMIT_ITEM_HEIGHT + COMMIT_ITEM_PADDING)}
                     style={{ background: 'transparent', display: 'block' }}
                 >
                     {/* Branch track lines */}
-                    {Array.from({length: totalBranches}).map((_, track) => (
+                    {Array.from({ length: totalBranches }).map((_, track) => (
                         <line
                             key={`branch-${track}`}
                             x1={LEFT_MARGIN + track * TRACK_WIDTH}
@@ -822,13 +822,13 @@ const GitView = (props) => {
                             opacity="0.3"
                         />
                     ))}
-                    
+
                     {/* Commit nodes and connections */}
                     {commits.map((commit, index) => {
                         // Позиционируем точку в середине элемента коммита
                         const y = (COMMIT_ITEM_HEIGHT + COMMIT_ITEM_PADDING) * index + COMMIT_ITEM_HEIGHT / 2;
                         const x = LEFT_MARGIN + commit.branchTrack * TRACK_WIDTH;
-                        
+
                         return (
                             <g key={commit.fullHash || index}>
                                 {/* Connection lines */}
@@ -844,7 +844,7 @@ const GitView = (props) => {
                                             strokeWidth="2"
                                             opacity="0.8"
                                         />
-                                        
+
                                         {/* Merge/branch curves */}
                                         {commit.branchTrack !== commits[index + 1].branchTrack && (
                                             <path
@@ -861,24 +861,24 @@ const GitView = (props) => {
                                         )}
                                     </>
                                 )}
-                                
+
                                 {/* Commit node */}
                                 <circle
                                     cx={x}
                                     cy={y}
                                     r={commit.message.toLowerCase().includes('merge') ? 7 : 5}
                                     fill={getBranchColor(commit.branchTrack)}
-                                    stroke={theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff'}
+                                    stroke={mode === 'dark' ? '#1e293b' : '#ffffff'}
                                     strokeWidth="2"
                                 />
-                                
+
                                 {/* Merge indicator */}
                                 {commit.message.toLowerCase().includes('merge') && (
                                     <circle
                                         cx={x}
                                         cy={y}
                                         r="3"
-                                        fill={theme.palette.mode === 'dark' ? '#1e293b' : '#ffffff'}
+                                        fill={mode === 'dark' ? '#1e293b' : '#ffffff'}
                                     />
                                 )}
                             </g>
@@ -895,20 +895,20 @@ const GitView = (props) => {
                 {commits.map((commit, index) => (
                     <Box
                         key={commit.fullHash || index}
-                        sx={{
+                        sx={(theme) => ({
                             height: COMMIT_ITEM_HEIGHT,
                             mb: COMMIT_ITEM_PADDING / 8, // Небольшой отступ между элементами
                             p: 1.5,
                             borderRadius: 1,
-                            border: `1px solid ${theme.palette.divider}`,
-                            backgroundColor: theme.palette.background.paper,
+                            border: `1px solid ${theme.vars.palette.divider}`,
+                            backgroundColor: 'background.paper',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'center',
                             '&:hover': {
-                                backgroundColor: theme.palette.action.hover,
+                                backgroundColor: 'action.hover',
                             },
-                        }}
+                        })}
                     >
                         <Box display="flex" alignItems="center" gap={1} mb={0.5}>
                             <Box
@@ -919,11 +919,11 @@ const GitView = (props) => {
                                     backgroundColor: getBranchColor(commit.branchTrack),
                                 }}
                             />
-                            <Typography 
-                                variant="caption" 
-                                sx={{ 
+                            <Typography
+                                variant="caption"
+                                sx={{
                                     fontFamily: 'monospace',
-                                    backgroundColor: theme.palette.action.selected,
+                                    backgroundColor: 'action.selected',
                                     px: 0.5,
                                     py: 0.25,
                                     borderRadius: 0.5,
@@ -968,11 +968,11 @@ const GitView = (props) => {
                     </Typography>
                 )}
                 <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 2 }}>
-                    <button onClick={fetchData} style={{ 
+                    <button onClick={fetchData} style={{
                         padding: '6px 12px',
                         border: 'none',
                         borderRadius: '4px',
-                        backgroundColor: theme.palette.primary.main,
+                        backgroundColor: 'primary.main',
                         color: 'white',
                         cursor: 'pointer',
                         fontSize: '0.875rem'
@@ -980,11 +980,11 @@ const GitView = (props) => {
                         🔄 Retry
                     </button>
                     {error.includes('Project not found') && (
-                        <Typography 
-                            variant="caption" 
-                            sx={{ 
+                        <Typography
+                            variant="caption"
+                            sx={{
                                 padding: '6px 12px',
-                                backgroundColor: theme.palette.info.main,
+                                backgroundColor: 'info.main',
                                 color: 'white',
                                 borderRadius: '4px',
                                 cursor: 'default',
@@ -1003,17 +1003,17 @@ const GitView = (props) => {
         <ScrollableContainer style={{ flex: 1 }}>
             {/* Last Commit Info */}
             {graphData.commits && graphData.commits.length > 0 && (
-                <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: theme.palette.background.paper,
-                    borderBottom: `1px solid ${theme.palette.divider}`,
+                <Box sx={(theme) => ({
+                    p: 2,
+                    backgroundColor: 'background.paper',
+                    borderBottom: `1px solid ${theme.vars.palette.divider}`,
                     mb: 2
-                }}>
+                })}>
                     <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                         Последний коммит
                     </Typography>
                     <Box display="flex" alignItems="center" gap={1}>
-                        <CommitIcon fontSize="small" color="action" />
+                        <CommitIcon fontSize="small" color="action"/>
                         <Typography variant="body2" noWrap sx={{ flex: 1 }}>
                             {graphData.commits[0].message || 'No message'}
                         </Typography>
@@ -1043,9 +1043,9 @@ const GitView = (props) => {
                     {error}
                 </Alert>
             )}
-            
+
             {/* Git Actions Section */}
-            <Accordion 
+            <Accordion
                 defaultExpanded
                 elevation={0}
                 square
@@ -1056,7 +1056,7 @@ const GitView = (props) => {
                 }}
             >
                 <AccordionSummary
-                    expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />}
+                    expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }}/>}
                     sx={{
                         px: 1,
                         py: 4 / 8,
@@ -1081,7 +1081,7 @@ const GitView = (props) => {
                         Git Actions
                     </Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{ 
+                <AccordionDetails sx={{
                     py: 1,
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -1090,37 +1090,37 @@ const GitView = (props) => {
                     <Stack spacing={1} sx={{ width: '100%' }}>
                         <Button
                             variant="outlined"
-                            startIcon={<CommitIcon />}
+                            startIcon={<CommitIcon/>}
                             onClick={() => setCommitDialogOpen(true)}
                             disabled={loading || !connected || gitStatus.length === 0}
                             fullWidth
                         >
                             Commit ({gitStatus.length})
                         </Button>
-                        
+
                         <Button
                             variant="outlined"
-                            startIcon={<PushIcon />}
+                            startIcon={<PushIcon/>}
                             onClick={handlePush}
                             disabled={loading || !connected}
                             fullWidth
                         >
                             Push
                         </Button>
-                        
+
                         <Button
                             variant="outlined"
-                            startIcon={<PullIcon />}
+                            startIcon={<PullIcon/>}
                             onClick={handlePull}
                             disabled={loading || !connected}
                             fullWidth
                         >
                             Pull
                         </Button>
-                        
+
                         <Button
                             variant="outlined"
-                            startIcon={<SwitchIcon />}
+                            startIcon={<SwitchIcon/>}
                             onClick={() => setSwitchBranchDialogOpen(true)}
                             disabled={loading || !connected || branches.local.length <= 1}
                             fullWidth
@@ -1129,20 +1129,20 @@ const GitView = (props) => {
                         >
                             Switch Branch {branches.local.length > 1 && `(${branches.local.length - 1})`}
                         </Button>
-                        
+
                         <Button
                             variant="outlined"
-                            startIcon={<BranchIcon />}
+                            startIcon={<BranchIcon/>}
                             onClick={() => setBranchDialogOpen(true)}
                             disabled={loading || !connected}
                             fullWidth
                         >
                             Create Branch
                         </Button>
-                        
+
                         <Button
                             variant="outlined"
-                            startIcon={<MergeIcon />}
+                            startIcon={<MergeIcon/>}
                             onClick={handleMergeBranch}
                             disabled={loading || !connected}
                             fullWidth
@@ -1152,7 +1152,7 @@ const GitView = (props) => {
 
                         <Button
                             variant="outlined"
-                            startIcon={<RestoreIcon />}
+                            startIcon={<RestoreIcon/>}
                             onClick={handleStash}
                             disabled={loading || !connected || gitStatus.length === 0}
                             fullWidth
@@ -1163,7 +1163,7 @@ const GitView = (props) => {
 
                         <Button
                             variant="outlined"
-                            startIcon={<HistoryIcon />}
+                            startIcon={<HistoryIcon/>}
                             onClick={handleStashPop}
                             disabled={loading || !connected || !hasStash}
                             fullWidth
@@ -1175,7 +1175,7 @@ const GitView = (props) => {
 
                         <Button
                             variant="outlined"
-                            startIcon={<ResetIcon />}
+                            startIcon={<ResetIcon/>}
                             onClick={handleReset}
                             disabled={loading || !connected}
                             fullWidth
@@ -1183,13 +1183,13 @@ const GitView = (props) => {
                         >
                             Reset Changes
                         </Button>
-                        
+
                         <Button
                             variant="outlined"
-                            startIcon={<SyncIcon />}
-                            onClick={() => { 
-                                fetchData(); 
-                                loadGitStatus(); 
+                            startIcon={<SyncIcon/>}
+                            onClick={() => {
+                                fetchData();
+                                loadGitStatus();
                                 setSuccess('Данные Git обновлены');
                             }}
                             disabled={loading}
@@ -1203,7 +1203,7 @@ const GitView = (props) => {
             </Accordion>
 
             {/* File Status Section */}
-            <Accordion 
+            <Accordion
                 defaultExpanded
                 elevation={0}
                 square
@@ -1214,7 +1214,7 @@ const GitView = (props) => {
                 }}
             >
                 <AccordionSummary
-                    expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />}
+                    expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }}/>}
                     sx={{
                         px: 1,
                         py: 4 / 8,
@@ -1239,7 +1239,7 @@ const GitView = (props) => {
                         File Status ({gitStatus.length})
                     </Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{ 
+                <AccordionDetails sx={{
                     py: 1,
                     display: 'flex',
                     flexWrap: 'wrap',
@@ -1259,7 +1259,7 @@ const GitView = (props) => {
                                     <ListItemText
                                         primary={item.file}
                                         secondary={
-                                            <Chip 
+                                            <Chip
                                                 label={item.status}
                                                 size="small"
                                                 color={getStatusColor(item.status)}
@@ -1272,143 +1272,143 @@ const GitView = (props) => {
                     )}
                 </AccordionDetails>
             </Accordion>
-                
-            {/* Branches Section */}
-                <Accordion 
-                    defaultExpanded
-                    elevation={0}
-                    square
-                    disableGutters
-                    sx={{
-                        '&::before': { display: 'none' },
-                        backgroundColor: 'transparent',
-                    }}
-                >
-                    <AccordionSummary
-                        expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />}
-                        sx={{
-                            px: 1,
-                            py: 4 / 8,
-                            minHeight: 0,
-                            '& .MuiAccordionSummary-expandIconWrapper': {
-                                width: 16,
-                                order: -1,
-                                justifyContent: 'center',
-                                transition: 'none',
-                                '&.Mui-expanded': {
-                                    transform: 'rotate(90deg)',
-                                },
-                            },
-                            '& .MuiAccordionSummary-content': {
-                                m: 0,
-                                gap: 1,
-                                minWidth: 0,
-                            },
-                        }}
-                    >
-                        <Typography noWrap variant="button" pl={1}>
-                            Branches
-                        </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ 
-                        py: 1,
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 1,
-                    }}>
-                        <Stack spacing={1} sx={{ width: '100%' }}>
-                            {branches.local.length > 0 && (
-                                <>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ px: 1 }}>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                                            Local Branches ({branches.local.length})
-                                        </Typography>
-                                        {/* Кнопка обновления локальных веток удалена */}
-                                    </Box>
-                                    {branches.local.map(branch => renderBranchItem(branch, true))}
-                                </>
-                            )}
-                            
-                            {branches.remote.length > 0 ? (
-                                <>
-                                    {branches.local.length > 0 && <Divider sx={{ my: 1 }} />}
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ px: 1 }}>
-                                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                                            Remote Branches ({branches.remote.length})
-                                        </Typography>
-                                        {/* Кнопка обновления remote веток удалена */}
-                                    </Box>
-                                    {branches.remote.map(branch => renderBranchItem(branch, false))}
-                                </>
-                            ) : (
-                                <>
-                                    {branches.local.length > 0 && <Divider sx={{ my: 1 }} />}
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ px: 1 }}>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Remote Branches (0) - No remote branches found
-                                        </Typography>
-                                        {/* Кнопка обновления remote веток (🔄🌐) удалена */}
-                                    </Box>
-                                    <Typography variant="body2" color="text.secondary" sx={{ px: 1, fontStyle: 'italic' }}>
-                                        Try clicking the refresh button to fetch all remote branches.
-                                    </Typography>
-                                </>
-                            )}
-                        </Stack>
-                    </AccordionDetails>
-                </Accordion>
 
-                {/* History Section */}
-                <Accordion 
-                    defaultExpanded
-                    elevation={0}
-                    square
-                    disableGutters
+            {/* Branches Section */}
+            <Accordion
+                defaultExpanded
+                elevation={0}
+                square
+                disableGutters
+                sx={{
+                    '&::before': { display: 'none' },
+                    backgroundColor: 'transparent',
+                }}
+            >
+                <AccordionSummary
+                    expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }}/>}
                     sx={{
-                        '&::before': { display: 'none' },
-                        backgroundColor: 'transparent',
+                        px: 1,
+                        py: 4 / 8,
+                        minHeight: 0,
+                        '& .MuiAccordionSummary-expandIconWrapper': {
+                            width: 16,
+                            order: -1,
+                            justifyContent: 'center',
+                            transition: 'none',
+                            '&.Mui-expanded': {
+                                transform: 'rotate(90deg)',
+                            },
+                        },
+                        '& .MuiAccordionSummary-content': {
+                            m: 0,
+                            gap: 1,
+                            minWidth: 0,
+                        },
                     }}
                 >
-                    <AccordionSummary
-                        expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />}
-                        sx={{
-                            px: 1,
-                            py: 4 / 8,
-                            minHeight: 0,
-                            '& .MuiAccordionSummary-expandIconWrapper': {
-                                width: 16,
-                                order: -1,
-                                justifyContent: 'center',
-                                transition: 'none',
-                                '&.Mui-expanded': {
-                                    transform: 'rotate(90deg)',
-                                },
-                            },
-                            '& .MuiAccordionSummary-content': {
-                                m: 0,
-                                gap: 1,
-                                minWidth: 0,
-                            },
-                        }}
-                    >
-                        <Typography noWrap variant="button" pl={1}>
-                            History
-                        </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ p: 2 }}>
-                        {(() => {
-                            const { commits } = parseCommitData(graphData.commits, branches);
-                            return (
-                                <Box sx={{ display: 'flex', height: '100%' }}>
-                                    {/* Visual Graph */}
-                                    {renderCommitGraph(commits)}
-                                    {/* Commit List */}
-                                    {renderCommitList(commits)}
+                    <Typography noWrap variant="button" pl={1}>
+                        Branches
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{
+                    py: 1,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                }}>
+                    <Stack spacing={1} sx={{ width: '100%' }}>
+                        {branches.local.length > 0 && (
+                            <>
+                                <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ px: 1 }}>
+                                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                                        Local Branches ({branches.local.length})
+                                    </Typography>
+                                    {/* Кнопка обновления локальных веток удалена */}
                                 </Box>
-                            );
-                        })()}
-                    </AccordionDetails>
-                </Accordion>
+                                {branches.local.map(branch => renderBranchItem(branch, true))}
+                            </>
+                        )}
+
+                        {branches.remote.length > 0 ? (
+                            <>
+                                {branches.local.length > 0 && <Divider sx={{ my: 1 }}/>}
+                                <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ px: 1 }}>
+                                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
+                                        Remote Branches ({branches.remote.length})
+                                    </Typography>
+                                    {/* Кнопка обновления remote веток удалена */}
+                                </Box>
+                                {branches.remote.map(branch => renderBranchItem(branch, false))}
+                            </>
+                        ) : (
+                            <>
+                                {branches.local.length > 0 && <Divider sx={{ my: 1 }}/>}
+                                <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ px: 1 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        Remote Branches (0) - No remote branches found
+                                    </Typography>
+                                    {/* Кнопка обновления remote веток (🔄🌐) удалена */}
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" sx={{ px: 1, fontStyle: 'italic' }}>
+                                    Try clicking the refresh button to fetch all remote branches.
+                                </Typography>
+                            </>
+                        )}
+                    </Stack>
+                </AccordionDetails>
+            </Accordion>
+
+            {/* History Section */}
+            <Accordion
+                defaultExpanded
+                elevation={0}
+                square
+                disableGutters
+                sx={{
+                    '&::before': { display: 'none' },
+                    backgroundColor: 'transparent',
+                }}
+            >
+                <AccordionSummary
+                    expandIcon={<KeyboardArrowRightRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }}/>}
+                    sx={{
+                        px: 1,
+                        py: 4 / 8,
+                        minHeight: 0,
+                        '& .MuiAccordionSummary-expandIconWrapper': {
+                            width: 16,
+                            order: -1,
+                            justifyContent: 'center',
+                            transition: 'none',
+                            '&.Mui-expanded': {
+                                transform: 'rotate(90deg)',
+                            },
+                        },
+                        '& .MuiAccordionSummary-content': {
+                            m: 0,
+                            gap: 1,
+                            minWidth: 0,
+                        },
+                    }}
+                >
+                    <Typography noWrap variant="button" pl={1}>
+                        History
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 2 }}>
+                    {(() => {
+                        const { commits } = parseCommitData(graphData.commits, branches);
+                        return (
+                            <Box sx={{ display: 'flex', height: '100%' }}>
+                                {/* Visual Graph */}
+                                {renderCommitGraph(commits)}
+                                {/* Commit List */}
+                                {renderCommitList(commits)}
+                            </Box>
+                        );
+                    })()}
+                </AccordionDetails>
+            </Accordion>
 
             {/* Commit Dialog */}
             <Dialog open={commitDialogOpen} onClose={() => setCommitDialogOpen(false)} maxWidth="sm" fullWidth>
@@ -1436,7 +1436,7 @@ const GitView = (props) => {
                         Cancel
                     </Button>
                     <Button onClick={handleCommit} variant="contained" disabled={loading || !commitMessage.trim()}>
-                        {loading ? <CircularProgress size={20} /> : 'Create Commit'}
+                        {loading ? <CircularProgress size={20}/> : 'Create Commit'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -1461,14 +1461,16 @@ const GitView = (props) => {
                     <Button onClick={() => setBranchDialogOpen(false)}>
                         Cancel
                     </Button>
-                    <Button onClick={handleCreateBranch} variant="contained" disabled={loading || !newBranchName.trim()}>
-                        {loading ? <CircularProgress size={20} /> : 'Create Branch'}
+                    <Button onClick={handleCreateBranch} variant="contained"
+                            disabled={loading || !newBranchName.trim()}>
+                        {loading ? <CircularProgress size={20}/> : 'Create Branch'}
                     </Button>
                 </DialogActions>
             </Dialog>
 
             {/* Switch Branch Dialog */}
-            <Dialog open={switchBranchDialogOpen} onClose={() => setSwitchBranchDialogOpen(false)} maxWidth="sm" fullWidth>
+            <Dialog open={switchBranchDialogOpen} onClose={() => setSwitchBranchDialogOpen(false)} maxWidth="sm"
+                    fullWidth>
                 <DialogTitle>Переключиться на ветку</DialogTitle>
                 <DialogContent>
                     <Box sx={{ mt: 1 }}>
@@ -1476,7 +1478,8 @@ const GitView = (props) => {
                             Текущая ветка: <strong>{branches.current}</strong>
                         </Typography>
                         <Alert severity="info" sx={{ mb: 2 }}>
-                            💡 Переключение возможно только на локальные ветки. Для работы с remote ветками сначала создайте локальную копию.
+                            💡 Переключение возможно только на локальные ветки. Для работы с remote ветками сначала
+                            создайте локальную копию.
                         </Alert>
                         <TextField
                             select
@@ -1515,12 +1518,12 @@ const GitView = (props) => {
                     <Button onClick={() => setSwitchBranchDialogOpen(false)}>
                         Отмена
                     </Button>
-                    <Button 
-                        onClick={handleSwitchBranch} 
+                    <Button
+                        onClick={handleSwitchBranch}
                         variant="contained"
                         disabled={loading || !selectedBranch || selectedBranch === branches.current}
                     >
-                        {loading ? <CircularProgress size={20} /> : 'Переключиться'}
+                        {loading ? <CircularProgress size={20}/> : 'Переключиться'}
                     </Button>
                 </DialogActions>
             </Dialog>
