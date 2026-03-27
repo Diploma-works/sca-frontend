@@ -7,6 +7,7 @@ import {
     Menu,
     MenuItem,
     Stack,
+    TextField,
     Toolbar,
     Typography,
     useColorScheme
@@ -91,6 +92,14 @@ const Navbar = () => {
                     SCA
                 </Typography>
                 <Divider variant="middle" orientation="vertical" flexItem/>
+                <TextField
+                    select
+                    size="xs"
+                    //sx={{ alignSelf: "center"}}
+                    value={"123"}
+                >
+                    <MenuItem value="123">123</MenuItem>
+                </TextField>
                 <Button
                     variant={isProjectsPage ? "contained" : "text"}
                     startIcon={<FolderIcon/>}

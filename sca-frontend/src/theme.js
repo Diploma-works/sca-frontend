@@ -98,6 +98,34 @@ export const theme = createTheme(
                     }),
                 },
             },
+            MuiTextField: {
+                styleOverrides: {
+                    root: ({ theme }) => ({
+                        variants: [
+                            {
+                                props: { select: true, size: "xs" },
+                                style: {
+                                    [`& .${outlinedInputClasses.root} .${outlinedInputClasses.input}.${selectClasses.select}`]: {
+                                        padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+                                        paddingRight: `calc(${theme.spacing(1)}*2 + 11px)`,
+                                    },
+                                    [`.${selectClasses.icon}`]: {
+                                        right: 3,
+                                    },
+                                },
+                            },
+                        ],
+                        /*
+                        [`& .${inputLabelClasses.root}`]: {
+                            marginLeft: 2,
+                        },
+                        [`& .${outlinedInputClasses.notchedOutline} legend`]: {
+                            marginLeft: 2,
+                        },
+                        */
+                    }),
+                },
+            },
             /*
             MuiButton: {
                 defaultProps: {
