@@ -1,4 +1,4 @@
-import { createTheme, inputLabelClasses, outlinedInputClasses, selectClasses } from "@mui/material";
+import { createTheme, dividerClasses, listSubheaderClasses, outlinedInputClasses, selectClasses } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { ruRU } from "@mui/material/locale";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
@@ -69,19 +69,35 @@ export const theme = createTheme(
             },
             MuiMenu: {
                 styleOverrides: {
-                    list: {
-                        padding: 0,
-                    },
+                    list: ({ theme }) => ({
+                        padding: `${theme.spacing(0.5)}`,
+                        [`& > .${dividerClasses.root}`]: {
+                            margin: `${theme.spacing(0.5)} 0 !important`,
+                            zIndex: 1,
+                            position: 'relative',
+                        },
+                        [`.${listSubheaderClasses.root}`]: {
+                            backgroundImage: theme.vars.overlays[2],
+                            font: theme.vars.font.caption,
+                            fontWeight: theme.typography.fontWeightMedium,
+                            paddingTop: theme.spacing(1),
+                            paddingBottom: theme.spacing(0.5),
+                            paddingLeft: theme.spacing(1),
+                            paddingRight: theme.spacing(1),
+                            marginTop: `calc(0px - ${theme.spacing(0.5)})`,
+                        }
+                    }),
                 },
             },
             MuiMenuItem: {
                 styleOverrides: {
                     root: ({ theme }) => ({
-                        ...theme.typography.button,
+                        font: theme.vars.font.body2,
                         minHeight: 0,
                         padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
-                    })
-                } ,
+                        borderRadius: `calc(0.5 * ${theme.vars.shape.borderRadius})`,
+                    }),
+                },
             },
             MuiPopover: {
                 defaultProps: {

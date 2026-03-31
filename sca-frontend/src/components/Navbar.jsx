@@ -1,11 +1,19 @@
+import { useEffect, useRef, useState } from "react";
+import useSignOut from "react-auth-kit/hooks/useSignOut";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
 import {
     AppBar,
     Box,
     Button,
     Divider,
     IconButton,
+    ListSubheader,
     Menu,
     MenuItem,
+    Skeleton,
     Stack,
     TextField,
     Toolbar,
@@ -19,11 +27,9 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import FolderIcon from "@mui/icons-material/Folder";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import { useEffect, useRef, useState } from "react";
-import useSignOut from "react-auth-kit/hooks/useSignOut";
-import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { useLocation, useNavigate } from "react-router-dom";
+
 import { ProjectInfo } from "@/components/ProjectInfo";
+import { projectAPI } from "@/utils";
 
 const Navbar = () => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -33,6 +39,8 @@ const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { mode, setMode } = useColorScheme();
+
+    const { isLoading, data: projects } = useQuery({ queryKey: ["projects"], queryFn: projectAPI.getAll });
 
     const [projectInfoOpen, setProjectInfoOpen] = useState(false);
     const searchInputRef = useRef(null);
@@ -92,14 +100,38 @@ const Navbar = () => {
                     SCA
                 </Typography>
                 <Divider variant="middle" orientation="vertical" flexItem/>
-                <TextField
-                    select
-                    size="xs"
-                    //sx={{ alignSelf: "center"}}
-                    value={"123"}
-                >
-                    <MenuItem value="123">123</MenuItem>
-                </TextField>
+                {isLoading ? (
+                    <Skeleton animation="wave" variant="rounded">
+                        <TextField
+                            select
+                            size="xs"
+                            sx={{ minWidth: 100, }}
+                        >
+                            <MenuItem/>
+                        </TextField>
+                    </Skeleton>
+                ) : (
+                    <TextField
+                        select
+                        size="xs"
+                        value={"12"}
+                        sx={{ minWidth: 100, }}
+                    >
+                        <ListSubheader>
+                            Ваши проекты
+                        </ListSubheader>
+                        {projects.map(({ id, name }) => (
+                            <MenuItem key={id} value={id}>{name}</MenuItem>
+                        ))}
+                        <MenuItem value="123">123</MenuItem>
+                        <Divider component="li"/>
+                        <ListSubheader>
+                            Ваши проекты
+                        </ListSubheader>
+                        <MenuItem value="12">123</MenuItem>
+                        <MenuItem value="1">123</MenuItem>
+                    </TextField>
+                )}
                 <Button
                     variant={isProjectsPage ? "contained" : "text"}
                     startIcon={<FolderIcon/>}
