@@ -1,8 +1,7 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Stack } from "@mui/material";
 import RequireAuth from "@auth-kit/react-router/RequireAuth"
 
-import Navbar from "./components/Navbar";
 import Main from "./components/Main";
 import Auth from "./components/Auth";
 import Projects from "./components/Projects";
@@ -12,7 +11,6 @@ const App = () => {
     return (
         <Stack sx={{ height: '100dvh' }}>
             <BrowserRouter>
-                <Navbar/>
                 <Routes>
                     <Route path="/auth" element={<Auth/>}/>
                     <Route path="/projects" element={
@@ -32,7 +30,7 @@ const App = () => {
                     }/>
                     <Route path="/*" element={
                         <RequireAuth fallbackPath="/auth">
-                            <Main/>
+                            <Navigate to="/projects" replace/>
                         </RequireAuth>
                     }/>
                 </Routes>

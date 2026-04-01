@@ -1,4 +1,11 @@
-import { createTheme, dividerClasses, listSubheaderClasses, outlinedInputClasses, selectClasses } from "@mui/material";
+import {
+    createTheme,
+    dividerClasses,
+    listItemIconClasses, listItemTextClasses,
+    listSubheaderClasses,
+    outlinedInputClasses,
+    selectClasses
+} from "@mui/material";
 import { grey } from "@mui/material/colors";
 import { ruRU } from "@mui/material/locale";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
@@ -96,6 +103,16 @@ export const theme = createTheme(
                         minHeight: 0,
                         padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
                         borderRadius: `calc(0.5 * ${theme.vars.shape.borderRadius})`,
+                        [`.${listItemIconClasses.root}`]: {
+                            minWidth: 20,
+                            marginLeft: `calc(0px - ${theme.spacing(0.5)})`,
+                            marginRight: theme.spacing(1),
+                            justifyContent: 'center',
+                            color: theme.vars.palette.text.secondary,
+                        },
+                        [`.${listItemTextClasses.primary}`]: {
+                            font: theme.vars.font.body2,
+                        },
                     }),
                 },
             },
@@ -122,7 +139,8 @@ export const theme = createTheme(
                                 props: { select: true, size: "xs" },
                                 style: {
                                     [`& .${outlinedInputClasses.root} .${outlinedInputClasses.input}.${selectClasses.select}`]: {
-                                        padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
+                                        fontSize: theme.typography.button.fontSize,
+                                        padding: `calc(${theme.spacing(0.5)} - 1px) calc(${theme.spacing(1)} - 1px)`,
                                         paddingRight: `calc(${theme.spacing(1)}*2 + 11px)`,
                                     },
                                     [`.${selectClasses.icon}`]: {
@@ -131,14 +149,6 @@ export const theme = createTheme(
                                 },
                             },
                         ],
-                        /*
-                        [`& .${inputLabelClasses.root}`]: {
-                            marginLeft: 2,
-                        },
-                        [`& .${outlinedInputClasses.notchedOutline} legend`]: {
-                            marginLeft: 2,
-                        },
-                        */
                     }),
                 },
             },

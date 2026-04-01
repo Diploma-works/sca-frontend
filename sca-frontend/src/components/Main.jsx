@@ -1,140 +1,49 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import {
+    Box,
+    Button,
+    Divider,
+    ListItemIcon,
+    ListItemText,
+    ListSubheader,
+    MenuItem,
+    Skeleton,
+    Stack,
+    TextField
+} from "@mui/material";
 
-import { Skeleton, Stack } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
-import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import { FaGitSquare } from "react-icons/fa";
+
+import Navbar from "@/components/Navbar";
+import { NavbarBreadcrumbs } from "@/components/NavbarBreadcrumbs";
+import { projectAPI } from "@/utils";
 
 import { Editor, TabsContextProvider } from "./Editor";
 import { Problems, ProblemsContextProvider } from "./Problems";
 import { LeftSidebar, SidebarContextProvider } from "./LeftSidebar";
 import { ProjectStructure, ProjectStructureContextProvider } from "./ProjectStructure";
-import { Statistics } from "./Statistics";
 import { Git } from "./Git";
-
-const defaultTabs = [
-    {
-        id: "Editor.jsx",
-        label: "Editor.jsx",
-        path: [
-            {
-                id: "src",
-                label: "src"
-            },
-            {
-                id: "components",
-                label: "components"
-            },
-            {
-                id: "Editor",
-                label: "Editor"
-            }
-        ]
-    },
-    {
-        id: "index1.js",
-        label: "index.js",
-        path: [
-            {
-                id: "src",
-                label: "src"
-            },
-            {
-                id: "components",
-                label: "components"
-            },
-            {
-                id: "Editor",
-                label: "Editor"
-            }
-        ]
-    },
-    {
-        id: "utils",
-        label: "utils.ts",
-        path: [
-            {
-                id: "src",
-                label: "src"
-            },
-            {
-                id: "themes",
-                label: "themes"
-            }
-        ]
-    },
-    {
-        id: "index.html",
-        label: "index.html",
-        path: [
-            {
-                id: "public",
-                label: "public"
-            }
-        ]
-    },
-    {
-        id: "logo512.jpg",
-        label: "logo512.jpg",
-        path: [
-            {
-                id: "public",
-                label: "public"
-            }
-        ]
-    },
-    {
-        id: "manifest.json",
-        label: "manifest.json",
-        path: [
-            {
-                id: "public",
-                label: "public"
-            }
-        ]
-    },
-    {
-        id: "robots.txt",
-        label: "robots.txt",
-        path: [
-            {
-                id: "public",
-                label: "public"
-            }
-        ]
-    },
-    {
-        id: "main.css",
-        label: "main.css",
-        path: [
-            {
-                id: "styles",
-                label: "styles"
-            },
-            {
-                id: "css",
-                label: "css"
-            }
-        ]
-    },
-];
 
 const Main = () => {
     const { id: projectId } = useParams();
-    const [isLoading, setIsLoading] = useState(true); // TODO: заменить?
+    const navigate = useNavigate();
+    const { isLoading, data: projects } = useQuery({ queryKey: ["projects"], queryFn: projectAPI.getAll });
 
     const tools = [
         {
             title: "Файлы проекта",
             icon: <FolderOutlinedIcon/>,
-            component: <ProjectStructure projectId={projectId} />
+            component: <ProjectStructure projectId={projectId}/>
         },
         {
             title: "GitHub",
             icon: <GitHubIcon/>,
-            component: <Git projectId={projectId} />
+            component: <Git projectId={projectId}/>
         },
         {
             title: "Проблемы",
@@ -143,15 +52,64 @@ const Main = () => {
         },
     ];
 
-    useEffect(() => {
-        setTimeout(() => setIsLoading(false), 1000);
-    }, []);
-
     return (
         <TabsContextProvider>
             <SidebarContextProvider>
                 <ProjectStructureContextProvider>
                     <ProblemsContextProvider>
+                        <Navbar>
+                            <NavbarBreadcrumbs>
+                                <Button
+                                    color="inherit"
+                                    onClick={() => navigate("/projects")}
+                                >
+                                    Проекты
+                                </Button>
+                                <Box sx={{ minWidth: 100, ml: 1, }}>
+                                    {isLoading ? (
+                                        <Skeleton animation="wave" variant="rounded" width="100%">
+                                            <TextField select size="xs">
+                                                <MenuItem/>
+                                            </TextField>
+                                        </Skeleton>
+                                    ) : (
+                                        <TextField
+                                            fullWidth
+                                            select
+                                            size="xs"
+                                            value={projectId}
+                                            slotProps={{
+                                                select: {
+                                                    sx: {
+                                                        fontWeight: 600
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            <MenuItem>
+                                                <ListItemIcon><AddRoundedIcon fontSize="small"/></ListItemIcon>
+                                                <ListItemText>Новый проект</ListItemText>
+                                            </MenuItem>
+                                            <MenuItem>
+                                                <ListItemIcon><FaGitSquare size={20}/></ListItemIcon>
+                                                <ListItemText>Новый проект с Git</ListItemText>
+                                            </MenuItem>
+                                            <Divider component="li"/>
+                                            <ListSubheader>Ваши проекты</ListSubheader>
+                                            {projects.map(({ id, name }) => (
+                                                <MenuItem
+                                                    key={id}
+                                                    value={id}
+                                                    onClick={() => navigate(`/projects/${id}`)}
+                                                >
+                                                    {name}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    )}
+                                </Box>
+                            </NavbarBreadcrumbs>
+                        </Navbar>
                         <Stack
                             direction="row"
                             spacing={{ xs: 4 / 8, md: 1 }}

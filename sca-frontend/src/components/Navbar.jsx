@@ -1,46 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-
-import {
-    AppBar,
-    Box,
-    Button,
-    Divider,
-    IconButton,
-    ListSubheader,
-    Menu,
-    MenuItem,
-    Skeleton,
-    Stack,
-    TextField,
-    Toolbar,
-    Typography,
-    useColorScheme
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { AppBar, Box, IconButton, Menu, MenuItem, Stack, Toolbar, Typography, useColorScheme } from "@mui/material";
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import FolderIcon from "@mui/icons-material/Folder";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 import { ProjectInfo } from "@/components/ProjectInfo";
-import { projectAPI } from "@/utils";
 
-const Navbar = () => {
+const Navbar = ({ children }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+
     const signOut = useSignOut();
     const authUser = useAuthUser();
     const navigate = useNavigate();
-    const location = useLocation();
     const { mode, setMode } = useColorScheme();
-
-    const { isLoading, data: projects } = useQuery({ queryKey: ["projects"], queryFn: projectAPI.getAll });
 
     const [projectInfoOpen, setProjectInfoOpen] = useState(false);
     const searchInputRef = useRef(null);
@@ -62,22 +41,14 @@ const Navbar = () => {
     }, []);
 
     const handleProjectInfoClick = () => setProjectInfoOpen(true);
-    const handleAccountClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+    const handleAccountClick = (e) => setAnchorEl(e.currentTarget);
+    const handleClose = () => setAnchorEl(null);
     const handleLogout = () => {
         signOut();
         handleClose();
         navigate("/auth");
     };
     const handleThemeChange = () => setMode(mode === "light" ? "dark" : "light");
-
-    const isProjectsPage = location.pathname === '/projects';
-    const isMainPage = location.pathname === '/' || location.pathname === '/editor';
-    const isGitHubPage = location.pathname === '/github';
 
     return (
         <AppBar
@@ -90,48 +61,21 @@ const Navbar = () => {
             }}
         >
             <Toolbar variant="dense" disableGutters sx={{ px: 1, gap: 1 }}>
+                <IconButton size="small">
+                    <MenuRoundedIcon/>
+                </IconButton>
                 <Typography
-                    variant="h4"
+                    variant="h5"
                     fontWeight="bold"
                     color="primary"
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => navigate('/')}
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => navigate("/")}
                 >
                     SCA
                 </Typography>
+                {children}
+                {/*
                 <Divider variant="middle" orientation="vertical" flexItem/>
-                {isLoading ? (
-                    <Skeleton animation="wave" variant="rounded">
-                        <TextField
-                            select
-                            size="xs"
-                            sx={{ minWidth: 100, }}
-                        >
-                            <MenuItem/>
-                        </TextField>
-                    </Skeleton>
-                ) : (
-                    <TextField
-                        select
-                        size="xs"
-                        value={"12"}
-                        sx={{ minWidth: 100, }}
-                    >
-                        <ListSubheader>
-                            Ваши проекты
-                        </ListSubheader>
-                        {projects.map(({ id, name }) => (
-                            <MenuItem key={id} value={id}>{name}</MenuItem>
-                        ))}
-                        <MenuItem value="123">123</MenuItem>
-                        <Divider component="li"/>
-                        <ListSubheader>
-                            Ваши проекты
-                        </ListSubheader>
-                        <MenuItem value="12">123</MenuItem>
-                        <MenuItem value="1">123</MenuItem>
-                    </TextField>
-                )}
                 <Button
                     variant={isProjectsPage ? "contained" : "text"}
                     startIcon={<FolderIcon/>}
@@ -152,6 +96,7 @@ const Navbar = () => {
                 >
                     Редактор
                 </Button>
+                */}
                 <Box sx={{ flex: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <IconButton size="small" onClick={handleProjectInfoClick} ref={searchInputRef}>
