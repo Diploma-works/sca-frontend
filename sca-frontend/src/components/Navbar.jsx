@@ -2,37 +2,53 @@ import { useEffect, useRef, useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import { useNavigate } from "react-router-dom";
-import { AppBar, Box, IconButton, Menu, MenuItem, Stack, Toolbar, Typography, useColorScheme } from "@mui/material";
+import {
+    AppBar,
+    Box,
+    Drawer,
+    drawerClasses,
+    IconButton,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Stack,
+    Toolbar,
+    Typography,
+    useColorScheme
+} from "@mui/material";
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
 import { ProjectInfo } from "@/components/ProjectInfo";
 
 const Navbar = ({ children }) => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
-
     const signOut = useSignOut();
     const authUser = useAuthUser();
     const navigate = useNavigate();
     const { mode, setMode } = useColorScheme();
 
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
     const searchInputRef = useRef(null);
-
-    const handleKeyDown = (e) => {
-        if (e.ctrlKey && e.code === "KeyF") {
-            e.preventDefault();
-            e.stopPropagation();
-            setProjectInfoOpen(true);
-        }
-    }
+    const avatarRef = useRef(null);
 
     useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.ctrlKey && e.code === "KeyF") {
+                e.preventDefault();
+                e.stopPropagation();
+                setProjectInfoOpen(true);
+            }
+        }
+
         window.addEventListener("keydown", handleKeyDown);
 
         return () => {
@@ -40,15 +56,17 @@ const Navbar = ({ children }) => {
         };
     }, []);
 
+    const handleDrawerClick = () => setDrawerOpen(true);
+    const handleDrawerClose = () => setDrawerOpen(false);
     const handleProjectInfoClick = () => setProjectInfoOpen(true);
-    const handleAccountClick = (e) => setAnchorEl(e.currentTarget);
-    const handleClose = () => setAnchorEl(null);
-    const handleLogout = () => {
+    const handleThemeClick = () => setMode(mode === "light" ? "dark" : "light");
+    const handleProfileClick = () => setProfileOpen(true);
+    const handleProfileClose = () => setProfileOpen(false);
+    const handleLogoutClick = () => {
         signOut();
-        handleClose();
+        handleProfileClose();
         navigate("/auth");
     };
-    const handleThemeChange = () => setMode(mode === "light" ? "dark" : "light");
 
     return (
         <AppBar
@@ -61,9 +79,39 @@ const Navbar = ({ children }) => {
             }}
         >
             <Toolbar variant="dense" disableGutters sx={{ px: 1, gap: 1 }}>
-                <IconButton size="small">
+                <IconButton size="small" onClick={handleDrawerClick}>
                     <MenuRoundedIcon/>
                 </IconButton>
+                <Drawer
+                    open={drawerOpen}
+                    onClose={handleDrawerClose}
+                    sx={{
+                        [`.${drawerClasses.paper}`]: {
+                            width: 250,
+                        },
+                    }}
+                >
+                    <Toolbar variant="dense">
+                        <Typography
+                            variant="h5"
+                            fontWeight="bold"
+                            color="primary"
+                            sx={{ cursor: 'pointer', userSelect: 'none' }}
+                            onClick={() => navigate("/")}
+                        >
+                            SCA
+                        </Typography>
+                    </Toolbar>
+                    <List disablePadding sx={{ px: 1, }}>
+                        {['Проекты', 'Github'].map((text, index) => (
+                            <ListItem key={text} disablePadding>
+                                <ListItemButton sx={{ borderRadius: 1, px: 2, py: 1, }}>
+                                    <ListItemText primary={text}/>
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Drawer>
                 <Typography
                     variant="h5"
                     fontWeight="bold"
@@ -102,20 +150,20 @@ const Navbar = ({ children }) => {
                     <IconButton size="small" onClick={handleProjectInfoClick} ref={searchInputRef}>
                         <SearchRoundedIcon sx={{ color: 'text.secondary' }}/>
                     </IconButton>
-                    <IconButton size="small" onClick={handleThemeChange}>
+                    <IconButton size="small" onClick={handleThemeClick}>
                         {mode === "light" ? (
                             <DarkModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
                         ) : (
                             <LightModeOutlinedIcon sx={{ color: 'text.secondary' }}/>
                         )}
                     </IconButton>
-                    <IconButton sx={{ p: 0 }} onClick={handleAccountClick}>
+                    <IconButton sx={{ p: 0 }} onClick={handleProfileClick} ref={avatarRef}>
                         <AccountCircleIcon sx={{ color: 'text.primary', fontSize: 34 }}/>
                     </IconButton>
                     <Menu
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
+                        anchorEl={() => avatarRef.current}
+                        open={profileOpen}
+                        onClose={handleProfileClose}
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                     >
@@ -124,7 +172,7 @@ const Navbar = ({ children }) => {
                                 <Typography variant="subtitle2">{authUser.fullName}</Typography>
                             </MenuItem>
                         )}
-                        <MenuItem onClick={handleLogout}>Выйти</MenuItem>
+                        <MenuItem onClick={handleLogoutClick}>Выйти</MenuItem>
                     </Menu>
                     <ProjectInfo open={projectInfoOpen} setOpen={setProjectInfoOpen} anchorRef={searchInputRef}/>
                 </Stack>
