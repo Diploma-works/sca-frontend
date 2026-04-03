@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { useNavigate } from "react-router-dom";
+import { useMatches, useNavigate } from "react-router-dom";
 import {
     AppBar,
     Box,
+    Button,
     Drawer,
     drawerClasses,
     IconButton,
@@ -27,11 +28,15 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
 import { ProjectInfo } from "@/components/ProjectInfo";
+import { navRoutes } from "@/routes";
+import { NavbarBreadcrumbs } from "@/components/NavbarBreadcrumbs";
 
-const Navbar = ({ children }) => {
+const Navbar = () => {
     const signOut = useSignOut();
     const authUser = useAuthUser();
     const navigate = useNavigate();
+    const matches = useMatches();
+    const crumbMatches = matches.filter(({ handle }) => handle?.CrumbComponent || handle?.title);
     const { mode, setMode } = useColorScheme();
 
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -103,10 +108,10 @@ const Navbar = ({ children }) => {
                         </Typography>
                     </Toolbar>
                     <List disablePadding sx={{ px: 1, }}>
-                        {['Проекты', 'Github'].map((text, index) => (
-                            <ListItem key={text} disablePadding>
-                                <ListItemButton sx={{ borderRadius: 1, px: 2, py: 1, }}>
-                                    <ListItemText primary={text}/>
+                        {navRoutes.map(({ path, handle }) => (
+                            <ListItem key={path} disablePadding>
+                                <ListItemButton sx={{ borderRadius: 1, px: 2, py: 1, }} onClick={() => navigate(path)}>
+                                    <ListItemText primary={handle?.title}/>
                                 </ListItemButton>
                             </ListItem>
                         ))}
@@ -121,30 +126,22 @@ const Navbar = ({ children }) => {
                 >
                     SCA
                 </Typography>
-                {children}
-                {/*
-                <Divider variant="middle" orientation="vertical" flexItem/>
-                <Button
-                    variant={isProjectsPage ? "contained" : "text"}
-                    startIcon={<FolderIcon/>}
-                    onClick={() => navigate('/projects')}
-                >
-                    Проекты
-                </Button>
-                <Button
-                    variant={isGitHubPage ? "contained" : "text"}
-                    startIcon={<GitHubIcon/>}
-                    onClick={() => navigate('/github')}
-                >
-                    GitHub
-                </Button>
-                <Button
-                    variant={isMainPage ? "contained" : "text"}
-                    onClick={() => navigate('/')}
-                >
-                    Редактор
-                </Button>
-                */}
+                {crumbMatches && (
+                    <NavbarBreadcrumbs>
+                        {crumbMatches.map(({ handle: { CrumbComponent, title }, ...rest }, index) => (
+                            CrumbComponent ? (
+                                <CrumbComponent {...rest}/>
+                            ) : (
+                                <Button
+                                    color="inherit"
+                                    onClick={() => navigate(rest.pathname)}
+                                    sx={{ fontWeight: index === crumbMatches.length - 1 && 600 }}
+                                >
+                                    {title}
+                                </Button>
+                            )))}
+                    </NavbarBreadcrumbs>
+                )}
                 <Box sx={{ flex: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <IconButton size="small" onClick={handleProjectInfoClick} ref={searchInputRef}>

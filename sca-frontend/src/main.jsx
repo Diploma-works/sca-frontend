@@ -2,16 +2,17 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import AuthProvider from "react-auth-kit";
 import createStore from "react-auth-kit/createStore";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, Stack, ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "@fontsource-variable/montserrat";
 import "overlayscrollbars/overlayscrollbars.css";
 import "./styles.css";
 import "./monaco/init.js";
 
-import App from "./App";
 import { theme } from "./theme";
+import { routes } from "./routes";
 
 const store = createStore({
     authName: '_auth',
@@ -22,6 +23,7 @@ const store = createStore({
 });
 
 const queryClient = new QueryClient();
+const router = createBrowserRouter(routes);
 
 createRoot(document.getElementById("root")).render(
     <StrictMode>
@@ -29,7 +31,9 @@ createRoot(document.getElementById("root")).render(
             <QueryClientProvider client={queryClient}>
                 <ThemeProvider theme={theme} noSsr>
                     <CssBaseline enableColorScheme/>
-                    <App/>
+                    <Stack sx={{ height: '100dvh' }}>
+                        <RouterProvider router={router}/>
+                    </Stack>
                 </ThemeProvider>
             </QueryClientProvider>
         </AuthProvider>

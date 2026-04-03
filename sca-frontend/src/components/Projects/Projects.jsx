@@ -1,35 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    Alert,
     Box,
     Button,
     Card,
-    CardContent,
     CardActions,
+    CardContent,
+    Chip,
+    CircularProgress,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
-    TextField,
-    Typography,
+    DialogContent,
+    DialogTitle,
     Grid,
     IconButton,
-    Chip,
     Stack,
-    Alert,
-    CircularProgress
+    TextField,
+    Typography
 } from '@mui/material';
 import {
     Add as AddIcon,
+    Delete as DeleteIcon,
     Folder as FolderIcon,
     GitHub as GitHubIcon,
-    Delete as DeleteIcon,
-    Edit as EditIcon,
     Launch as LaunchIcon
 } from '@mui/icons-material';
 import { projectsAPI } from '../../utils/api';
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import { NavbarBreadcrumbs } from "@/components/NavbarBreadcrumbs";
 
 const Projects = () => {
     const navigate = useNavigate();
@@ -160,13 +157,6 @@ const Projects = () => {
 
     return (
         <>
-            <Navbar>
-                <NavbarBreadcrumbs>
-                    <Button color="inherit" sx={{ fontWeight: 600 }} onClick={() => navigate("/projects")}>
-                        Проекты
-                    </Button>
-                </NavbarBreadcrumbs>
-            </Navbar>
             {loading ? (
                 <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
                     <CircularProgress/>
