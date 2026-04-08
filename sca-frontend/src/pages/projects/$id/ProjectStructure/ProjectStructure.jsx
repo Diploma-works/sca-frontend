@@ -33,6 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
 import { SidebarTool } from "../LeftSidebar/";
 import { useTabsContext } from "../Editor";
@@ -41,12 +42,12 @@ import { fileAPI, fileTypeIcons, getFileType } from "@/utils";
 import { ScrollableContainer } from "@/components";
 
 // TODO: упростить (пока нельзя, потому что path собирается здесь)
-const ProjectStructureItemLabel = memo(({ 
-    id, label, path, isFolder, addTab, onDeleteFile, onRenameFile, 
-    onCreateFile, onCreateFolder, onCopyPath, onRefreshStructure 
-}) => {
+const ProjectStructureItemLabel = memo(({
+                                            id, label, path, isFolder, addTab, onDeleteFile, onRenameFile,
+                                            onCreateFile, onCreateFolder, onCopyPath, onRefreshStructure
+                                        }) => {
     const icon = isFolder ? fileTypeIcons.folder : (fileTypeIcons[getFileType(label)] ?? fileTypeIcons.unknown);
-    
+
     const [contextMenu, setContextMenu] = useState(null);
     const [renameDialogOpen, setRenameDialogOpen] = useState(false);
     const [newName, setNewName] = useState(label);
@@ -111,9 +112,9 @@ const ProjectStructureItemLabel = memo(({
 
     return (
         <>
-            <Stack 
-                direction="row" 
-                spacing={1} 
+            <Stack
+                direction="row"
+                spacing={1}
                 onDoubleClick={!isFolder ? handleDoubleClick : null}
                 onContextMenu={handleContextMenu}
                 sx={{ cursor: 'context-menu' }}
@@ -140,53 +141,56 @@ const ProjectStructureItemLabel = memo(({
                 }}
             >
                 {!isFolder && (
-                    <MenuItem onClick={() => { handleDoubleClick(); handleCloseContextMenu(); }}>
+                    <MenuItem onClick={() => {
+                        handleDoubleClick();
+                        handleCloseContextMenu();
+                    }}>
                         <ListItemIcon>
-                            <EditIcon fontSize="small" />
+                            <EditIcon fontSize="small"/>
                         </ListItemIcon>
                         <ListItemText>Открыть в редакторе</ListItemText>
                     </MenuItem>
                 )}
-                
+
                 <MenuItem onClick={handleCopyPath}>
                     <ListItemIcon>
-                        <ContentCopyIcon fontSize="small" />
+                        <ContentCopyIcon fontSize="small"/>
                     </ListItemIcon>
                     <ListItemText>Копировать путь</ListItemText>
                 </MenuItem>
 
                 <MenuItem onClick={handleRename}>
                     <ListItemIcon>
-                        <EditIcon fontSize="small" />
+                        <EditIcon fontSize="small"/>
                     </ListItemIcon>
                     <ListItemText>Переименовать</ListItemText>
                 </MenuItem>
 
-                <Divider />
+                <Divider/>
 
                 {isFolder && (
                     <>
                         <MenuItem onClick={handleCreateFile}>
                             <ListItemIcon>
-                                <NoteAddIcon fontSize="small" />
+                                <NoteAddIcon fontSize="small"/>
                             </ListItemIcon>
                             <ListItemText>Создать файл</ListItemText>
                         </MenuItem>
 
                         <MenuItem onClick={handleCreateFolder}>
                             <ListItemIcon>
-                                <CreateNewFolderIcon fontSize="small" />
+                                <CreateNewFolderIcon fontSize="small"/>
                             </ListItemIcon>
                             <ListItemText>Создать папку</ListItemText>
                         </MenuItem>
 
-                        <Divider />
+                        <Divider/>
                     </>
                 )}
 
                 <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
                     <ListItemIcon>
-                        <DeleteIcon fontSize="small" color="error" />
+                        <DeleteIcon fontSize="small" color="error"/>
                     </ListItemIcon>
                     <ListItemText>Удалить</ListItemText>
                 </MenuItem>
@@ -209,8 +213,8 @@ const ProjectStructureItemLabel = memo(({
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setRenameDialogOpen(false)}>Отмена</Button>
-                    <Button 
-                        onClick={handleRenameConfirm} 
+                    <Button
+                        onClick={handleRenameConfirm}
                         variant="contained"
                         disabled={!newName.trim() || newName === label}
                     >
@@ -296,8 +300,8 @@ const ProjectStructure = memo((props) => {
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'info' });
 
     // Состояния для создания из контекстного меню
-    const [quickCreateDialog, setQuickCreateDialog] = useState({ 
-        open: false, 
+    const [quickCreateDialog, setQuickCreateDialog] = useState({
+        open: false,
         type: 'file', // 'file' or 'folder'
         parentPath: '',
         name: ''
@@ -307,6 +311,7 @@ const ProjectStructure = memo((props) => {
     const refreshStructure = async () => {
         try {
             const structure = await fileAPI.getProjectStructure(projectId);
+
             // Рекурсивно добавляем id для каждого элемента
             function addIdsAndLabels(items, parentPath = "") {
                 return items.map(item => {
@@ -319,6 +324,7 @@ const ProjectStructure = memo((props) => {
                     return newItem;
                 });
             }
+
             setItems(addIdsAndLabels(structure));
             console.log(addIdsAndLabels(structure));
         } catch (e) {
@@ -400,9 +406,9 @@ const ProjectStructure = memo((props) => {
     // Функция быстрого создания из контекстного меню
     const handleQuickCreate = async () => {
         if (!quickCreateDialog.name.trim()) return;
-        
+
         try {
-            const fullPath = quickCreateDialog.parentPath 
+            const fullPath = quickCreateDialog.parentPath
                 ? `${quickCreateDialog.parentPath}/${quickCreateDialog.name}`
                 : quickCreateDialog.name;
 
@@ -413,7 +419,7 @@ const ProjectStructure = memo((props) => {
                 await fileAPI.createFolder(projectId, fullPath);
                 showNotification('Папка успешно создана', 'success');
             }
-            
+
             setQuickCreateDialog({ open: false, type: 'file', parentPath: '', name: '' });
             refreshStructure();
         } catch (e) {
@@ -423,6 +429,13 @@ const ProjectStructure = memo((props) => {
 
     // TODO: добавить полноценные функции
     const additionalActions = [
+        {
+            title: "Создать",
+            icon: <AddRoundedIcon/>,
+            props: {
+                onClick: () => setCreateFileDialogOpen(true)
+            }
+        },
         {
             title: "Развернуть все",
             icon: <UnfoldMoreRoundedIcon/>,
@@ -459,14 +472,27 @@ const ProjectStructure = memo((props) => {
     };
 
     return (
-        <Box>
-            <Button
-                variant="outlined"
-                sx={{ mb: 2 }}
-                onClick={() => setCreateFileDialogOpen(true)}
-            >
-                Создать файл
-            </Button>
+        <SidebarTool {...props} additionalActions={additionalActions}>
+            <ScrollableContainer style={{ flex: 1 }}>
+                <Box display="flex">
+                    <RichTreeView
+                        apiRef={treeViewApiRef}
+                        items={items}
+                        selectedItems={selectedItems}
+                        expandedItems={expandedItems}
+                        slots={{
+                            item: (itemProps) => <ProjectStructureItem {...itemProps}
+                                                                       contextHandlers={contextHandlers}/>,
+                            expandIcon: KeyboardArrowRightRoundedIcon,
+                            collapseIcon: KeyboardArrowDownRoundedIcon
+                        }}
+                        sx={{ flex: 1 }}
+                        onExpandedItemsChange={handleExpandedItemsChange}
+                        onSelectedItemsChange={handleSelectedItemsChange}
+                        onItemExpansionToggle={handleItemExpansionToggle}
+                    />
+                </Box>
+            </ScrollableContainer>
 
             {/* Диалог создания файла (главная кнопка) */}
             <Dialog open={createFileDialogOpen} onClose={() => setCreateFileDialogOpen(false)}>
@@ -487,14 +513,16 @@ const ProjectStructure = memo((props) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setCreateFileDialogOpen(false)} disabled={creatingFile}>Отмена</Button>
-                    <Button onClick={handleCreateFile} variant="contained" disabled={!newFileName.trim() || creatingFile}>
+                    <Button onClick={handleCreateFile} variant="contained"
+                            disabled={!newFileName.trim() || creatingFile}>
                         Создать
                     </Button>
                 </DialogActions>
             </Dialog>
 
             {/* Диалог быстрого создания (из контекстного меню) */}
-            <Dialog open={quickCreateDialog.open} onClose={() => setQuickCreateDialog({ ...quickCreateDialog, open: false })}>
+            <Dialog open={quickCreateDialog.open}
+                    onClose={() => setQuickCreateDialog({ ...quickCreateDialog, open: false })}>
                 <DialogTitle>
                     Создать {quickCreateDialog.type === 'file' ? 'файл' : 'папку'} в "{quickCreateDialog.parentPath}"
                 </DialogTitle>
@@ -514,37 +542,15 @@ const ProjectStructure = memo((props) => {
                     <Button onClick={() => setQuickCreateDialog({ ...quickCreateDialog, open: false })}>
                         Отмена
                     </Button>
-                    <Button 
-                        onClick={handleQuickCreate} 
-                        variant="contained" 
+                    <Button
+                        onClick={handleQuickCreate}
+                        variant="contained"
                         disabled={!quickCreateDialog.name.trim()}
                     >
                         Создать
                     </Button>
                 </DialogActions>
             </Dialog>
-
-            <SidebarTool {...props} additionalActions={additionalActions}>
-                <ScrollableContainer style={{ flex: 1 }}>
-                    <Box display="flex">
-                        <RichTreeView
-                            apiRef={treeViewApiRef}
-                            items={items}
-                            selectedItems={selectedItems}
-                            expandedItems={expandedItems}
-                            slots={{
-                                item: (itemProps) => <ProjectStructureItem {...itemProps} contextHandlers={contextHandlers} />,
-                                expandIcon: KeyboardArrowRightRoundedIcon,
-                                collapseIcon: KeyboardArrowDownRoundedIcon
-                            }}
-                            sx={{ flex: 1 }}
-                            onExpandedItemsChange={handleExpandedItemsChange}
-                            onSelectedItemsChange={handleSelectedItemsChange}
-                            onItemExpansionToggle={handleItemExpansionToggle}
-                        />
-                    </Box>
-                </ScrollableContainer>
-            </SidebarTool>
 
             {/* Уведомления */}
             <Snackbar
@@ -553,15 +559,15 @@ const ProjectStructure = memo((props) => {
                 onClose={() => setNotification({ ...notification, open: false })}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-                <Alert 
-                    onClose={() => setNotification({ ...notification, open: false })} 
+                <Alert
+                    onClose={() => setNotification({ ...notification, open: false })}
                     severity={notification.severity}
                     sx={{ width: '100%' }}
                 >
                     {notification.message}
                 </Alert>
             </Snackbar>
-        </Box>
+        </SidebarTool>
     );
 });
 
