@@ -5,7 +5,7 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import SquareIcon from "@mui/icons-material/Square";
 
 import { SidebarTool } from "../LeftSidebar";
-import ScrollableContainer from "../ScrollableContainer";
+import { ScrollableContainer } from "@/components";
 
 const PIE_CHART_SIZE = 200;
 const BAR_CHART_WIDTH = 300;

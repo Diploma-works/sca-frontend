@@ -39,7 +39,7 @@ import {
     Sync as SyncIcon,
     Upload as PushIcon
 } from '@mui/icons-material';
-import ScrollableContainer from '../ScrollableContainer';
+import { ScrollableContainer } from '@/components';
 import { api, gitHubAPI } from '@/utils/api';
 import './GitView.css';
 

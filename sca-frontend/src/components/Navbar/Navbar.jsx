@@ -5,6 +5,8 @@ import { useMatches, useNavigate } from "react-router-dom";
 import {
     AppBar,
     Box,
+    Breadcrumbs,
+    breadcrumbsClasses,
     Button,
     Drawer,
     drawerClasses,
@@ -25,13 +27,13 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
-import { ProjectInfo } from "@/components/ProjectInfo";
 import { navRoutes } from "@/routes";
-import { NavbarBreadcrumbs } from "@/components/NavbarBreadcrumbs";
+import { SearchPopover } from "./SearchPopover";
 
-const Navbar = () => {
+export const Navbar = () => {
     const signOut = useSignOut();
     const authUser = useAuthUser();
     const navigate = useNavigate();
@@ -40,7 +42,7 @@ const Navbar = () => {
     const { mode, setMode } = useColorScheme();
 
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const [projectInfoOpen, setProjectInfoOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const searchInputRef = useRef(null);
     const avatarRef = useRef(null);
@@ -50,7 +52,7 @@ const Navbar = () => {
             if (e.ctrlKey && e.code === "KeyF") {
                 e.preventDefault();
                 e.stopPropagation();
-                setProjectInfoOpen(true);
+                setSearchOpen(true);
             }
         }
 
@@ -63,7 +65,7 @@ const Navbar = () => {
 
     const handleDrawerClick = () => setDrawerOpen(true);
     const handleDrawerClose = () => setDrawerOpen(false);
-    const handleProjectInfoClick = () => setProjectInfoOpen(true);
+    const handleProjectInfoClick = () => setSearchOpen(true);
     const handleThemeClick = () => setMode(mode === "light" ? "dark" : "light");
     const handleProfileClick = () => setProfileOpen(true);
     const handleProfileClose = () => setProfileOpen(false);
@@ -127,7 +129,20 @@ const Navbar = () => {
                     SCA
                 </Typography>
                 {crumbMatches && (
-                    <NavbarBreadcrumbs>
+                    <Breadcrumbs
+                        separator={<NavigateNextRoundedIcon fontSize="small"/>}
+                        sx={(theme) => ({
+                            [`.${breadcrumbsClasses.ol}`]: {
+                                flexWrap: "nowrap",
+                            },
+                            [`.${breadcrumbsClasses.li}`]: {
+                                color: "text.primary",
+                            },
+                            [`.${breadcrumbsClasses.separator}`]: {
+                                margin: `0 ${theme.spacing(0.5)}`,
+                            },
+                        })}
+                    >
                         {crumbMatches.map(({ handle: { CrumbComponent, title }, ...rest }, index) => (
                             CrumbComponent ? (
                                 <CrumbComponent {...rest}/>
@@ -140,7 +155,7 @@ const Navbar = () => {
                                     {title}
                                 </Button>
                             )))}
-                    </NavbarBreadcrumbs>
+                    </Breadcrumbs>
                 )}
                 <Box sx={{ flex: 1 }}/>
                 <Stack direction="row" spacing={1} alignItems="center">
@@ -171,11 +186,9 @@ const Navbar = () => {
                         )}
                         <MenuItem onClick={handleLogoutClick}>Выйти</MenuItem>
                     </Menu>
-                    <ProjectInfo open={projectInfoOpen} setOpen={setProjectInfoOpen} anchorRef={searchInputRef}/>
+                    <SearchPopover open={searchOpen} setOpen={setSearchOpen} anchorRef={searchInputRef}/>
                 </Stack>
             </Toolbar>
         </AppBar>
     );
 }
-
-export default Navbar;

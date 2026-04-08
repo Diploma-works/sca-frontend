@@ -6,8 +6,8 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 
 import { useProblemsContext } from "./ProblemsContext";
 import { SidebarTool } from "../LeftSidebar";
-import ScrollableContainer from "../ScrollableContainer";
-import { analysisAPI } from "../../utils/api";
+import { ScrollableContainer } from "@/components";
+import { analysisAPI } from "@/utils";
 
 const Problems = (props) => {
     const [problems, setProblems] = useProblemsContext();

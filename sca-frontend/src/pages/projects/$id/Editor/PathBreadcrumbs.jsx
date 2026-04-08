@@ -6,7 +6,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { useTabsStateContext } from "./TabsContext";
 import { useSidebarUpdateContext } from "../LeftSidebar";
 import { useProjectStructureContext } from "../ProjectStructure";
-import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
+import { fileTypeIcons, getFileType } from "@/utils";
 
 const PathBreadcrumbs = () => {
     const setActiveTool = useSidebarUpdateContext();

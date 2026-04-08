@@ -3,7 +3,7 @@ import { useColorScheme } from "@mui/material";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 // TODO: пофиксить clickScroll или убрать его
-const ScrollableContainer = forwardRef(({ children, style, events }, ref) => {
+export const ScrollableContainer = forwardRef(({ children, style, events }, ref) => {
     const { mode } = useColorScheme();
 
     return (
@@ -22,5 +22,3 @@ const ScrollableContainer = forwardRef(({ children, style, events }, ref) => {
         </OverlayScrollbarsComponent>
     );
 });
-
-export default ScrollableContainer;

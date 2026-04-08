@@ -1,33 +1,33 @@
 import { Navigate } from "react-router-dom";
 
-import Auth from "@/components/Auth";
-import Projects from "@/components/Projects";
-import GitHubPage from "@/pages/GitHubPage";
-import Main from "@/components/Main";
-import App from "@/App";
-import { ProjectCrumb } from "@/components/ProjectCrumb";
+import { AuthPage } from "@/pages/auth/AuthPage";
+import { RootLayout } from "@/pages/RootLayout";
+import { AllProjectsPage } from "@/pages/projects/AllProjectsPage";
+import { ProjectPage } from "@/pages/projects/$id/ProjectPage";
+import { ProjectCrumb } from "@/pages/projects/$id/ProjectCrumb";
+import { GitHubPage } from "@/pages/github/GitHubPage";
 
 export const routes = [
     {
         path: "/auth",
-        Component: Auth,
+        Component: AuthPage,
         handle: { hideFromSidebar: true },
     },
     {
-        Component: App,
+        Component: RootLayout,
         children: [
             {
                 path: "projects",
                 handle: { title: "Проекты" },
                 children: [
                     {
-                        index: true, // сделано так, поскольку Projects и Main не имеют общего UI
-                        Component: Projects,
+                        index: true,
+                        Component: AllProjectsPage, // не layout, поскольку AllProjects и Project не имеют общего UI
                         handle: { hideFromSidebar: true },
                     },
                     {
                         path: ":id",
-                        Component: Main,
+                        Component: ProjectPage,
                         handle: { hideFromSidebar: true, CrumbComponent: ProjectCrumb },
                     },
                 ],

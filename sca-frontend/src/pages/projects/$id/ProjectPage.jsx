@@ -10,9 +10,9 @@ import { Editor, TabsContextProvider } from "./Editor";
 import { Problems, ProblemsContextProvider } from "./Problems";
 import { LeftSidebar, SidebarContextProvider } from "./LeftSidebar";
 import { ProjectStructure, ProjectStructureContextProvider } from "./ProjectStructure";
-import { Git } from "./Git";
+import { Git } from "@/components/Git";
 
-const Main = () => {
+export const ProjectPage = () => {
     const { id: projectId } = useParams();
     const { isLoading } = useQuery({ queryKey: ["projects"], queryFn: projectAPI.getAll });
 
@@ -66,5 +66,3 @@ const Main = () => {
         </TabsContextProvider>
     );
 }
-
-export default Main;

@@ -25,10 +25,10 @@ import {
     GitHub as GitHubIcon,
     Launch as LaunchIcon
 } from '@mui/icons-material';
-import { projectsAPI } from '../../utils/api';
+import { projectsAPI } from '@/utils';
 import { useNavigate } from "react-router-dom";
 
-const Projects = () => {
+export const AllProjectsPage = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -358,6 +358,4 @@ const Projects = () => {
             )}
         </>
     );
-};
-
-export default Projects; 
+}

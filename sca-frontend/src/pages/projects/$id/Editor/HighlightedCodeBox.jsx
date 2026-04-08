@@ -4,7 +4,7 @@ import { yellow } from "@mui/material/colors";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { useProblemsStateContext } from "../Problems";
-import ScrollableContainer from "../ScrollableContainer";
+import { ScrollableContainer } from "@/components";
 import MonacoEditor from "@monaco-editor/react";
 
 const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {

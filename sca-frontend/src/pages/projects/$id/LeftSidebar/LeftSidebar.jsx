@@ -4,8 +4,8 @@ import { Stack, useTheme } from "@mui/material";
 import { useSidebarContext } from "./SidebarContext";
 import SidebarButton from "./SidebarButton";
 
-import useWindowSize from "../../hooks/useWindowSize";
-import HorizontallyResizableBox from "../HorizontallyResizableBox";
+import useWindowSize from "@/hooks/useWindowSize";
+import { HorizontallyResizableBox } from "@/components";
 
 const MIN_WIDTH = 36;
 

@@ -4,7 +4,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
-import { authAPI } from "../utils/api";
+import { authAPI } from "@/utils";
 
 const VisibilityToggleAdornment = ({ showPassword, setShowPassword }) => {
     const handleClick = () => setShowPassword((prevState) => !prevState);
@@ -17,7 +17,7 @@ const VisibilityToggleAdornment = ({ showPassword, setShowPassword }) => {
     );
 }
 
-const Auth = () => {
+export const AuthPage = () => {
     const [signUpMode, setSignUpMode] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ username: '', email: '', password: '', fullName: '', confirm: '' });
@@ -170,5 +170,3 @@ const Auth = () => {
         </Stack>
     );
 }
-
-export default Auth;

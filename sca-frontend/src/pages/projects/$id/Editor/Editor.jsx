@@ -7,10 +7,8 @@ import { useTabsStateContext } from "./TabsContext";
 import EditorTabsRoot from "./EditorTabsRoot";
 import PathBreadcrumbs from "./PathBreadcrumbs";
 import HighlightedCodeBox from "./HighlightedCodeBox";
-import { getFileType } from "../../utils/fileTypes";
-import ScrollableContainer from "../ScrollableContainer";
-import { fileAPI } from "../../utils/api";
-import { act } from "react";
+import { fileAPI, getFileType } from "@/utils";
+import { ScrollableContainer } from "@/components";
 
 const Editor = ({ projectId }) => {
     const { tabs, activeTab } = useTabsStateContext();

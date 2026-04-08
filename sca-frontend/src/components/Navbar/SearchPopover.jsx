@@ -3,7 +3,7 @@ import { Box, Divider, Fade, Popover, Typography, useColorScheme } from "@mui/ma
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { Editor } from "@monaco-editor/react";
 
-export const ProjectInfo = ({ anchorRef, open, setOpen }) => {
+export const SearchPopover = ({ anchorRef, open, setOpen }) => {
     const { mode } = useColorScheme();
     const editorRef = useRef(null);
 

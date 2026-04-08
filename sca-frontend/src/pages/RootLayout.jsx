@@ -1,9 +1,8 @@
 import { Outlet } from "react-router-dom";
-import { Stack } from "@mui/material";
-import Navbar from "@/components/Navbar";
 import RequireAuth from "@auth-kit/react-router/RequireAuth";
+import { Navbar } from "@/components";
 
-const App = () => {
+export const RootLayout = () => {
     return (
         <RequireAuth fallbackPath="/auth">
             <Navbar/>
@@ -11,5 +10,3 @@ const App = () => {
         </RequireAuth>
     );
 }
-
-export default App;

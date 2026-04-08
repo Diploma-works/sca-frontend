@@ -3,10 +3,25 @@ import { cloneElement, memo, useEffect, useState } from "react";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeItem } from "@mui/x-tree-view/TreeItem";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
-import { 
-    Box, Skeleton, Stack, SvgIcon, useTheme, Button, Dialog, DialogTitle, 
-    DialogContent, DialogActions, TextField, Menu, MenuItem, ListItemIcon, 
-    ListItemText, Divider, Snackbar, Alert 
+import {
+    Alert,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Skeleton,
+    Snackbar,
+    Stack,
+    SvgIcon,
+    TextField,
+    useTheme
 } from "@mui/material";
 
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
@@ -15,18 +30,15 @@ import UnfoldLessRoundedIcon from "@mui/icons-material/UnfoldLessRounded";
 import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-import ITEMS from "./items";
 import { SidebarTool } from "../LeftSidebar/";
 import { useTabsContext } from "../Editor";
 import { useProjectStructureContext } from "./ProjectStructureContext";
-import { fileTypeIcons, getFileType } from "../../utils/fileTypes";
-import ScrollableContainer from "../ScrollableContainer";
-import { fileAPI } from "../../utils/api";
+import { fileAPI, fileTypeIcons, getFileType } from "@/utils";
+import { ScrollableContainer } from "@/components";
 
 // TODO: упростить (пока нельзя, потому что path собирается здесь)
 const ProjectStructureItemLabel = memo(({ 
