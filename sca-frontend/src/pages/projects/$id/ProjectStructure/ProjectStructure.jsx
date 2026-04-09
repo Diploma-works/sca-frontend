@@ -1,7 +1,7 @@
 import { cloneElement, memo, useEffect, useState } from "react";
 
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
-import { TreeItem } from "@mui/x-tree-view/TreeItem";
+import { TreeItem, treeItemClasses } from "@mui/x-tree-view/TreeItem";
 import { useTreeViewApiRef } from "@mui/x-tree-view";
 import {
     Alert,
@@ -20,8 +20,7 @@ import {
     Snackbar,
     Stack,
     SvgIcon,
-    TextField,
-    useTheme
+    TextField
 } from "@mui/material";
 
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
@@ -227,7 +226,6 @@ const ProjectStructureItemLabel = memo(({
 });
 
 const ProjectStructureItem = ({ itemId, label, path, children, contextHandlers }) => {
-    const theme = useTheme();
     const { addTab } = useTabsContext();
 
     const isLoading = itemId.startsWith("_");
@@ -245,13 +243,12 @@ const ProjectStructureItem = ({ itemId, label, path, children, contextHandlers }
                     {...contextHandlers}
                 />
             }
-            sx={{
-                '.MuiTreeItem-iconContainer': {
+            sx={(theme) => ({
+                [`.${treeItemClasses.iconContainer}`]: {
                     color: 'text.secondary',
                 },
-                '.MuiTreeItem-content': {
-                    gap: 1,
-                    borderRadius: 0,
+                [`.${treeItemClasses.content}`]: {
+                    pl: 1,
                     userSelect: 'none',
                     '&.Mui-selected, &.Mui-selected.Mui-focused': {
                         bgcolor: 'bg.main',
@@ -259,17 +256,36 @@ const ProjectStructureItem = ({ itemId, label, path, children, contextHandlers }
                             bgcolor: 'bg.dark',
                         }
                     },
-                    '.MuiTreeItem-label': {
-                        ...theme.typography.button,
-                        textWrap: 'nowrap',
+                },
+                [`.${treeItemClasses.label}`]: {
+                    font: theme.vars.font.button,
+                    textWrap: 'nowrap',
+                },
+                [`.${treeItemClasses.root}`]: {
+                    ml: 3,
+                    position: 'relative',
+                    '::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: `calc(1px - ${theme.spacing(1)})`,
+                        height: theme.typography.button.fontSize,
+                        width: `calc(${theme.spacing(1)} - 1px)`,
+                        borderBottom: `1px solid ${theme.vars.palette.divider}`,
                     },
+                    '::after': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: `calc(0px - ${theme.spacing(1)})`,
+                        height: 1,
+                        borderLeft: `1px solid ${theme.vars.palette.divider}`,
+                    },
+                    '&:last-child::after': {
+                        height: theme.typography.button.fontSize,
+                    }
                 },
-                '.MuiTreeItem-groupTransition': {
-                    ml: 2,
-                    pl: 0,
-                    borderLeft: `1px solid ${theme.vars.palette.divider}`,
-                },
-            }}
+            })}
         >
             {children?.map((child) => cloneElement(child, {
                 contextHandlers: contextHandlers,
