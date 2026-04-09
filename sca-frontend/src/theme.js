@@ -74,6 +74,13 @@ export const theme = createTheme(
                     }),
                 },
             },
+            MuiListItemButton: {
+                styleOverrides: {
+                    dense: ({ theme }) => ({
+                        padding: `${theme.spacing(0.5)} ${theme.spacing(1.5)}`,
+                    }),
+                }
+            },
             MuiMenu: {
                 styleOverrides: {
                     list: ({ theme }) => ({

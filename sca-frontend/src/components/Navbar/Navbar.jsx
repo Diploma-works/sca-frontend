@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
-import { useMatches, useNavigate } from "react-router-dom";
+import { Link, NavLink, useMatches, useNavigate } from "react-router-dom";
 import {
     AppBar,
     Box,
     Breadcrumbs,
     breadcrumbsClasses,
     Button,
+    Divider,
     Drawer,
     drawerClasses,
     IconButton,
@@ -30,6 +31,7 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
+import { Logo } from "@/components";
 import { navRoutes } from "@/routes";
 import { SearchPopover } from "./SearchPopover";
 
@@ -98,36 +100,28 @@ export const Navbar = () => {
                         },
                     }}
                 >
-                    <Toolbar variant="dense">
-                        <Typography
-                            variant="h5"
-                            fontWeight="bold"
-                            color="primary"
-                            sx={{ cursor: 'pointer', userSelect: 'none' }}
-                            onClick={() => navigate("/")}
-                        >
-                            SCA
-                        </Typography>
+                    <Toolbar variant="dense" disableGutters sx={{ justifyContent: "center" }}>
+                        <Logo/>
                     </Toolbar>
-                    <List disablePadding sx={{ px: 1, }}>
+                    <Divider/>
+                    <List sx={{ px: 1 }}>
                         {navRoutes.map(({ path, handle }) => (
                             <ListItem key={path} disablePadding>
-                                <ListItemButton sx={{ borderRadius: 1, px: 2, py: 1, }} onClick={() => navigate(path)}>
-                                    <ListItemText primary={handle?.title}/>
-                                </ListItemButton>
+                                <NavLink to={path} style={{ width: '100%', color: 'inherit', textDecoration: 'none' }}>
+                                    {({ isActive }) => (
+                                        <ListItemButton dense selected={isActive} sx={{ borderRadius: 1 }}>
+                                            <ListItemText
+                                                primary={handle?.title}
+                                                slotProps={{ primary: { sx: { fontWeight: isActive && 600 } } }}
+                                            />
+                                        </ListItemButton>
+                                    )}
+                                </NavLink>
                             </ListItem>
                         ))}
                     </List>
                 </Drawer>
-                <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    color="primary"
-                    sx={{ cursor: 'pointer', userSelect: 'none' }}
-                    onClick={() => navigate("/")}
-                >
-                    SCA
-                </Typography>
+                <Logo/>
                 {crumbMatches && (
                     <Breadcrumbs
                         separator={<NavigateNextRoundedIcon fontSize="small"/>}
@@ -148,8 +142,9 @@ export const Navbar = () => {
                                 <CrumbComponent {...rest}/>
                             ) : (
                                 <Button
+                                    component={Link}
+                                    to={rest.pathname}
                                     color="inherit"
-                                    onClick={() => navigate(rest.pathname)}
                                     sx={{ fontWeight: index === crumbMatches.length - 1 && 600 }}
                                 >
                                     {title}
