@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useTheme } from '@mui/material/styles';
-import { api } from '../../utils/api';
-import './ModernBranchGraph.css';
+import React, { useState, useEffect } from "react";
+import { useColorScheme } from "@mui/material";
+
+import { api } from "@/utils/api";
+import "./ModernBranchGraph.css";
 
 const ModernBranchGraph = ({ projectId }) => {
-    const theme = useTheme();
+    const { mode } = useColorScheme();
     const [graphData, setGraphData] = useState({ commits: [], total: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedCommit, setSelectedCommit] = useState(null);
     const [limit, setLimit] = useState(20);
-    
+
     // Refs for scroll synchronization
     const commitsPanelRef = React.useRef(null);
     const graphPanelRef = React.useRef(null);
@@ -53,7 +54,7 @@ const ModernBranchGraph = ({ projectId }) => {
 
     const parseCommitData = (commits) => {
         if (!commits || !Array.isArray(commits)) return [];
-        
+
         // First pass: collect all unique branches
         const allBranches = new Set();
         const parsedCommits = commits.map((commit, index) => {
@@ -81,7 +82,7 @@ const ModernBranchGraph = ({ projectId }) => {
 
             const branches = [];
             const tags = [];
-            
+
             if (refs && refs !== 'null') {
                 const refParts = refs.split(',').map(r => r.trim());
                 refParts.forEach(ref => {
@@ -132,7 +133,7 @@ const ModernBranchGraph = ({ projectId }) => {
         const now = new Date();
         const diffTime = Math.abs(now - date);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 1) return 'Yesterday';
         if (diffDays < 7) return `${diffDays} days ago`;
         if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
@@ -165,23 +166,23 @@ const ModernBranchGraph = ({ projectId }) => {
                 {/* Left Panel - Git Graph */}
                 <div className="graph-panel">
                     <div className="graph-canvas" ref={graphPanelRef} onScroll={handleScroll}>
-                        <svg 
-                            width={Math.max(200, 80 + totalBranches * 40)} 
-                            height={commits.length * COMMIT_HEIGHT + 60} 
+                        <svg
+                            width={Math.max(200, 80 + totalBranches * 40)}
+                            height={commits.length * COMMIT_HEIGHT + 60}
                             className="branch-network-svg"
                         >
                             <defs>
                                 <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
                                     <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                                    <feMerge> 
+                                    <feMerge>
                                         <feMergeNode in="coloredBlur"/>
                                         <feMergeNode in="SourceGraphic"/>
                                     </feMerge>
                                 </filter>
                             </defs>
-                            
+
                             {/* Branch track lines */}
-                            {Array.from({length: Math.max(totalBranches, 1)}).map((_, track) => (
+                            {Array.from({ length: Math.max(totalBranches, 1) }).map((_, track) => (
                                 <line
                                     key={`branch-${track}`}
                                     x1={40 + track * 40}
@@ -193,12 +194,12 @@ const ModernBranchGraph = ({ projectId }) => {
                                     opacity="0.3"
                                 />
                             ))}
-                            
+
                             {/* Commit nodes and connections */}
                             {commits.map((commit, index) => {
                                 const y = 30 + index * COMMIT_HEIGHT + COMMIT_HEIGHT / 2;
                                 const x = 40 + commit.branchTrack * 40;
-                                
+
                                 return (
                                     <g key={commit.fullHash || index}>
                                         {/* Connection lines */}
@@ -213,18 +214,18 @@ const ModernBranchGraph = ({ projectId }) => {
                                                 opacity="0.8"
                                             />
                                         )}
-                                        
+
                                         {/* Merge curves */}
                                         {commit.message.toLowerCase().includes('merge') && index > 0 && (
                                             <path
-                                                d={`M ${40 + ((commit.branchTrack + 1) % 3) * 40} ${y - COMMIT_HEIGHT/2} Q ${x - 20} ${y - COMMIT_HEIGHT/4} ${x} ${y}`}
+                                                d={`M ${40 + ((commit.branchTrack + 1) % 3) * 40} ${y - COMMIT_HEIGHT / 2} Q ${x - 20} ${y - COMMIT_HEIGHT / 4} ${x} ${y}`}
                                                 stroke={getBranchColor((commit.branchTrack + 1) % 3)}
                                                 strokeWidth="2"
                                                 fill="none"
                                                 opacity="0.6"
                                             />
                                         )}
-                                        
+
                                         {/* Commit node */}
                                         <circle
                                             cx={x}
@@ -237,7 +238,7 @@ const ModernBranchGraph = ({ projectId }) => {
                                             className="commit-node-clickable"
                                             onClick={() => setSelectedCommit(commit)}
                                         />
-                                        
+
                                         {/* Inner circle */}
                                         <circle
                                             cx={x}
@@ -247,7 +248,7 @@ const ModernBranchGraph = ({ projectId }) => {
                                             opacity="0.9"
                                             onClick={() => setSelectedCommit(commit)}
                                         />
-                                        
+
                                         {/* Selection indicator */}
                                         {selectedCommit?.id === commit.id && (
                                             <circle
@@ -282,16 +283,16 @@ const ModernBranchGraph = ({ projectId }) => {
                 <div className="commits-panel">
                     <div className="commits-list" ref={commitsPanelRef} onScroll={handleScroll}>
                         {commits.map((commit, index) => (
-                            <div 
+                            <div
                                 key={commit.fullHash || index}
                                 className={`commit-item ${selectedCommit?.id === commit.id ? 'selected' : ''}`}
                                 onClick={() => setSelectedCommit(commit)}
                             >
-                                <div 
+                                <div
                                     className="branch-indicator"
                                     style={{ backgroundColor: getBranchColor(commit.branchTrack) }}
                                 ></div>
-                                
+
                                 <div className="commit-content">
                                     <div className="commit-item-header">
                                         <div className="commit-hash-container">
@@ -302,9 +303,9 @@ const ModernBranchGraph = ({ projectId }) => {
                                         </div>
                                         <span className="commit-date">{formatDate(commit.date)}</span>
                                     </div>
-                                    
+
                                     <div className="commit-message">{commit.message}</div>
-                                    
+
                                     <div className="commit-meta">
                                         <span className="commit-author">👤 {commit.author}</span>
                                         {commit.branches.length > 0 && (
@@ -337,7 +338,7 @@ const ModernBranchGraph = ({ projectId }) => {
 
     if (loading) {
         return (
-            <div className={`modern-graph-container ${theme.palette.mode === 'dark' ? 'dark-theme' : ''}`}>
+            <div className={`modern-graph-container ${mode === 'dark' ? 'dark-theme' : ''}`}>
                 <div className="loading-spinner">
                     <div className="spinner"></div>
                     <span>Loading git history...</span>
@@ -348,7 +349,7 @@ const ModernBranchGraph = ({ projectId }) => {
 
     if (error) {
         return (
-            <div className={`modern-graph-container ${theme.palette.mode === 'dark' ? 'dark-theme' : ''}`}>
+            <div className={`modern-graph-container ${mode === 'dark' ? 'dark-theme' : ''}`}>
                 <div className="error-message">
                     <div className="error-icon">⚠️</div>
                     <div className="error-text">{error}</div>
@@ -361,12 +362,12 @@ const ModernBranchGraph = ({ projectId }) => {
     }
 
     return (
-        <div className={`modern-graph-container ${theme.palette.mode === 'dark' ? 'dark-theme' : ''}`}>
+        <div className={`modern-graph-container ${mode === 'dark' ? 'dark-theme' : ''}`}>
             <div className="graph-header">
                 <h3>Git History</h3>
                 <div className="graph-controls">
-                    <select 
-                        value={limit} 
+                    <select
+                        value={limit}
                         onChange={(e) => setLimit(Number(e.target.value))}
                         className="limit-select"
                     >
@@ -387,7 +388,7 @@ const ModernBranchGraph = ({ projectId }) => {
                 <div className="commit-details-panel">
                     <div className="panel-header">
                         <h4>Commit Details</h4>
-                        <button 
+                        <button
                             onClick={() => setSelectedCommit(null)}
                             className="close-button"
                         >

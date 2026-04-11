@@ -1,6 +1,6 @@
 import React from 'react';
 import GitView from './GitView';
-import { SidebarTool } from "../LeftSidebar";
+import { SidebarTool } from "@/pages/projects/$id/LeftSidebar";
 
 const Git = ({ projectId, ...props }) => {
     return (

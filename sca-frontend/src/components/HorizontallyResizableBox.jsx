@@ -1,5 +1,5 @@
 import { Box, Divider, Stack, useTheme } from "@mui/material";
-import useHorizontalResizing from "../hooks/useHorizontalResizing";
+import useHorizontalResizing from "@/hooks/useHorizontalResizing";
 
 const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
     const theme = useTheme();
@@ -43,11 +43,11 @@ const InteractiveVerticalDivider = ({ isResizing, ...props }) => {
     );
 }
 
-const HorizontallyResizableBox = ({ sx, prevWidth, updatePrevWidth, disable, children }) => {
+export const HorizontallyResizableBox = ({ sx, prevWidth, updatePrevWidth, disable, children }) => {
     const { width, listeners, isResizing, resizableElementRef } = useHorizontalResizing(prevWidth, updatePrevWidth);
 
     return (
-        <Stack direction={"row"}>
+        <Stack direction="row">
             <Box
                 ref={resizableElementRef}
                 sx={{
@@ -63,5 +63,3 @@ const HorizontallyResizableBox = ({ sx, prevWidth, updatePrevWidth, disable, chi
         </Stack>
     )
 }
-
-export default HorizontallyResizableBox;
