@@ -173,6 +173,24 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  ollama:
+    image: ollama/ollama:0.20.7
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_FLASH_ATTENTION=true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+
 volumes:
   postgres_data:
     driver: local
@@ -187,6 +205,8 @@ volumes:
   workspace_data:
     driver: local
   pgadmin_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:

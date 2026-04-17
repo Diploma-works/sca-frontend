@@ -6,13 +6,11 @@ server:
 spring:
   application:
     name: sca-backend
-  
   datasource:
-    url: jdbc:postgresql://postgres:5432/sca_ide
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/sca_ide
+    username: ${DB_USERNAME:sca_user}
+    password: ${DB_PASSWORD:sca_password}
     driver-class-name: org.postgresql.Driver
-  
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,17 +19,20 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  
   data:
     redis:
       host: ${SPRING_REDIS_HOST}
       port: 6379
       password: ${REDIS_PASSWORD}
-  
   security:
     jwt:
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:your-super-secret-jwt-key-123456}
       expiration: 86400000 # 24 hours
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: qwen3.5:9b
 
 # Docker configuration
 docker:
