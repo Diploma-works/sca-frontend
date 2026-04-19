@@ -33,6 +33,8 @@ spring:
       base-url: http://localhost:11434
       chat:
         model: qwen3.5:9b
+        options:
+          num-ctx: 64000
 
 # Docker configuration
 docker:
