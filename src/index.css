@@ -85,6 +85,7 @@
 }
 
 .svg-content-fill {
+  clip-path: rect(0 100% 100% 0 round 0 0 7.25px 7.25px);
   fill: var(--svg-content-fill);
 }
 

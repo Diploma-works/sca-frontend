@@ -88,13 +88,8 @@ function findAndPasteSelector(str, textAfterPaste, textToPaste) {
 }
 
 
-function decodeBase64SVG(base64String) {
-  const base64Data = base64String.replace(/^data:image\/svg\+xml;base64,/, '');
-  return atob(base64Data);
-}
-
 function formatShapeString(svgi) {
-  const svg = decodeBase64SVG(svgi)
+  const svg = svgi;
 
   const indexStart = svg.indexOf("<g>");
   const indexEnd = svg.indexOf("</g>") + 4;
@@ -120,7 +115,7 @@ function formatShapeString(svgi) {
 function makeLabelOptions(text) {
   return {
     text,
-    textVerticalAnchor: "central",
+    dominantBaseline: "central",
     textAnchor: "middle",
     x: "48",
     y: "48",
@@ -249,15 +244,15 @@ class BalancerShape extends dia.Element {
     };
   }
 
-  // markup = util.svg`
-  //       <g @selector="body">
-  //           <rect @selector="background"/>
-  //           <rect @selector="content"/>
-  //           <rect @selector="border"/>
-  //           <rect @selector="divider"/>
-  //           <text @selector="label"/>
-  //       </g>
-  //   `;
+  markup = util.svg`
+        <g @selector="body">
+            <rect @selector="background"/>
+            <rect @selector="content"/>
+            <rect @selector="border"/>
+            <rect @selector="divider"/>
+            <text @selector="label"/>
+        </g>
+    `;
 }
 
 class CDNShape extends dia.Element {
