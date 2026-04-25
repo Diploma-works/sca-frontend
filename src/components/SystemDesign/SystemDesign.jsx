@@ -37,7 +37,7 @@ const TEXT_INPUTS = [
 function getBrowserId() {
     let id = localStorage.getItem("sca_browser_id");
     if (!id) {
-        id = crypto.randomUUID();
+        id = crypto.randomUUID?.() ?? Array.from(crypto.getRandomValues(new Uint8Array(16))).map((b, i) => ([4, 6, 8, 10].includes(i) ? '-' : '') + b.toString(16).padStart(2, '0')).join('');
         localStorage.setItem("sca_browser_id", id);
     }
     return id;
