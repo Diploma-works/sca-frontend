@@ -25,7 +25,7 @@ import {useEffect, useRef, useMemo, useState, useCallback} from "react";
 import {shapes as customShapes} from "./shapes/shapes";
 import {deleteBlockTool, connectTool, createResizeTool} from "./tools";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = window.__env__?.API_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const TEXT_INPUTS = [
     {label: "Функциональные требования", key: "functional_req"},
