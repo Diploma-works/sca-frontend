@@ -8,7 +8,7 @@ import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 import { useSidebarUpdateContext } from "./SidebarContext";
 
-const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisableResizing, children }) => {
+const SidebarTool = ({ title, additionalActions = [], hideSettings = false, disableResizing, setDisableResizing, children }) => {
     const theme = useTheme();
     const setActiveTool = useSidebarUpdateContext();
     const [anchorEl, setAnchorEl] = useState(null);
@@ -21,7 +21,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
 
     const actions = [
         ...additionalActions,
-        {
+        ...(!hideSettings ? [{
             title: "Настройки",
             icon: <MoreVertRoundedIcon/>,
             props: {
@@ -29,7 +29,7 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                 variant: open ? "contained" : "text",
                 onClick: handleOptionsButtonClick,
             }
-        },
+        }] : []),
         {
             title: "Скрыть",
             icon: <RemoveRoundedIcon/>,
@@ -62,17 +62,19 @@ const SidebarTool = ({ title, additionalActions = [], disableResizing, setDisabl
                                 }]
                             }}
                         >
-                            <Button
-                                color="inherit"
-                                disableElevation
-                                sx={{
-                                    p: 2 / 8,
-                                    minWidth: 0,
-                                }}
-                                {...props}
-                            >
-                                <SvgIcon sx={{ fontSize: 16 }}>{icon}</SvgIcon>
-                            </Button>
+                            <span style={{display: 'inline-flex'}}>
+                                <Button
+                                    color="inherit"
+                                    disableElevation
+                                    sx={{
+                                        p: 2 / 8,
+                                        minWidth: 0,
+                                    }}
+                                    {...props}
+                                >
+                                    <SvgIcon sx={{ fontSize: 16 }}>{icon}</SvgIcon>
+                                </Button>
+                            </span>
                         </Tooltip>
                     ))}
                 </Stack>

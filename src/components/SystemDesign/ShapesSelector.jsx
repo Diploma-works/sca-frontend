@@ -141,7 +141,7 @@ const ShapesSelector = ({canvasRef, onCreateShape}) => {
     };
 
     return (
-        <Stack direction="row" spacing={2} padding={2}>
+        <Stack direction="row" spacing={2} padding={2} sx={{overflowX: "auto"}}>
             {Object.entries(shapesRaw).map(([key, shape]) => (
                 <Tooltip key={key} title={shape.tooltip} arrow>
                     <Box>

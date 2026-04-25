@@ -1,5 +1,5 @@
 import { cloneElement, useCallback, useState } from "react";
-import { Stack, useTheme } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 
 import { useSidebarContext } from "./SidebarContext";
 import SidebarButton from "./SidebarButton";
@@ -51,26 +51,37 @@ const LeftSidebar = ({ tools }) => {
                 ))}
             </Stack>
             {activeTool !== null && (
-                <HorizontallyResizableBox
-                    key={activeTool} // TODO: поискать другое решение?
-                    sx={{
-                        display: 'flex',
-                        minWidth: MIN_WIDTH,
-                        maxWidth: {
-                            xs: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(4 / 8)),
-                            md: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(1)),
-                        },
-                    }}
-                    prevWidth={prevWidths[activeTool]}
-                    updatePrevWidth={updatePrevWidth}
-                    disable={disableResizing}
-                >
-                    {cloneElement(tools[activeTool].component, {
-                        title: tools[activeTool].title,
-                        disableResizing,
-                        setDisableResizing
-                    })}
-                </HorizontallyResizableBox>
+                tools[activeTool].fullscreen
+                    ? (
+                        <Box key={activeTool} sx={{flex: 1, display: 'flex', overflow: 'hidden'}}>
+                            {cloneElement(tools[activeTool].component, {
+                                title: tools[activeTool].title,
+                                disableResizing,
+                                setDisableResizing
+                            })}
+                        </Box>
+                    ) : (
+                        <HorizontallyResizableBox
+                            key={activeTool}
+                            sx={{
+                                display: 'flex',
+                                minWidth: MIN_WIDTH,
+                                maxWidth: {
+                                    xs: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(4 / 8)),
+                                    md: innerWidth - MIN_WIDTH - 3 * parseInt(theme.spacing(1)),
+                                },
+                            }}
+                            prevWidth={prevWidths[activeTool]}
+                            updatePrevWidth={updatePrevWidth}
+                            disable={disableResizing}
+                        >
+                            {cloneElement(tools[activeTool].component, {
+                                title: tools[activeTool].title,
+                                disableResizing,
+                                setDisableResizing
+                            })}
+                        </HorizontallyResizableBox>
+                    )
             )}
         </>
     );

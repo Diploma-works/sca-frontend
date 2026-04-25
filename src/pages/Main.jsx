@@ -9,6 +9,7 @@ import WysiwygIcon from '@mui/icons-material/Wysiwyg';
 import {Editor, TabsContextProvider} from "../components/Editor";
 import {Problems, ProblemsContextProvider} from "../components/Problems";
 import {LeftSidebar, SidebarContextProvider} from "../components/LeftSidebar";
+import {useSidebarStateContext} from "../components/LeftSidebar";
 import {ProjectStructure, ProjectStructureContextProvider} from "../components/ProjectStructure";
 import {Statistics} from "../components/Statistics";
 import SystemDesign from "../components/SystemDesign/SystemDesign"
@@ -139,9 +140,24 @@ const tools = [
   {
     title: 'Проектирование системы',
     icon: <WysiwygIcon/>,
-    component: <SystemDesign/>
+    component: <SystemDesign/>,
+    fullscreen: true,
   }
 ];
+
+const SYSTEM_DESIGN_INDEX = tools.findIndex(t => t.fullscreen);
+
+const MainContent = () => {
+  const activeTool = useSidebarStateContext();
+  const isFullscreen = activeTool === SYSTEM_DESIGN_INDEX;
+
+  return (
+    <>
+      <LeftSidebar tools={tools}/>
+      {!isFullscreen && <Editor/>}
+    </>
+  );
+};
 
 const Main = () => {
   const [isLoading, setIsLoading] = useState(true); // TODO: заменить?
@@ -170,10 +186,7 @@ const Main = () => {
                   <Skeleton animation="wave" sx={{flex: 1, transform: 'none'}}/>
                 </>
               ) : (
-                <>
-                  <LeftSidebar tools={tools}/>
-                  <Editor/>
-                </>
+                <MainContent/>
               )}
             </Stack>
           </ProblemsContextProvider>
