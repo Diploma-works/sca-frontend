@@ -1,5 +1,5 @@
-import { memo, useMemo, useState, useEffect } from "react";
-import { alpha, Box, Button, Divider, Link, Menu, MenuItem, SvgIcon, Tooltip, useTheme } from "@mui/material";
+import { memo, useState, useEffect } from "react";
+import { alpha, Box, Button, Menu, MenuItem, SvgIcon, Tooltip, useTheme } from "@mui/material";
 import { yellow } from "@mui/material/colors";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
@@ -9,7 +9,6 @@ import MonacoEditor from "@monaco-editor/react";
 
 const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {
     const theme = useTheme();
-    const [leaveSpaceForScrollbar, setLeaveSpaceForScrollbar] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [editorInstance, setEditorInstance] = useState(null);
     const [decorations, setDecorations] = useState([]);
@@ -18,14 +17,6 @@ const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {
     const problems = useProblemsStateContext();
     const [showInfo, setShowInfo] = useState(false);
     const [showProblems, setShowProblems] = useState(true);
-
-    const info = {
-        user: {
-            name: 'gramdel',
-            link: 'http://github.com/gramdel',
-        },
-        time: '24.04.2024 18:00',
-    };
 
     // Подсветка проблемных строк
     useEffect(() => {
@@ -63,6 +54,7 @@ const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {
         return () => {
             editorInstance.deltaDecorations(decorationIds, []);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorInstance, problems, showProblems]);
 
     const handleEditorDidMount = (editor, monaco) => {
@@ -90,14 +82,11 @@ const HighlightedCodeBox = memo(({ language, children, onCodeChange }) => {
         });
     };
 
-    const updated = (instance) => setLeaveSpaceForScrollbar(instance.state().hasOverflow.y);
-
     const handleClick = (e) => setAnchorEl(e.currentTarget);
     const handleClose = () => setAnchorEl(null);
 
     return (
         <ScrollableContainer
-            events={{ updated }}
             style={{
                 flex: 1,
                 position: 'relative',

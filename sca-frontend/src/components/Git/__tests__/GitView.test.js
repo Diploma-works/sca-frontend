@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import GitView from '../GitView';
-import { api, gitHubAPI } from '../../../utils/api';
+import { api, gitHubAPI, projectGitAPI } from '../../../utils/api';
 
 // Mock the API modules
 jest.mock('../../../utils/api', () => ({
@@ -13,9 +13,11 @@ jest.mock('../../../utils/api', () => ({
     },
   },
   gitHubAPI: {
-    checkGitHubConnection: jest.fn(),
-    getGitStatus: jest.fn(),
-    getRemoteBranches: jest.fn(),
+    getStatus: jest.fn(),
+  },
+  projectGitAPI: {
+    getProjectGitStatus: jest.fn(),
+    getStashStatus: jest.fn(),
     createProjectCommit: jest.fn(),
     pushProjectChanges: jest.fn(),
     pullProjectChanges: jest.fn(),
@@ -24,7 +26,7 @@ jest.mock('../../../utils/api', () => ({
     stashPopProjectChanges: jest.fn(),
     resetProjectChanges: jest.fn(),
     mergeProjectBranch: jest.fn(),
-    createProjectTag: jest.fn(),
+    switchProjectBranch: jest.fn(),
   },
 }));
 
@@ -88,9 +90,9 @@ describe('GitView Component', () => {
     // Setup default mock implementations
     api.projectAPI.getBranches.mockResolvedValue(mockBranchesData);
     api.projectAPI.getBranchGraph.mockResolvedValue(mockGraphData);
-    gitHubAPI.checkGitHubConnection.mockResolvedValue(true);
-    gitHubAPI.getGitStatus.mockResolvedValue(mockGitStatus);
-    gitHubAPI.getRemoteBranches.mockResolvedValue(['origin/feature/remote-only']);
+    gitHubAPI.getStatus.mockResolvedValue({ connected: true });
+    projectGitAPI.getProjectGitStatus.mockResolvedValue({ files: mockGitStatus });
+    projectGitAPI.getStashStatus.mockResolvedValue({ hasStash: false });
   });
 
   describe('Rendering', () => {
@@ -105,14 +107,14 @@ describe('GitView Component', () => {
     test('shows loading state initially', () => {
       renderWithTheme(<GitView projectId={mockProjectId} />);
       
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByText('Loading git data...')).toBeInTheDocument();
     });
 
     test('displays error message when no project ID provided', async () => {
       renderWithTheme(<GitView />);
       
       await waitFor(() => {
-        expect(screen.getByText('No project selected')).toBeInTheDocument();
+        expect(screen.getByText(/No project selected/)).toBeInTheDocument();
       });
     });
 
@@ -121,9 +123,9 @@ describe('GitView Component', () => {
       
       await waitFor(() => {
         expect(screen.getByText('Последний коммит')).toBeInTheDocument();
-        expect(screen.getByText('Initial commit')).toBeInTheDocument();
-        expect(screen.getByText('Test User')).toBeInTheDocument();
-        expect(screen.getByText('1234567')).toBeInTheDocument();
+        expect(screen.getAllByText('Initial commit').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Test User').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('1234567').length).toBeGreaterThan(0);
       });
     });
   });
@@ -140,7 +142,6 @@ describe('GitView Component', () => {
         expect(screen.getByRole('button', { name: /merge branch/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /stash changes/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /apply stash/i })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /create tag/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /reset changes/i })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
       });
@@ -162,8 +163,9 @@ describe('GitView Component', () => {
         fireEvent.click(commitButton);
       });
 
-      expect(screen.getByText('Create Commit')).toBeInTheDocument();
-      expect(screen.getByLabelText('Commit Message')).toBeInTheDocument();
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByRole('heading', { name: 'Create Commit' })).toBeInTheDocument();
+      expect(within(dialog).getByLabelText('Commit Message')).toBeInTheDocument();
     });
 
     test('opens branch creation dialog when create branch clicked', async () => {
@@ -184,8 +186,8 @@ describe('GitView Component', () => {
       renderWithTheme(<GitView projectId={mockProjectId} />);
       
       await waitFor(() => {
-        expect(screen.getByText('Local Branches')).toBeInTheDocument();
-        expect(screen.getByText('Remote Branches')).toBeInTheDocument();
+        expect(screen.getByText(/Local Branches/)).toBeInTheDocument();
+        expect(screen.getByText(/Remote Branches/)).toBeInTheDocument();
         expect(screen.getByText('main')).toBeInTheDocument();
         expect(screen.getByText('feature/test-branch')).toBeInTheDocument();
         expect(screen.getByText('origin/main')).toBeInTheDocument();
@@ -193,11 +195,11 @@ describe('GitView Component', () => {
       });
     });
 
-    test('includes additional remote branches from API', async () => {
+    test('loads remote branches from project API', async () => {
       renderWithTheme(<GitView projectId={mockProjectId} />);
       
       await waitFor(() => {
-        expect(gitHubAPI.getRemoteBranches).toHaveBeenCalledWith(mockProjectId);
+        expect(api.projectAPI.getBranches).toHaveBeenCalledWith(mockProjectId);
       });
     });
   });
@@ -207,7 +209,7 @@ describe('GitView Component', () => {
       renderWithTheme(<GitView projectId={mockProjectId} />);
       
       await waitFor(() => {
-        expect(screen.getByText('File Status')).toBeInTheDocument();
+        expect(screen.getByText(/File Status/)).toBeInTheDocument();
         expect(screen.getByText('src/test.js')).toBeInTheDocument();
         expect(screen.getByText('README.md')).toBeInTheDocument();
       });
@@ -220,7 +222,7 @@ describe('GitView Component', () => {
       
       await waitFor(() => {
         expect(screen.getByText('History')).toBeInTheDocument();
-        expect(screen.getByText('Initial commit')).toBeInTheDocument();
+        expect(screen.getAllByText('Initial commit').length).toBeGreaterThan(0);
         expect(screen.getByText('Add new feature')).toBeInTheDocument();
       });
     });
@@ -233,8 +235,8 @@ describe('GitView Component', () => {
       await waitFor(() => {
         expect(api.projectAPI.getBranches).toHaveBeenCalledWith(mockProjectId);
         expect(api.projectAPI.getBranchGraph).toHaveBeenCalledWith(mockProjectId, 20);
-        expect(gitHubAPI.checkGitHubConnection).toHaveBeenCalledWith(mockProjectId);
-        expect(gitHubAPI.getGitStatus).toHaveBeenCalledWith(mockProjectId);
+        expect(gitHubAPI.getStatus).toHaveBeenCalled();
+        expect(projectGitAPI.getProjectGitStatus).toHaveBeenCalledWith(mockProjectId);
       });
     });
 
@@ -254,7 +256,7 @@ describe('GitView Component', () => {
       renderWithTheme(<GitView projectId={mockProjectId} />);
       
       await waitFor(() => {
-        expect(screen.getByText('Project not found. Please select a valid project from the Projects tab.')).toBeInTheDocument();
+        expect(screen.getByText(/Project not found\. Please select a valid project from the Projects tab\./)).toBeInTheDocument();
       });
     });
   });
@@ -272,19 +274,19 @@ describe('GitView Component', () => {
       await waitFor(() => {
         expect(api.projectAPI.getBranches).toHaveBeenCalledTimes(2);
         expect(api.projectAPI.getBranchGraph).toHaveBeenCalledTimes(2);
-        expect(gitHubAPI.getGitStatus).toHaveBeenCalledTimes(2);
+        expect(projectGitAPI.getProjectGitStatus).toHaveBeenCalledTimes(2);
       });
     });
 
-    test('disables buttons when not connected', async () => {
-      gitHubAPI.checkGitHubConnection.mockResolvedValue(false);
+    test('keeps push/pull enabled when project is selected', async () => {
+      gitHubAPI.getStatus.mockResolvedValue({ connected: false });
       
       renderWithTheme(<GitView projectId={mockProjectId} />);
       
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: /push/i })).toBeDisabled();
-        expect(screen.getByRole('button', { name: /pull/i })).toBeDisabled();
-        expect(screen.getByRole('button', { name: /create branch/i })).toBeDisabled();
+        expect(screen.getByRole('button', { name: /push/i })).toBeEnabled();
+        expect(screen.getByRole('button', { name: /pull/i })).toBeEnabled();
+        expect(screen.getByRole('button', { name: /create branch/i })).toBeEnabled();
       });
     });
   });

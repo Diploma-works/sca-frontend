@@ -1,28 +1,22 @@
 package com.sca.service;
 
-import com.sca.model.BitbucketToken;
-import com.sca.model.GitLabToken;
 import com.sca.model.Project;
 import com.sca.model.User;
-import com.sca.repository.BitbucketTokenRepository;
-import com.sca.repository.GitLabTokenRepository;
 import com.sca.repository.ProjectRepository;
+import com.sca.service.vcs.UnifiedVcsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -32,13 +26,7 @@ public class ProjectGitService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private GitHubService gitHubService;
-
-    @Autowired
-    private GitLabTokenRepository gitLabTokenRepository;
-
-    @Autowired
-    private BitbucketTokenRepository bitbucketTokenRepository;
+    private UnifiedVcsService unifiedVcsService;
     
     @Value("${filesystem.workspace.base-path:/tmp/sca-workspaces}")
     private String workspaceBasePath;
@@ -203,92 +191,6 @@ public class ProjectGitService {
         return output.toString();
     }
 
-    private static String encodeUserInfoComponent(String value) {
-        if (value == null) return "";
-        
-        StringBuilder sb = new StringBuilder(value.length());
-        for (int i = 0; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
-                    || c == '-' || c == '.' || c == '_' || c == '~') {
-                sb.append(c);
-            } else {
-                byte[] bytes = String.valueOf(c).getBytes(StandardCharsets.UTF_8);
-                for (byte b : bytes) {
-                    sb.append('%');
-                    String hex = Integer.toHexString(b & 0xFF).toUpperCase(Locale.ROOT);
-                    if (hex.length() == 1) sb.append('0');
-                    sb.append(hex);
-                }
-            }
-        }
-        return sb.toString();
-    }
-
-    static String withUserInfo(String remoteUrl, String username, String passwordOrToken) {
-        if (remoteUrl == null) return null;
-        URI uri = URI.create(remoteUrl);
-        if (uri.getScheme() == null || uri.getHost() == null) return remoteUrl;
-
-        String user = encodeUserInfoComponent(username);
-        String pass = encodeUserInfoComponent(passwordOrToken);
-
-        String userInfo = user;
-        if (passwordOrToken != null) {
-            userInfo = user + ":" + pass;
-        }
-
-        try {
-            URI rebuilt = new URI(
-                    uri.getScheme(),
-                    userInfo,
-                    uri.getHost(),
-                    uri.getPort(),
-                    uri.getRawPath(),
-                    uri.getRawQuery(),
-                    uri.getRawFragment()
-            );
-            return rebuilt.toString();
-        } catch (java.net.URISyntaxException e) {
-            return remoteUrl;
-        }
-    }
-
-    private String embedAuthIntoRemoteUrl(Project project, User user, String remoteUrl) {
-        if (remoteUrl == null) return null;
-        String cleaned = remoteUrl.trim().replaceAll("\\s+", "").replaceAll("/+$", "");
-
-        try {
-            if (project.getType() == Project.ProjectType.GITHUB && cleaned.contains("github.com")) {
-                return gitHubService.getUserToken(user)
-                        .map(t -> withUserInfo(cleaned, "oauth2", t.getAccessToken()))
-                        .orElse(cleaned);
-            }
-
-            if (project.getType() == Project.ProjectType.GITLAB && cleaned.contains("gitlab.com")) {
-                Optional<GitLabToken> tokenOpt = gitLabTokenRepository.findByUser(user);
-                if (tokenOpt.isPresent()) {
-                    return withUserInfo(cleaned, "oauth2", tokenOpt.get().getAccessToken());
-                }
-            }
-
-            if (project.getType() == Project.ProjectType.BITBUCKET && cleaned.contains("bitbucket.org")) {
-                Optional<BitbucketToken> tokenOpt = bitbucketTokenRepository.findByUser(user);
-                if (tokenOpt.isPresent()) {
-                    BitbucketToken bt = tokenOpt.get();
-                    String username = bt.getBitbucketUsername();
-                    if (username == null || username.isBlank()) {
-                        throw new RuntimeException("Bitbucket username не сохранён. Для push/pull по HTTPS Bitbucket требует Basic auth (username + app password). Пожалуйста, сохраните токен вместе с username.");
-                    }
-                    return withUserInfo(cleaned, username, bt.getAccessToken());
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
-        return cleaned;
-    }
-
     private String runWithAuthenticatedOrigin(Project project, User user, String projectPath, String... gitCommand) throws Exception {
         if (project.getType() == Project.ProjectType.BITBUCKET) {
             return runWithBitbucketSsh(user, projectPath, gitCommand);
@@ -296,7 +198,7 @@ public class ProjectGitService {
         String originalRemoteUrl = null;
         try {
             originalRemoteUrl = executeGitCommand(projectPath, "git", "config", "--get", "remote.origin.url").trim();
-            String authenticated = embedAuthIntoRemoteUrl(project, user, originalRemoteUrl);
+            String authenticated = unifiedVcsService.buildAuthenticatedRemote(project, user, originalRemoteUrl);
             if (authenticated != null && !authenticated.equals(originalRemoteUrl)) {
                 executeGitCommand(projectPath, "git", "remote", "set-url", "origin", authenticated);
             }
@@ -703,7 +605,6 @@ public class ProjectGitService {
                 for (String line : lines) {
                     if (line.contains("|")) {
                         String commitData = "";
-                        int pipeIndex = -1;
                         for (int i = 0; i < line.length(); i++) {
                             char c = line.charAt(i);
                             if (Character.isLetterOrDigit(c)) {

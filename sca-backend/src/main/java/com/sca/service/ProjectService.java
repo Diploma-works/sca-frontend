@@ -1,23 +1,16 @@
 package com.sca.service;
 
 import com.sca.model.Project;
-import com.sca.model.ProjectFile;
 import com.sca.model.User;
 import com.sca.model.CodeProblem;
-import com.sca.model.GitHubToken;
-import com.sca.model.GitLabToken;
-import com.sca.model.BitbucketToken;
 import com.sca.repository.ProjectRepository;
-import com.sca.repository.GitLabTokenRepository;
-import com.sca.repository.BitbucketTokenRepository;
+import com.sca.service.vcs.UnifiedVcsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,30 +23,16 @@ import java.util.*;
 public class ProjectService {
 
     @Autowired
-    private CodeAnalysisService codeAnalysisService;
-    
-    @Autowired
     private ProjectRepository projectRepository;
     
     @Autowired
-    private GitHubService gitHubService;
-    
-    @Autowired
-    private GitLabTokenRepository gitLabTokenRepository;
-    
-    @Autowired
-    private BitbucketTokenRepository bitbucketTokenRepository;
+    private UnifiedVcsService unifiedVcsService;
     
     @Value("${filesystem.workspace.base-path:/tmp/sca-workspaces}")
     private String workspaceBasePath;
     
     @Value("${filesystem.workspace.max-size:100MB}")
     private String maxWorkspaceSize;
-
-    private String sanitizeGitUrlForStorage(String gitUrl) {
-        if (gitUrl == null) return null;
-        return gitUrl.replaceFirst("^https://[^/@]+@", "https://");
-    }
 
     /**
      * Получить все проекты пользователя
@@ -140,7 +119,7 @@ public class ProjectService {
      * Получить статистику проекта
      */
     public Map<String, Object> getProjectStatistics(Long id, User user) {
-        Project project = getProjectById(id, user);
+        getProjectById(id, user);
         Map<String, Object> statistics = new HashMap<>();
         
         // TODO: Реализовать подсчет статистики
@@ -300,196 +279,21 @@ public class ProjectService {
      * Клонировать проект из GitHub репозитория
      */
     public Project cloneFromGitHub(String gitUrl, String branch, String projectName, User user) {
-        try {
-            if (projectRepository.existsByNameAndOwner(projectName, user)) {
-                throw new RuntimeException("Проект с таким именем уже существует");
-            }
-            
-            Optional<GitHubToken> tokenOpt = gitHubService.getUserToken(user);
-            if (tokenOpt.isEmpty()) {
-                throw new RuntimeException("GitHub токен не найден. Пожалуйста, подключите ваш GitHub аккаунт.");
-            }
-            
-            String accessToken = tokenOpt.get().getAccessToken();
-            
-            String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
-            Path projectPath = Paths.get(workspacePath);
-            
-            String authenticatedUrl = gitUrl;
-            if (gitUrl.startsWith("https://github.com/")) {
-                authenticatedUrl = gitUrl.replace("https://github.com/", "https://oauth2:" + accessToken + "@github.com/");
-            }
-            
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.directory(projectPath.getParent().toFile());
-            
-            List<String> command = new ArrayList<>();
-            command.add("git");
-            command.add("clone");
-            command.add("--branch");
-            command.add(branch);
-            command.add("--single-branch");
-            command.add(authenticatedUrl);
-            command.add(projectPath.getFileName().toString());
-            
-            processBuilder.command(command);
-            
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-            
-            if (exitCode != 0) {
-                String error = new String(process.getErrorStream().readAllBytes());
-                System.err.println("Git clone failed with exit code: " + exitCode);
-                System.err.println("Error output: " + error);
-                throw new RuntimeException("Ошибка клонирования репозитория: " + error);
-            }
-            
-            Project project = new Project();
-            project.setName(projectName);
-            project.setDescription("Клонированный проект из " + gitUrl);
-            project.setOwner(user);
-            project.setWorkspacePath(workspacePath);
-            project.setType(Project.ProjectType.GITHUB);
-            project.setStatus(Project.ProjectStatus.ACTIVE);
-            project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
-            project.setGitBranch(branch);
-            
-            return projectRepository.save(project);
-            
-        } catch (Exception e) {
-            System.err.println("Error in cloneFromGitHub: " + e.getMessage());
-            throw new RuntimeException("Ошибка при клонировании проекта: " + e.getMessage());
-        }
+        return unifiedVcsService.cloneRepository(Project.ProjectType.GITHUB, gitUrl, branch, projectName, user);
     }
 
     /**
      * Клонировать проект из GitLab репозитория (путь и поведение как у GitHub).
      */
     public Project cloneFromGitLab(String gitUrl, String branch, String projectName, User user) {
-        try {
-            if (projectRepository.existsByNameAndOwner(projectName, user)) {
-                throw new RuntimeException("Проект с таким именем уже существует");
-            }
-
-            Optional<GitLabToken> tokenOpt = gitLabTokenRepository.findByUser(user);
-            if (tokenOpt.isEmpty()) {
-                throw new RuntimeException("GitLab токен не найден. Пожалуйста, подключите ваш GitLab аккаунт.");
-            }
-            
-            String accessToken = tokenOpt.get().getAccessToken();
-            
-            String authenticatedUrl = gitUrl;
-            if (gitUrl.startsWith("https://") && !gitUrl.contains("@")) {
-                authenticatedUrl = gitUrl.replaceFirst("^https://", "https://oauth2:" + accessToken + "@");
-            }
-
-            String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
-            Path projectPath = Paths.get(workspacePath);
-
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.directory(projectPath.getParent().toFile());
-            processBuilder.environment().put("GIT_TERMINAL_PROMPT", "0");
-
-            List<String> command = new ArrayList<>();
-            command.add("git");
-            command.add("clone");
-            command.add("--branch");
-            command.add(branch);
-            command.add("--single-branch");
-            command.add(authenticatedUrl);
-            command.add(projectPath.getFileName().toString());
-            processBuilder.command(command);
-
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode != 0) {
-                String error = new String(process.getErrorStream().readAllBytes());
-                System.err.println("Git clone failed with exit code: " + exitCode);
-                System.err.println("Error output: " + error);
-                throw new RuntimeException("Ошибка клонирования репозитория GitLab: " + error);
-            }
-
-            Project project = new Project();
-            project.setName(projectName);
-            project.setDescription("Клонированный проект из GitLab: " + sanitizeGitUrlForStorage(gitUrl));
-            project.setOwner(user);
-            project.setWorkspacePath(workspacePath);
-            project.setType(Project.ProjectType.GITLAB);
-            project.setStatus(Project.ProjectStatus.ACTIVE);
-            project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
-            project.setGitBranch(branch);
-
-            return projectRepository.save(project);
-        } catch (Exception e) {
-            System.err.println("Error in cloneFromGitLab: " + e.getMessage());
-            throw new RuntimeException("Ошибка при клонировании проекта GitLab: " + e.getMessage());
-        }
+        return unifiedVcsService.cloneRepository(Project.ProjectType.GITLAB, gitUrl, branch, projectName, user);
     }
 
     /**
      * Клонировать проект из Bitbucket репозитория (путь и поведение как у GitHub).
      */
     public Project cloneFromBitbucket(String gitUrl, String branch, String projectName, User user) {
-        try {
-            if (projectRepository.existsByNameAndOwner(projectName, user)) {
-                throw new RuntimeException("Проект с таким именем уже существует");
-            }
-
-            Optional<BitbucketToken> tokenOpt = bitbucketTokenRepository.findByUser(user);
-            if (tokenOpt.isEmpty()) {
-                throw new RuntimeException("Bitbucket токен не найден. Пожалуйста, подключите ваш Bitbucket аккаунт.");
-            }
-            
-            String accessToken = tokenOpt.get().getAccessToken();
-            
-            String authenticatedUrl = gitUrl;
-            if (gitUrl.startsWith("https://") && !gitUrl.contains("@")) {
-                authenticatedUrl = gitUrl.replaceFirst("^https://", "https://x-token-auth:" + accessToken + "@");
-            }
-
-            String workspacePath = createWorkspaceDirectory(user.getId(), projectName);
-            Path projectPath = Paths.get(workspacePath);
-
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.directory(projectPath.getParent().toFile());
-            processBuilder.environment().put("GIT_TERMINAL_PROMPT", "0");
-
-            List<String> command = new ArrayList<>();
-            command.add("git");
-            command.add("clone");
-            command.add("--branch");
-            command.add(branch);
-            command.add("--single-branch");
-            command.add(authenticatedUrl);
-            command.add(projectPath.getFileName().toString());
-            processBuilder.command(command);
-
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode != 0) {
-                String error = new String(process.getErrorStream().readAllBytes());
-                System.err.println("Git clone failed with exit code: " + exitCode);
-                System.err.println("Error output: " + error);
-                throw new RuntimeException("Ошибка клонирования репозитория Bitbucket: " + error);
-            }
-
-            Project project = new Project();
-            project.setName(projectName);
-            project.setDescription("Клонированный проект из Bitbucket: " + sanitizeGitUrlForStorage(gitUrl));
-            project.setOwner(user);
-            project.setWorkspacePath(workspacePath);
-            project.setType(Project.ProjectType.BITBUCKET);
-            project.setStatus(Project.ProjectStatus.ACTIVE);
-            project.setGitUrl(sanitizeGitUrlForStorage(gitUrl));
-            project.setGitBranch(branch);
-
-            return projectRepository.save(project);
-        } catch (Exception e) {
-            System.err.println("Error in cloneFromBitbucket: " + e.getMessage());
-            throw new RuntimeException("Ошибка при клонировании проекта Bitbucket: " + e.getMessage());
-        }
+        return unifiedVcsService.cloneRepository(Project.ProjectType.BITBUCKET, gitUrl, branch, projectName, user);
     }
 
     /**

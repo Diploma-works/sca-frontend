@@ -3,6 +3,7 @@ package com.sca.controller;
 import com.sca.model.Project;
 import com.sca.model.User;
 import com.sca.service.ProjectService;
+import com.sca.service.vcs.UnifiedVcsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,9 @@ public class ProjectController {
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private UnifiedVcsService unifiedVcsService;
 
     /**
      * Получить все проекты пользователя
@@ -243,30 +247,7 @@ public class ProjectController {
     @PostMapping(value = "/clone", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> cloneFromGitHub(@RequestBody Map<String, String> cloneData,
                                            @AuthenticationPrincipal User user) {
-        try {
-            if (user == null) {
-                return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
-            }
-            
-            String gitUrl = cloneData.get("gitUrl");
-            String branch = cloneData.getOrDefault("branch", "main");
-            String projectName = cloneData.get("name");
-            
-            if (gitUrl == null || gitUrl.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
-            }
-            
-            if (projectName == null || projectName.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Project name is required"));
-            }
-            
-            Project clonedProject = projectService.cloneFromGitHub(gitUrl, branch, projectName, user);
-            return ResponseEntity.ok(clonedProject);
-            
-        } catch (Exception e) {
-            System.err.println("Error cloning from GitHub: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
-        }
+        return handleClone(Project.ProjectType.GITHUB, cloneData, user);
     }
 
     /**
@@ -275,30 +256,7 @@ public class ProjectController {
     @PostMapping(value = "/clone/gitlab", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> cloneFromGitLab(@RequestBody Map<String, String> cloneData,
                                             @AuthenticationPrincipal User user) {
-        try {
-            if (user == null) {
-                return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
-            }
-            
-            String gitUrl = cloneData.get("gitUrl");
-            String branch = cloneData.getOrDefault("branch", "main");
-            String projectName = cloneData.get("name");
-            
-            if (gitUrl == null || gitUrl.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Git URL is required"));
-            }
-            
-            if (projectName == null || projectName.trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Project name is required"));
-            }
-            
-            Project clonedProject = projectService.cloneFromGitLab(gitUrl, branch, projectName, user);
-            return ResponseEntity.ok(clonedProject);
-            
-        } catch (Exception e) {
-            System.err.println("Error cloning from GitLab: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
-        }
+        return handleClone(Project.ProjectType.GITLAB, cloneData, user);
     }
 
     /**
@@ -307,6 +265,25 @@ public class ProjectController {
     @PostMapping(value = "/clone/bitbucket", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> cloneFromBitbucket(@RequestBody Map<String, String> cloneData,
                                                @AuthenticationPrincipal User user) {
+        return handleClone(Project.ProjectType.BITBUCKET, cloneData, user);
+    }
+
+    @PostMapping(value = "/clone/{provider}", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<?> cloneByProvider(@PathVariable String provider,
+                                             @RequestBody Map<String, String> cloneData,
+                                             @AuthenticationPrincipal User user) {
+        try {
+            Project.ProjectType type = Project.ProjectType.valueOf(provider.trim().toUpperCase());
+            if (type == Project.ProjectType.LOCAL) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Provider LOCAL is not supported for clone"));
+            }
+            return handleClone(type, cloneData, user);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Unknown VCS provider: " + provider));
+        }
+    }
+
+    private ResponseEntity<?> handleClone(Project.ProjectType type, Map<String, String> cloneData, User user) {
         try {
             if (user == null) {
                 return ResponseEntity.status(401).body(Map.of("error", "Authentication required"));
@@ -323,12 +300,11 @@ public class ProjectController {
             if (projectName == null || projectName.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Project name is required"));
             }
-            
-            Project clonedProject = projectService.cloneFromBitbucket(gitUrl, branch, projectName, user);
+
+            Project clonedProject = unifiedVcsService.cloneRepository(type, gitUrl, branch, projectName, user);
             return ResponseEntity.ok(clonedProject);
-            
         } catch (Exception e) {
-            System.err.println("Error cloning from Bitbucket: " + e.getMessage());
+            System.err.println("Error cloning from " + type + ": " + e.getMessage());
             return ResponseEntity.internalServerError().body(Map.of("error", "Failed to clone repository: " + e.getMessage()));
         }
     }

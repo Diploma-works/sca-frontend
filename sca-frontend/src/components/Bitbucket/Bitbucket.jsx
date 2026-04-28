@@ -26,10 +26,7 @@ import {
 import {
   Cloud as BitbucketIcon,
   Add as AddIcon,
-  Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
-  Star as StarIcon,
-  CallSplit as ForkIcon,
   Public as PublicIcon,
   Lock as LockIcon,
   Download as DownloadIcon,
@@ -49,16 +46,10 @@ const Bitbucket = () => {
 
   // Dialogs state
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
-  const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false);
   const [branchesDialogOpen, setBranchesDialogOpen] = useState(false);
 
   // Forms state
   const [token, setToken] = useState('');
-  const [newRepo, setNewRepo] = useState({
-    name: '',
-    description: '',
-    private: false
-  });
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [branches, setBranches] = useState([]);
 
@@ -71,6 +62,7 @@ const Bitbucket = () => {
   useEffect(() => {
     checkStatus();
     checkSshStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkSshStatus = async () => {
@@ -371,7 +363,7 @@ const Bitbucket = () => {
               <Button
                 startIcon={<AddIcon />}
                 variant="outlined"
-                onClick={() => setCreateRepoDialogOpen(true)}
+                onClick={() => setError('Создание репозиториев Bitbucket пока не реализовано в UI')}
                 disabled={loading}
               >
                 Создать репозиторий

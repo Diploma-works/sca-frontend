@@ -11,8 +11,7 @@ import {
   Chip,
   Stack
 } from '@mui/material';
-import { LineChart, BarChart } from '@mui/x-charts';
-import { useTheme } from '@mui/material/styles';
+import { BarChart } from '@mui/x-charts';
 import { api } from '../../utils/api';
 
 const EnhancedBranchGraph = ({ projectId }) => {
@@ -22,8 +21,6 @@ const EnhancedBranchGraph = ({ projectId }) => {
   const [limit, setLimit] = useState(50);
   const [viewMode, setViewMode] = useState('timeline'); // 'timeline' or 'frequency'
   
-  const theme = useTheme();
-
   useEffect(() => {
     const fetchBranchGraph = async () => {
       if (!projectId) return;
@@ -124,10 +121,6 @@ const EnhancedBranchGraph = ({ projectId }) => {
 
   const timelineData = prepareTimelineData();
   const frequencyData = prepareFrequencyData();
-
-  const formatDate = (timestamp) => {
-    return new Date(timestamp).toLocaleDateString();
-  };
 
   if (loading) {
     return (

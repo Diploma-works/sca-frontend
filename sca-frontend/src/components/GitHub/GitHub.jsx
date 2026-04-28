@@ -26,7 +26,6 @@ import {
 import {
   GitHub as GitHubIcon,
   Add as AddIcon,
-  Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
   Star as StarIcon,
   CallSplit as ForkIcon,
@@ -63,6 +62,7 @@ const GitHub = () => {
 
   useEffect(() => {
     checkGitHubStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkGitHubStatus = async () => {

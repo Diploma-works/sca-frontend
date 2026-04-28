@@ -6,3 +6,6 @@ user-data/*
 sca-backend/target/*
 sca-backend/.idea/*
 sca-backend/.env
+
+sca-frontend/node_modules/*
+sca-frontend/build/*

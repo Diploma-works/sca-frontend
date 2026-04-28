@@ -49,7 +49,7 @@ const GitView = (props) => {
     const [graphData, setGraphData] = useState({ commits: [], total: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [limit, setLimit] = useState(20);
+    const [limit] = useState(20);
 
     // Git Actions states
     const [connected, setConnected] = useState(false);
@@ -72,25 +72,8 @@ const GitView = (props) => {
             setLoading(false);
             setError('No project selected');
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId, limit]);
-
-    const fetchRemoteBranches = async () => {
-        if (!projectId) return;
-        
-        try {
-            setLoading(true);
-            const branchesResponse = await api.projectAPI.getBranches(projectId);
-            setBranches(prev => ({
-                ...prev,
-                remote: branchesResponse?.remote || []
-            }));
-        } catch (err) {
-            console.error('Error fetching remote branches:', err);
-            setError('Failed to fetch remote branches: ' + err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchData = async () => {
         try {
@@ -404,16 +387,6 @@ const GitView = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId]);
-
-    const switchBranch = async (branchName) => {
-        try {
-            await api.projectAPI.switchBranch(projectId, { branchName });
-            fetchData();
-        } catch (err) {
-            console.error('Error switching branch:', err);
-            setError('Failed to switch branch: ' + (err.message || 'Unknown error'));
-        }
-    };
 
     const handleSwitchBranch = async () => {
         if (!selectedBranch || selectedBranch === branches.current) {

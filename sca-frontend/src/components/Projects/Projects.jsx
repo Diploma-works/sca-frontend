@@ -23,7 +23,6 @@ import {
   Folder as FolderIcon,
   GitHub as GitHubIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
   Launch as LaunchIcon
 } from '@mui/icons-material';
 import { projectsAPI } from '../../utils/api';

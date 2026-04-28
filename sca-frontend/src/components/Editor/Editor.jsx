@@ -10,7 +10,6 @@ import HighlightedCodeBox from "./HighlightedCodeBox";
 import { getFileType } from "../../utils/fileTypes";
 import ScrollableContainer from "../ScrollableContainer";
 import { fileAPI } from "../../utils/api";
-import { act } from "react";
 
 const Editor = ({ projectId }) => {
     const { tabs, activeTab } = useTabsStateContext();

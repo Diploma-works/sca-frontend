@@ -1,8 +1,14 @@
 import { render, screen } from '@testing-library/react';
+
+jest.mock('overlayscrollbars/overlayscrollbars.css', () => ({}), { virtual: true });
+
+jest.mock('./components/Navbar', () => () => <div>Navbar Mock</div>);
+jest.mock('./routes', () => () => <div>Routes Mock</div>);
+
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders application shell', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByText('Navbar Mock')).toBeInTheDocument();
+  expect(screen.getByText('Routes Mock')).toBeInTheDocument();
 });

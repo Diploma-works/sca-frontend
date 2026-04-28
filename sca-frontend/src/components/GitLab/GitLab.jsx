@@ -26,7 +26,6 @@ import {
 import {
   Storage as GitLabIcon,
   Add as AddIcon,
-  Folder as FolderIcon,
   FolderOpen as FolderOpenIcon,
   Star as StarIcon,
   CallSplit as ForkIcon,
@@ -48,21 +47,16 @@ const GitLab = () => {
   
   // Dialogs state
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
-  const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false);
   const [branchesDialogOpen, setBranchesDialogOpen] = useState(false);
   
   // Forms state
   const [token, setToken] = useState('');
-  const [newRepo, setNewRepo] = useState({
-    name: '',
-    description: '',
-    private: false
-  });
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [branches, setBranches] = useState([]);
 
   useEffect(() => {
     checkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkStatus = async () => {
@@ -263,7 +257,7 @@ const GitLab = () => {
               <Button
                 startIcon={<AddIcon />}
                 variant="outlined"
-                onClick={() => setCreateRepoDialogOpen(true)}
+                onClick={() => setError('Создание репозиториев GitLab пока не реализовано в UI')}
                 disabled={loading}
               >
                 Создать репозиторий

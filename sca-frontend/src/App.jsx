@@ -4,19 +4,13 @@ import "overlayscrollbars/overlayscrollbars.css";
 
 import { CssBaseline, Divider, Stack, ThemeProvider } from "@mui/material";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
 import { darkTheme, lightTheme } from "./themes";
 import Navbar from "./components/Navbar";
-import Main from "./components/Main";
-import Auth from "./components/Auth";
-import Projects from "./components/Projects";
-import GitHubPage from "./pages/GitHubPage";
-import GitLabPage from "./pages/GitLabPage";
-import BitbucketPage from "./pages/BitbucketPage";
+import AppRoutes from "./routes";
 
 import AuthProvider from "react-auth-kit";
-import RequireAuth from "@auth-kit/react-router/RequireAuth"
 
 import createStore from "react-auth-kit/createStore";
 
@@ -44,39 +38,7 @@ const App = () => {
                     <BrowserRouter>
                         <Navbar mode={mode} switchMode={switchMode}/>
                         <Divider/>
-                        <Routes>
-                            <Route path="/auth" element={<Auth/>}/>
-                            <Route path="/projects" element={
-                                <RequireAuth fallbackPath="/auth">
-                                    <Projects/>
-                                </RequireAuth>
-                            }/>
-                            <Route path="/github" element={
-                                <RequireAuth fallbackPath="/auth">
-                                    <GitHubPage/>
-                                </RequireAuth>
-                            }/>
-                            <Route path="/gitlab" element={
-                                <RequireAuth fallbackPath="/auth">
-                                    <GitLabPage/>
-                                </RequireAuth>
-                            }/>
-                            <Route path="/bitbucket" element={
-                                <RequireAuth fallbackPath="/auth">
-                                    <BitbucketPage/>
-                                </RequireAuth>
-                            }/>
-                            <Route path="/projects/:id" element={
-                                <RequireAuth fallbackPath="/auth">
-                                    <Main/>
-                                </RequireAuth>
-                            }/>
-                            <Route path="/*" element={
-                                <RequireAuth fallbackPath="/auth">
-                                    <Main/>
-                                </RequireAuth>
-                            }/>
-                        </Routes>
+                        <AppRoutes />
                     </BrowserRouter>
                 </AuthProvider>
             </Stack>

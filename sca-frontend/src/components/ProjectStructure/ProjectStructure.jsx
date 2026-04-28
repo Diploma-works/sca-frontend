@@ -15,12 +15,10 @@ import UnfoldLessRoundedIcon from "@mui/icons-material/UnfoldLessRounded";
 import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-import ITEMS from "./items";
 import { SidebarTool } from "../LeftSidebar/";
 import { useTabsContext } from "../Editor";
 import { useProjectStructureContext } from "./ProjectStructureContext";
@@ -316,6 +314,7 @@ const ProjectStructure = memo((props) => {
 
     useEffect(() => {
         refreshStructure();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId]);
 
     const showNotification = (message, severity = 'info') => {

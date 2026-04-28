@@ -65,15 +65,6 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
-// Utility function to handle text responses (for file content)
-const handleTextResponse = async (response) => {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-  }
-  return response.text();
-};
-
 // Auth API functions
 export const authAPI = {
   // Login user
@@ -811,7 +802,7 @@ const api = {
 
 export { api };
 
-export default {
+const apiDefault = {
   auth: authAPI,
   project: projectAPI,
   projects: projectsAPI,
@@ -821,3 +812,5 @@ export default {
   websocket: websocketAPI,
   file: fileAPI,
 };
+
+export default apiDefault;

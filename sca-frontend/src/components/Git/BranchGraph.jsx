@@ -10,6 +10,7 @@ const BranchGraph = ({ projectId }) => {
 
     useEffect(() => {
         fetchBranchGraph();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [projectId, limit]);
 
     const fetchBranchGraph = async () => {
@@ -208,6 +209,8 @@ const BranchGraph = ({ projectId }) => {
                             opacity="0.8"
                         />
                     );
+                    break;
+                default:
                     break;
             }
         });
