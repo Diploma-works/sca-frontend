@@ -363,12 +363,8 @@ public class BitbucketService {
     }
 
 
-    public void removeUserToken(User user) {
-        deleteTokenTransactional(user);
-    }
-
     @Transactional
-    protected void deleteTokenTransactional(User user) {
+    public void removeUserToken(User user) {
         bitbucketTokenRepository.deleteByUser(user);
     }
 }
